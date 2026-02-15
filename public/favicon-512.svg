@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="dv-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="50%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#a000ff"/>
+    </linearGradient>
+    <linearGradient id="dv-shine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0.15"/>
+    </linearGradient>
+    <filter id="dv-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feFlood flood-color="#a000ff" flood-opacity="0.4"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#0f0f18"/>
+  <g stroke="url(#dv-grad)" stroke-width="2" opacity="0.15">
+    <path d="M80 128H432M80 256H432M80 384H432M128 80V432M256 80V432M384 80V432"/>
+  </g>
+  <text x="256" y="320" text-anchor="middle" fill="url(#dv-grad)" filter="url(#dv-glow)" font-family="system-ui,Arial,sans-serif" font-weight="800" font-size="220">DV</text>
+  <rect width="512" height="512" rx="96" fill="url(#dv-shine)" opacity="0.5"/>
+</svg>

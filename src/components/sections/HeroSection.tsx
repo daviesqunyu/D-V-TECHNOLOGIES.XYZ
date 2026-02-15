@@ -6,17 +6,17 @@ import heroBg from "@/assets/hero-bg.jpg";
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden scroll-mt-0">
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroBg})` }}
       />
-      {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-background/70" />
+      {/* Dark overlay for text readability - strong enough so text is never hidden */}
+      <div className="absolute inset-0 bg-background/80 z-[1]" aria-hidden="true" />
       
-      {/* Animated background elements */}
-      <div className="absolute inset-0 pointer-events-none hero-pattern">
+      {/* Animated background elements - behind content */}
+      <div className="absolute inset-0 pointer-events-none hero-pattern z-[2]" aria-hidden="true">
         <motion.div
           animate={{
             scale: [1, 1.2, 1],
@@ -35,7 +35,7 @@ export function HeroSection() {
         />
       </div>
 
-      <div className="container mx-auto px-4 lg:px-8 pt-20 lg:pt-24 pb-12">
+      <div className="container mx-auto px-4 lg:px-8 pt-20 lg:pt-24 pb-12 relative z-10">
         <div className="max-w-5xl mx-auto text-center">
           {/* Badge */}
           <motion.div

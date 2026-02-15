@@ -1,6 +1,13 @@
 import { Link } from "react-router-dom";
-import { Sparkles, Mail, Phone, MapPin, Twitter, Linkedin, Github, Facebook } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Mail, Phone, MapPin, MessageCircle, Globe } from "lucide-react";
+import { PaymentOptions } from "@/components/PaymentOptions";
+
+const WHATSAPP_NUMBER = "254759075816";
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+const EMAIL = "info@dvtechnologies.xyz";
+const PHONE = "0759 075 816";
+const WEBSITE = "https://dvtechnologies.xyz";
+const ADDRESS = "Lower Kabete, Nairobi, Kenya";
 
 export function Footer() {
   return (
@@ -10,8 +17,8 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary-foreground" />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
+                <img src="/favicon.svg" alt="D&V Technologies" className="w-6 h-6 object-contain" />
               </div>
               <span className="font-display font-bold text-xl">
                 <span className="gradient-text">D&V</span>
@@ -23,15 +30,38 @@ export function Footer() {
               Silicon Savannah 2030 Vision.
             </p>
             <div className="flex gap-3">
-              {[Twitter, Linkedin, Github, Facebook].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"
-                >
-                  <Icon className="w-4 h-4" />
-                </a>
-              ))}
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Chat on WhatsApp"
+                className="w-9 h-9 rounded-lg bg-[#25D366]/20 flex items-center justify-center hover:bg-[#25D366]/30 text-[#25D366] transition-all"
+              >
+                <MessageCircle className="w-4 h-4" />
+              </a>
+              <a
+                href={`mailto:${EMAIL}`}
+                title="Email us"
+                className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"
+              >
+                <Mail className="w-4 h-4" />
+              </a>
+              <a
+                href={`tel:+254759075816`}
+                title="Call us"
+                className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"
+              >
+                <Phone className="w-4 h-4" />
+              </a>
+              <a
+                href={WEBSITE}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Our website"
+                className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"
+              >
+                <Globe className="w-4 h-4" />
+              </a>
             </div>
           </div>
 
@@ -73,24 +103,42 @@ export function Footer() {
           <div>
             <h4 className="font-display font-semibold mb-4">Get In Touch</h4>
             <ul className="space-y-3">
-              <li className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Mail className="w-4 h-4 text-primary" />
-                info@dvtechnologies.com
+              <li>
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 text-sm text-muted-foreground hover:text-[#25D366] transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                  WhatsApp: {PHONE}
+                </a>
               </li>
-              <li className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Phone className="w-4 h-4 text-primary" />
-                0759 075 816
+              <li>
+                <a
+                  href={`mailto:${EMAIL}`}
+                  className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Mail className="w-4 h-4 text-primary" />
+                  {EMAIL}
+                </a>
+              </li>
+              <li>
+                <a
+                  href="tel:+254759075816"
+                  className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Phone className="w-4 h-4 text-primary" />
+                  {PHONE}
+                </a>
               </li>
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4 text-primary" />
-                Lower Kabete, Nairobi, Kenya
+                {ADDRESS}
               </li>
             </ul>
-            <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-accent/20 to-primary/20 border border-accent/30">
-              <p className="text-xs font-medium flex items-center gap-2">
-                <span className="text-accent">₿</span>
-                Crypto Payments Accepted
-              </p>
+            <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/30">
+              <PaymentOptions variant="footer" />
             </div>
           </div>
         </div>

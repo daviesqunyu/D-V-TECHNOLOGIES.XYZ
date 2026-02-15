@@ -12,9 +12,13 @@ import {
   MapPin,
   Clock,
   Send,
-  Bitcoin,
-  Wallet,
+  MessageCircle,
 } from "lucide-react";
+import { PaymentOptions } from "@/components/PaymentOptions";
+
+const CONTACT_API = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contact-form`;
+const WHATSAPP_NUMBER = "254759075816";
+const WHATSAPP_BASE = `https://wa.me/${WHATSAPP_NUMBER}`;
 
 const Contact = () => {
   const { toast } = useToast();
@@ -31,16 +35,58 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const res = await fetch(CONTACT_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || undefined,
+          subject: formData.subject,
+          message: formData.message,
+        }),
+      });
 
-    toast({
-      title: "Message Sent!",
-      description: "We'll get back to you within 24 hours.",
-    });
+      const data = await res.json().catch(() => ({}));
 
-    setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
-    setIsSubmitting(false);
+      if (!res.ok) {
+        toast({
+          title: "Could not send message",
+          description: data.error || "Please try again or chat us on WhatsApp.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      toast({
+        title: "Message sent!",
+        description: "We'll reply by email. For a faster response, chat us on WhatsApp.",
+      });
+
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+
+      if (data.whatsapp_url) {
+        const prefill = encodeURIComponent(
+          `Hi D&V Technologies, I just sent a message via your website (Subject: ${formData.subject}).`
+        );
+        setTimeout(() => {
+          window.open(`${data.whatsapp_url}?text=${prefill}`, "_blank", "noopener");
+        }, 800);
+      }
+    } catch {
+      toast({
+        title: "Connection error",
+        description: "Please try again or contact us on WhatsApp.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -59,9 +105,18 @@ const Contact = () => {
               <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
                 Get In <span className="gradient-text">Touch</span>
               </h1>
-              <p className="text-lg text-muted-foreground">
-                Ready to transform your business? Let's discuss how we can help.
+              <p className="text-lg text-muted-foreground mb-6">
+                Ready to transform your business? Chat us on WhatsApp for the fastest response.
               </p>
+              <a
+                href={WHATSAPP_BASE}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 rounded-xl px-6 py-4 bg-[#25D366] hover:bg-[#20BD5A] text-white font-semibold transition-colors"
+              >
+                <MessageCircle className="w-6 h-6" />
+                Chat on WhatsApp — 0759 075 816
+              </a>
             </motion.div>
           </div>
         </section>
@@ -172,7 +227,7 @@ const Contact = () => {
                   </h2>
                   <div className="space-y-6">
                     {[
-                      { icon: Mail, label: "Email", value: "info@dvtechnologies.com" },
+                      { icon: Mail, label: "Email", value: "info@dvtechnologies.xyz" },
                       { icon: Phone, label: "Phone", value: "0759 075 816" },
                       { icon: MapPin, label: "Address", value: "Lower Kabete, Nairobi, Kenya" },
                       { icon: Clock, label: "Hours", value: "Mon - Sat: 8AM - 6PM EAT" },
@@ -190,23 +245,10 @@ const Contact = () => {
                   </div>
                 </div>
 
-                {/* Crypto Payments */}
+                {/* Pay with Bitcoin or M-Pesa */}
                 <div className="glass-card rounded-2xl p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-primary flex items-center justify-center">
-                      <Bitcoin className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">Crypto Payments Accepted</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Secure blockchain transactions
-                      </p>
-                    </div>
-                  </div>
-                  <Button variant="glass" className="w-full">
-                    <Wallet className="w-5 h-5" />
-                    Connect Wallet
-                  </Button>
+                  <h3 className="font-semibold mb-4">Pay with Bitcoin or M-Pesa</h3>
+                  <PaymentOptions variant="card" />
                 </div>
 
                 {/* Map placeholder */}

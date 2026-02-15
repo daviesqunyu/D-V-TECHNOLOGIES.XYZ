@@ -32,7 +32,7 @@ const services = [
 
 export function ServicesSection() {
   return (
-    <section className="py-20 lg:py-32 bg-card relative overflow-hidden">
+    <section id="services" className="scroll-mt-24 py-20 lg:py-32 bg-card relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-accent/5 rounded-full blur-3xl" />

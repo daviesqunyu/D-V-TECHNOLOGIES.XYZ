@@ -1,11 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* D&V Technologies Design System - Silicon Savannah Theme */
 /* Dark tech aesthetic with vibrant accents */
-
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -82,6 +82,11 @@
 
   html {
     scroll-behavior: smooth;
+  }
+
+  /* Section scroll offset for fixed navbar */
+  [id]:not(#hero) {
+    scroll-margin-top: 6rem;
   }
 
   body {
@@ -173,6 +178,25 @@
     }
     50% {
       box-shadow: 0 0 40px hsl(175 84% 50% / 0.5);
+    }
+  }
+
+  /* 3D rotating logo (favicon / tech icon) */
+  .logo-3d {
+    transform-style: preserve-3d;
+    animation: logo-rotate-3d 8s linear infinite;
+  }
+
+  .logo-3d:hover {
+    animation-duration: 3s;
+  }
+
+  @keyframes logo-rotate-3d {
+    0% {
+      transform: rotateY(0deg) rotateX(0deg);
+    }
+    100% {
+      transform: rotateY(360deg) rotateX(10deg);
     }
   }
 

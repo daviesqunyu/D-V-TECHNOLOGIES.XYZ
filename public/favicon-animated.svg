@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <style>
+    .dv-text {
+      font-family: system-ui, Arial, sans-serif;
+      font-size: 220px;
+      font-weight: 800;
+      fill: url(#dv-grad);
+      text-anchor: middle;
+      transform-origin: 256px 260px;
+      animation: dv-spin 5s linear infinite;
+    }
+    @keyframes dv-spin {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(360deg); }
+    }
+  </style>
+  <defs>
+    <linearGradient id="dv-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="50%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#a000ff"/>
+    </linearGradient>
+    <linearGradient id="dv-shine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="dv-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+      <feFlood flood-color="#a000ff" flood-opacity="0.35"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Transparent - no background -->
+  <g stroke="url(#dv-grad)" stroke-width="1.5" opacity="0.12">
+    <path d="M64 128 H448 M64 256 H448 M64 384 H448 M128 64 V448 M256 64 V448 M384 64 V448"/>
+  </g>
+  <text x="256" y="320" class="dv-text" filter="url(#dv-glow)">DV</text>
+</svg>

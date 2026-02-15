@@ -3,7 +3,7 @@ import { Target, Eye, Heart, Rocket } from "lucide-react";
 
 export function MissionSection() {
   return (
-    <section className="py-20 lg:py-32 bg-card relative overflow-hidden">
+    <section id="mission" className="scroll-mt-24 py-20 lg:py-32 bg-card relative overflow-hidden">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Content */}

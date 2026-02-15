@@ -1,73 +1,52 @@
-# Welcome to your Lovable project
+# D&V Technologies — Silicon Savannah AI Hub
 
-## Project info
+Nairobi's next-generation tech company: IT, hardware & software solutions, AI, IoT, and digital transformation for modern businesses across Kenya and East Africa.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Business DNA
 
-## How can I edit this code?
+- **Mission**: Transform Kenyan and African business through problem-solving and innovation.
+- **Vision**: Make Nairobi the Silicon Savannah of Africa by 2030.
+- **Offerings**: IT Support & Maintenance, Hardware Repair, Software Development, Networking, AI & Automation, Crypto-ready payments.
+- **Contact**: info@dvtechnologies.xyz | Lower Kabete, Nairobi, Kenya.
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- Vite, TypeScript, React
+- shadcn-ui, Tailwind CSS
+- Supabase (backend: AI chat, contact form, DB)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Backend & API (Supabase)
 
-Changes made via Lovable will be committed automatically to this repo.
+- **AI Assistant**: Edge Function `ai-chat` uses **OpenAI API** (no Lovable). Set `OPENAI_API_KEY` in Supabase Edge Function secrets.
+- **Contact form**: Edge Function `contact-form` saves submissions to `contact_submissions` and can send email via **Resend**. Set `RESEND_API_KEY` in Supabase Edge Function secrets to enable:
+  - Email to **info@dvtechnologies.xyz** when someone submits the form
+  - Automated reply to the user’s email
+- **Database**: Run the migration so the contact table exists:
+  - `supabase/migrations/20250215000000_contact_submissions.sql` — create `contact_submissions` table
+- **WhatsApp**: Main contact channel; links use **wa.me/254759075816** (0759 075 816). Form success can open WhatsApp for a quick follow-up.
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Run locally
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Build
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+npm run build
+```
 
-**Use GitHub Codespaces**
+## Deployment (dvtechnologies.xyz)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Domain**: Set canonical URL and `og:url` in `index.html` to your live domain (e.g. `https://dvtechnologies.xyz`).
+- **Sitemap**: `public/sitemap.xml` lists main routes; submit to [Google Search Console](https://search.google.com/search-console) and Bing Webmaster.
+- **robots.txt**: Points to `Sitemap: https://dvtechnologies.xyz/sitemap.xml`; update base URL when deploying.
+- **SEO**: Meta tags, JSON-LD Organization, Open Graph and Twitter cards are set for indexing and social sharing.
+- **Ads**: For Google Ads / fast searchability, deploy to a fast host (e.g. Vercel, Netlify), then create a campaign and link the domain in Google Ads; the site is already SEO-optimized for indexing.
 
-## What technologies are used for this project?
+## Payments
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- **Bitcoin**: Address `1PZPhUGugY5ecF9hYFYvpffsYUFUk2hK6i`; copy via "Pay with Bitcoin" button.
+- **M-Pesa**: Number `0759 075 816`; "Pay via M-Pesa" links to call. For STK Push / Paybill, integrate [Safaricom Daraja API](https://developer.safaricom.co.ke/) (consumer key, secret, till/paybill) via your backend.

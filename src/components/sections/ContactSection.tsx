@@ -1,14 +1,20 @@
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Clock, Bitcoin, ArrowRight } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, ArrowRight, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { PaymentOptions } from "@/components/PaymentOptions";
+
+const WHATSAPP_URL = "https://wa.me/254759075816";
+const EMAIL = "info@dvtechnologies.xyz";
+const PHONE = "0759 075 816";
+const ADDRESS = "Lower Kabete, Nairobi, Kenya";
 
 export function ContactSection() {
   return (
-    <section className="py-20 lg:py-32 relative overflow-hidden">
+    <section id="contact" className="scroll-mt-24 py-20 lg:py-32 relative overflow-hidden">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
-          {/* Contact Info */}
+          {/* Contact Info - WhatsApp primary */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -20,15 +26,26 @@ export function ContactSection() {
             </h2>
             <p className="text-muted-foreground text-lg mb-8">
               Ready to transform your business with technology? 
-              Let's discuss how we can help you achieve your goals.
+              Chat us on WhatsApp for the fastest response, or send a message below.
             </p>
+
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 w-full sm:w-auto justify-center rounded-xl px-6 py-4 mb-8 bg-[#25D366] hover:bg-[#20BD5A] text-white font-semibold transition-colors"
+            >
+              <MessageCircle className="w-6 h-6" />
+              Chat on WhatsApp — {PHONE}
+            </a>
 
             <div className="space-y-6">
               {[
-                { icon: Mail, label: "Email", value: "info@dvtechnologies.com" },
-                { icon: Phone, label: "Phone", value: "0759 075 816" },
-                { icon: MapPin, label: "Location", value: "Lower Kabete, Nairobi, Kenya" },
-                { icon: Clock, label: "Hours", value: "Mon - Sat: 8AM - 6PM EAT" },
+                { icon: MessageCircle, label: "WhatsApp (main)", value: PHONE, href: WHATSAPP_URL },
+                { icon: Mail, label: "Email", value: EMAIL, href: `mailto:${EMAIL}` },
+                { icon: Phone, label: "Phone", value: PHONE, href: "tel:+254759075816" },
+                { icon: MapPin, label: "Location", value: ADDRESS, href: null },
+                { icon: Clock, label: "Hours", value: "Mon - Sat: 8AM - 6PM EAT", href: null },
               ].map((item, i) => (
                 <motion.div
                   key={item.label}
@@ -38,32 +55,33 @@ export function ContactSection() {
                   transition={{ duration: 0.4, delay: i * 0.1 }}
                   className="flex items-center gap-4"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <item.icon className="w-5 h-5 text-primary" />
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${item.icon === MessageCircle ? "bg-[#25D366]/20" : "bg-primary/10"}`}>
+                    <item.icon className={`w-5 h-5 ${item.icon === MessageCircle ? "text-[#25D366]" : "text-primary"}`} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm text-muted-foreground">{item.label}</p>
-                    <p className="font-medium">{item.value}</p>
+                    {item.href ? (
+                      <a href={item.href} target={item.href.startsWith("http") ? "_blank" : undefined} rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined} className="font-medium hover:text-primary transition-colors truncate block">
+                        {item.value}
+                      </a>
+                    ) : (
+                      <p className="font-medium">{item.value}</p>
+                    )}
                   </div>
                 </motion.div>
               ))}
             </div>
 
-            {/* Crypto Badge */}
+            {/* Payment options: BTC + M-Pesa */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-8 p-4 rounded-xl bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/30"
+              className="mt-8 p-6 rounded-xl glass-card border border-accent/30"
             >
-              <div className="flex items-center gap-3">
-                <Bitcoin className="w-8 h-8 text-accent" />
-                <div>
-                  <p className="font-semibold">Crypto Payments Accepted</p>
-                  <p className="text-sm text-muted-foreground">Connect your wallet for secure transactions</p>
-                </div>
-              </div>
+              <p className="font-semibold mb-3">Pay with Bitcoin or M-Pesa</p>
+              <PaymentOptions variant="card" />
             </motion.div>
           </motion.div>
 

@@ -13,11 +13,12 @@ const SYSTEM_PROMPT = `You are the AI assistant for D&V Technologies, a next-gen
 D&V Technologies is Nairobi's leading IT, hardware, and software solutions provider. We serve businesses across Kenya and East Africa with a mission to make Nairobi the "Silicon Savannah" of Africa by 2030.
 
 ## Company Information
+- **Website:** https://dvtechnologies.xyz
+- **Email:** info@dvtechnologies.xyz
+- **Phone / WhatsApp:** +254 759 075 816 (0759 075 816) — WhatsApp is our main contact channel
 - **Location:** Lower Kabete, Nairobi, Kenya
-- **Email:** info@dvtechnologies.com
-- **Phone:** 0759 075 816
 - **Hours:** Monday - Saturday, 8AM - 6PM EAT
-- **Established:** Trusted by 100+ businesses across Kenya & East Africa
+- **Trusted by:** 100+ businesses across Kenya & East Africa
 
 ## Our Services
 
@@ -75,23 +76,25 @@ To empower Kenyan businesses and communities through innovative technology, prob
 
 ## Payment Options
 - Standard invoicing and payment plans
-- **Crypto Payments Accepted** - Secure blockchain transactions
+- **Bitcoin:** 1PZPhUGugY5ecF9hYFYvpffsYUFUk2hK6i
+- **M-Pesa:** 0759 075 816
+- Crypto and M-Pesa accepted
 
 ## Pricing
-Our pricing is customized based on project scope and requirements. For detailed quotes:
-- Contact us at info@dvtechnologies.com
-- Call 0759 075 816
-- Visit our Contact page
+Our pricing is customized based on project scope. For quotes:
+- **WhatsApp (preferred):** https://wa.me/254759075816
+- Email: info@dvtechnologies.xyz
+- Call: 0759 075 816
 
 ## Response Guidelines
 1. Be friendly, professional, and helpful
 2. Provide accurate information about our services
-3. If asked about pricing, explain that we offer customized quotes and encourage contacting us
-4. Highlight our Silicon Savannah 2030 vision when relevant
-5. Emphasize our expertise in serving Kenyan and East African businesses
-6. For complex technical questions, provide helpful guidance and suggest contacting our team
+3. For pricing, explain customized quotes and encourage WhatsApp or email
+4. Highlight Silicon Savannah 2030 vision when relevant
+5. Emphasize serving Kenyan and East African businesses
+6. Recommend WhatsApp as the fastest way to reach the team when contact is needed
 7. Keep responses concise but informative
-8. Use markdown formatting for better readability when listing information`;
+8. Use markdown formatting for lists when helpful`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -100,12 +103,12 @@ serve(async (req) => {
 
   try {
     const { messages } = await req.json();
-    
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
+
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY is not configured");
       return new Response(
-        JSON.stringify({ error: "AI service not configured" }),
+        JSON.stringify({ error: "AI service not configured. Set OPENAI_API_KEY in Supabase Edge Function secrets." }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -115,28 +118,25 @@ serve(async (req) => {
 
     console.log("Received chat request with", messages?.length || 0, "messages");
 
-    const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...messages,
-          ],
-          stream: true,
-        }),
-      }
-    );
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...messages,
+        ],
+        stream: true,
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("OpenAI API error:", response.status, errorText);
 
       if (response.status === 429) {
         return new Response(
@@ -148,11 +148,11 @@ serve(async (req) => {
         );
       }
 
-      if (response.status === 402) {
+      if (response.status === 401) {
         return new Response(
-          JSON.stringify({ error: "Service temporarily unavailable." }),
+          JSON.stringify({ error: "AI service not configured." }),
           {
-            status: 402,
+            status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           }
         );
@@ -167,7 +167,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Streaming response from AI gateway");
+    console.log("Streaming response from OpenAI");
 
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
