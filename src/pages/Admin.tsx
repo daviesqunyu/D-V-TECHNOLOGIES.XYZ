@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   RefreshCw,
@@ -10,8 +10,17 @@ import {
   Download,
   Reply,
   ExternalLink,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { api, authHeaders, config } from "@/lib/api";
 import * as XLSX from "xlsx";
@@ -61,6 +70,10 @@ type PaymentRecord = {
   checkout_request_id: string | null;
   error_message: string | null;
   created_at: string;
+  card_last4?: string | null;
+  card_brand?: string | null;
+  card_expiry_month?: string | null;
+  card_expiry_year?: string | null;
 };
 
 type NewsletterSubscriber = {
@@ -159,26 +172,55 @@ function webmailUrl(domain: string) {
   return `https://${domain}:2096`;
 }
 
-function downloadPaymentsExcel(records: PaymentRecord[]) {
-  const rows = records.map((p) => {
-    const isKes = p.method === "mpesa" || p.method === "paystack" || p.method === "card";
-    return {
-      Date: p.created_at,
-      Method: p.method,
-      Plan: p.plan,
-      Amount: Number(p.amount),
-      Currency: isKes ? "KES" : "USD",
-      Status: p.status,
-      Phone: p.phone ?? "",
-      Email: p.email ?? "",
-      Name: p.name ?? "",
-      Reference: p.checkout_request_id ?? "",
-      Error: p.error_message ?? "",
-    };
-  });
+function formatDateForExcel(iso: string) {
+  try {
+    return new Date(iso).toLocaleString("en-KE", { dateStyle: "short", timeStyle: "short" });
+  } catch {
+    return iso;
+  }
+}
+
+/** Build card details string for admin/support: name, last4, brand, expiry. Full number and CVV are never stored (PCI). */
+function cardDetailsForAdmin(p: PaymentRecord): string {
+  if (p.method !== "paystack" && p.method !== "card") return "";
+  const parts: string[] = [];
+  if (p.name?.trim()) parts.push(`Name: ${p.name.trim()}`);
+  if (p.card_last4) parts.push(`****${p.card_last4}`);
+  if (p.card_brand) parts.push(p.card_brand);
+  const expiry = [p.card_expiry_month, p.card_expiry_year].filter(Boolean).join("/");
+  if (expiry) parts.push(`Exp ${expiry}`);
+  return parts.length ? parts.join(" · ") : "(card; details after verification)";
+}
+
+function buildPaymentsExcel(records: PaymentRecord[]) {
+  const isKes = (m: string) => m === "mpesa" || m === "paystack" || m === "card";
+  const rows = records.map((p) => ({
+    Name: String(p.name ?? ""),
+    Date: formatDateForExcel(p.created_at),
+    "M-Pesa (no.)": p.method === "mpesa" ? String(p.phone ?? "") : "",
+    Email: String(p.email ?? ""),
+    "Card details (admin)": cardDetailsForAdmin(p),
+    Method: p.method,
+    Plan: p.plan,
+    Amount: Number(p.amount),
+    Currency: isKes(p.method) ? "KES" : "USD",
+    Status: p.status,
+    Reference: String(p.checkout_request_id ?? ""),
+    "Error / Notes": String(p.error_message ?? ""),
+  }));
 
   const ws = XLSX.utils.json_to_sheet(rows);
+  const wsInfo = XLSX.utils.aoa_to_sheet([
+    ["D&V Technologies – Payment Records Export"],
+    ["Confidential. Admin use only. Do not share."],
+    [],
+    ["Columns: Name, Date, M-Pesa (no.), Email, Card details (admin), Method, Plan, Amount, Currency, Status, Reference, Error/Notes."],
+    ["Card details (admin): For card/paystack only. Shows name, last 4 digits, brand, expiry. Full card number and CVV are never stored (PCI). For user card issues use Reference or Paystack dashboard."],
+    ["Export date: " + new Date().toISOString()],
+  ]);
+
   const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, wsInfo, "Info");
   XLSX.utils.book_append_sheet(wb, ws, "Payments");
 
   const stamp = new Date().toISOString().slice(0, 10);
@@ -195,6 +237,11 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<"contacts" | "payments" | "newsletter">(
     "contacts"
   );
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportPassword, setExportPassword] = useState("");
+  const [exporting, setExporting] = useState(false);
+  const [sessionWarningShown, setSessionWarningShown] = useState(false);
+  const lastActivityRef = useRef(Date.now());
 
   const fetchData = useCallback(async () => {
     if (!token) return;
@@ -293,8 +340,84 @@ export default function Admin() {
     sessionStorage.removeItem(ADMIN_STORAGE_KEY);
     setToken(null);
     setData(null);
+    setExportDialogOpen(false);
     toast({ title: "Logged out" });
   };
+
+  const handleExportExcel = async () => {
+    if (!data?.paymentRecords?.length) return;
+    setExporting(true);
+    try {
+      const res = await fetch(api.adminData, {
+        method: "GET",
+        headers: {
+          ...authHeaders(),
+          "x-admin-secret": exportPassword.trim(),
+        },
+      });
+      const json = await parseJsonSafe<AdminData & { success?: boolean }>(res);
+      if (res.ok && json.success) {
+        buildPaymentsExcel(data.paymentRecords);
+        setExportDialogOpen(false);
+        setExportPassword("");
+        toast({ title: "Export downloaded. File is confidential." });
+      } else {
+        toast({ title: "Invalid admin password", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Export failed", variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!token) return;
+    const INTERVAL = 60 * 1000;
+    const checkExpiry = () => {
+      const raw = sessionStorage.getItem(ADMIN_STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw) as { expiresAt?: number };
+        if (typeof parsed.expiresAt === "number" && parsed.expiresAt < Date.now() + 5 * 60 * 1000 && !sessionWarningShown) {
+          setSessionWarningShown(true);
+          toast({ title: "Session expiring in ~5 minutes", description: "Refresh or log in again to stay in.", variant: "destructive" });
+        }
+        if (parsed.expiresAt < Date.now()) {
+          sessionStorage.removeItem(ADMIN_STORAGE_KEY);
+          setToken(null);
+          setData(null);
+          toast({ title: "Session expired. Please log in again.", variant: "destructive" });
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+    const id = setInterval(checkExpiry, INTERVAL);
+    return () => clearInterval(id);
+  }, [token, toast, sessionWarningShown]);
+
+  useEffect(() => {
+    if (!token) return;
+    const INACTIVITY_MS = 30 * 60 * 1000;
+    const onActivity = () => { lastActivityRef.current = Date.now(); };
+    window.addEventListener("click", onActivity);
+    window.addEventListener("keydown", onActivity);
+    const id = setInterval(() => {
+      if (Date.now() - lastActivityRef.current > INACTIVITY_MS) {
+        sessionStorage.removeItem(ADMIN_STORAGE_KEY);
+        setToken(null);
+        setData(null);
+        setExportDialogOpen(false);
+        toast({ title: "Logged out due to inactivity (30 min).", variant: "destructive" });
+      }
+    }, 60 * 1000);
+    return () => {
+      window.removeEventListener("click", onActivity);
+      window.removeEventListener("keydown", onActivity);
+      clearInterval(id);
+    };
+  }, [token, toast]);
 
   if (!token) {
     return (
@@ -345,6 +468,49 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5" />
+              Confirm export
+            </DialogTitle>
+            <DialogDescription>
+              Enter your admin password to download the payment records file. The file is confidential and includes M-Pesa numbers and card last-4/brand/expiry (no full card or CVV).
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <label htmlFor="export-password" className="text-sm font-medium">
+                Admin password
+              </label>
+              <input
+                id="export-password"
+                type="password"
+                value={exportPassword}
+                onChange={(e) => setExportPassword(e.target.value)}
+                placeholder="Admin secret"
+                className="w-full px-4 py-2 rounded-lg border border-border bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary"
+                autoComplete="current-password"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExportExcel}
+              disabled={exporting || !exportPassword.trim()}
+              className="gap-2"
+            >
+              {exporting ? "Verifying…" : "Export Excel"}
+              <Download className="w-4 h-4" />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -367,6 +533,12 @@ export default function Admin() {
             </Button>
           </div>
         </div>
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2">
+          <div className="container mx-auto flex items-center gap-2 text-sm text-amber-800 dark:text-amber-200">
+            <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+            <span>Confidential. Session expires after 8 hours or 30 min inactivity. Do not share your admin password.</span>
+          </div>
+        </div>
         <div className="container mx-auto px-4 flex gap-2 border-t border-border/50">
           {tabs.map((tab) => (
             <button
@@ -386,18 +558,39 @@ export default function Admin() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="grid gap-3 sm:grid-cols-3 mb-6">
-          <div className="glass-card rounded-xl p-4 border border-border">
-            <p className="text-xs text-muted-foreground">Contacts</p>
-            <p className="font-display text-2xl font-bold">{data?.contactSubmissions?.length ?? 0}</p>
+        <div className="grid gap-4 sm:grid-cols-3 mb-8">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Contacts</p>
+                <p className="font-display text-2xl font-bold tabular-nums">{data?.contactSubmissions?.length ?? 0}</p>
+              </div>
+            </div>
           </div>
-          <div className="glass-card rounded-xl p-4 border border-border">
-            <p className="text-xs text-muted-foreground">Payments</p>
-            <p className="font-display text-2xl font-bold">{data?.paymentRecords?.length ?? 0}</p>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Payments</p>
+                <p className="font-display text-2xl font-bold tabular-nums">{data?.paymentRecords?.length ?? 0}</p>
+              </div>
+            </div>
           </div>
-          <div className="glass-card rounded-xl p-4 border border-border">
-            <p className="text-xs text-muted-foreground">Newsletter</p>
-            <p className="font-display text-2xl font-bold">{data?.newsletterSubscribers?.length ?? 0}</p>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <Rss className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Newsletter</p>
+                <p className="font-display text-2xl font-bold tabular-nums">{data?.newsletterSubscribers?.length ?? 0}</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -549,7 +742,7 @@ export default function Admin() {
                 variant="outline"
                 size="sm"
                 className="gap-2 w-full sm:w-auto"
-                onClick={() => data?.paymentRecords?.length && downloadPaymentsExcel(data.paymentRecords)}
+                onClick={() => data?.paymentRecords?.length && setExportDialogOpen(true)}
                 disabled={!data?.paymentRecords?.length}
               >
                 <Download className="w-4 h-4" />
@@ -567,24 +760,34 @@ export default function Admin() {
                       <table className="w-full text-sm">
                         <thead className="bg-muted/50 sticky top-0">
                           <tr>
+                            <th className="text-left p-3 font-medium">Name</th>
                             <th className="text-left p-3 font-medium">Date</th>
                             <th className="text-left p-3 font-medium">Method</th>
                             <th className="text-left p-3 font-medium">Plan</th>
                             <th className="text-left p-3 font-medium">Amount</th>
-                            <th className="text-left p-3 font-medium">Phone/Email</th>
+                            <th className="text-left p-3 font-medium">M-Pesa (no.)</th>
+                            <th className="text-left p-3 font-medium">Email</th>
+                            <th className="text-left p-3 font-medium">Card details (admin)</th>
+                            <th className="text-left p-3 font-medium">Reference</th>
                             <th className="text-left p-3 font-medium">Status</th>
                           </tr>
                         </thead>
                         <tbody>
                           {data.paymentRecords.map((p) => (
                             <tr key={p.id} className="border-t border-border hover:bg-muted/30">
-                              <td className="p-3 text-muted-foreground">{formatDate(p.created_at)}</td>
+                              <td className="p-3">{p.name ?? "—"}</td>
+                              <td className="p-3 text-muted-foreground whitespace-nowrap">{formatDate(p.created_at)}</td>
                               <td className="p-3">
                                 <span className="capitalize">{p.method}</span>
                               </td>
                               <td className="p-3">{p.plan}</td>
                               <td className="p-3 font-medium">{formatPaymentAmount(p.method, p.amount)}</td>
-                              <td className="p-3">{p.phone || p.email || "—"}</td>
+                              <td className="p-3">{p.method === "mpesa" ? (p.phone ?? "—") : "—"}</td>
+                              <td className="p-3">{p.email ?? "—"}</td>
+                              <td className="p-3 text-xs max-w-[200px]" title="Name, last4, brand, expiry. Full number/CVV not stored.">
+                                {cardDetailsForAdmin(p) || "—"}
+                              </td>
+                              <td className="p-3 text-xs font-mono break-all max-w-[120px] truncate" title={p.checkout_request_id ?? undefined}>{p.checkout_request_id ?? "—"}</td>
                               <td className="p-3">
                                 <span
                                   className={`px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -607,11 +810,11 @@ export default function Admin() {
                     {/* Mobile cards */}
                     <div className="md:hidden divide-y divide-border">
                       {data.paymentRecords.map((p) => (
-                        <div key={p.id} className="p-4 space-y-2">
+                        <div key={p.id} className="p-4 space-y-2 rounded-lg border border-border/50 bg-card/50">
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
-                              <p className="font-medium truncate">{p.plan}</p>
-                              <p className="text-xs text-muted-foreground capitalize">{p.method}</p>
+                              <p className="font-medium truncate">{p.name || p.plan}</p>
+                              <p className="text-xs text-muted-foreground capitalize">{p.method} · {p.plan}</p>
                             </div>
                             <span
                               className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
@@ -633,11 +836,19 @@ export default function Admin() {
                             {formatDate(p.created_at)}
                           </p>
                           <p className="text-xs text-muted-foreground break-words">
-                            Contact: <span className="text-foreground">{p.phone || p.email || "—"}</span>
+                            M-Pesa: <span className="text-foreground">{p.method === "mpesa" ? (p.phone || "—") : "—"}</span>
                           </p>
+                          <p className="text-xs text-muted-foreground break-words">
+                            Email: <span className="text-foreground">{p.email ?? "—"}</span>
+                          </p>
+                          {(p.method === "paystack" || p.method === "card") && cardDetailsForAdmin(p) ? (
+                            <p className="text-[11px] text-muted-foreground">
+                              Card (admin): {cardDetailsForAdmin(p)}
+                            </p>
+                          ) : null}
                           {p.checkout_request_id ? (
-                            <p className="text-[11px] text-muted-foreground break-words">
-                              Ref: <span className="text-foreground">{p.checkout_request_id}</span>
+                            <p className="text-[11px] text-muted-foreground break-all font-mono">
+                              Ref: {p.checkout_request_id}
                             </p>
                           ) : null}
                           {p.error_message ? (

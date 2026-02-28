@@ -131,6 +131,7 @@ function PaymentModal({
 }) {
   const { toast } = useToast();
   const [tab, setTab] = useState<"paystack" | "btc">("paystack");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [btcCopied, setBtcCopied] = useState(false);
@@ -163,6 +164,7 @@ function PaymentModal({
           plan: plan.name,
           amount: amountKes,
           email: trimmed,
+          name: name.trim() || undefined,
         }),
       });
       const data = (await res.json().catch(() => null)) as
@@ -275,16 +277,34 @@ function PaymentModal({
           </div>
         ) : (
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Email (Paystack receipt)</label>
-              <Input
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-muted/50 h-12"
-                type="email"
-                autoComplete="email"
-              />
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3">
+              <p className="text-sm font-medium">Card payment details</p>
+              <p className="text-xs text-muted-foreground">
+                Add your name and email here. You will be redirected to Paystack to enter card number, CVV and expiry securely — we never see or store them.
+              </p>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">Full name (for receipt & admin)</label>
+                  <Input
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="bg-muted/50 h-10"
+                    autoComplete="name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">Email (receipt & Paystack)</label>
+                  <Input
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="bg-muted/50 h-10"
+                    type="email"
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
             </div>
             <Button onClick={handlePaystack} disabled={loading} className="w-full h-12 font-semibold">
               {loading ? (
@@ -292,12 +312,12 @@ function PaymentModal({
               ) : (
                 <>
                   <CreditCard className="w-5 h-5" />
-                  Pay {formatKes(amountKes)} with Paystack
+                  Pay {formatKes(amountKes)} with card (Paystack)
                 </>
               )}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              You will be redirected to Paystack checkout (Card, M-Pesa, and other available methods).
+              You will be redirected to Paystack to complete payment. The record is saved for your receipt and our records.
             </p>
           </div>
         )}

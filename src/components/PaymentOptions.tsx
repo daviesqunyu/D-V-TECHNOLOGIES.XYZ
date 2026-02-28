@@ -50,6 +50,7 @@ export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "c
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [planKey, setPlanKey] = useState<PlanKey>("basic");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [loadingPaystack, setLoadingPaystack] = useState(false);
 
@@ -83,6 +84,7 @@ export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "c
           plan: selected.label,
           amount: amountKes,
           email: trimmedEmail,
+          name: name.trim() || undefined,
         }),
       });
 
@@ -140,8 +142,14 @@ export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "c
         </Button>
       </div>
 
-      {/* Paystack details */}
-      <div className={isCard ? "space-y-2" : "space-y-2"}>
+      {/* Card payment section: name + email here; card number, CVV and expiry on Paystack (PCI) */}
+      <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3">
+        <div>
+          <p className="text-xs font-medium text-foreground">Card payment (Paystack)</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            Add your name and email below. You will be redirected to Paystack to enter card number, CVV and expiry securely — we never see or store them.
+          </p>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <label className="text-xs text-muted-foreground">
             Plan
@@ -158,9 +166,19 @@ export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "c
           </label>
           <div />
         </div>
-
         <label className="text-xs text-muted-foreground block">
-          Email (Paystack receipt)
+          Full name (for receipt & admin)
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="John Doe"
+            className="mt-1 h-10 bg-muted/30"
+            autoComplete="name"
+            disabled={loadingPaystack}
+          />
+        </label>
+        <label className="text-xs text-muted-foreground block">
+          Email (receipt & Paystack)
           <Input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -172,19 +190,19 @@ export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "c
           />
         </label>
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <p className="text-xs text-muted-foreground">
             Amount: <span className="font-medium text-foreground">{formatKes(amountKes)}</span>{" "}
             <span className="text-muted-foreground/70">({formatUsd(selected.usd)})</span>
           </p>
           <Button variant={isCard ? "hero" : "outline"} size={isCard ? "default" : "sm"} onClick={startPaystack} disabled={loadingPaystack} className="gap-2">
             {loadingPaystack ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
-            Paystack Checkout
+            Pay with card (Paystack)
           </Button>
         </div>
 
         <p className="text-[11px] text-muted-foreground">
-          You will be redirected to Paystack to choose Card, M-Pesa, or other available methods.
+          You will be redirected to Paystack to complete payment (card, M-Pesa, or other methods). After payment, the record is saved for your receipt and our records.
         </p>
       </div>
     </div>

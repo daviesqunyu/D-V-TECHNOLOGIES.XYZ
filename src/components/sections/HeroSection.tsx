@@ -94,28 +94,28 @@ export function HeroSection() {
             </Link>
           </motion.div>
 
-          {/* Stats */}
+          {/* Stats - dashboard-style metrics */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8"
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"
           >
             {[
               { icon: Users, value: "100+", label: "Businesses Served" },
               { icon: Globe, value: "Kenya", label: "& East Africa" },
-              { icon: Shield, value: "24/7", label: "Support Available" },
-              { icon: Sparkles, value: "2030", label: "Vision Goal" },
+              { icon: Shield, value: "24/7", label: "Support" },
+              { icon: Sparkles, value: "2030", label: "Vision" },
             ].map((stat, i) => (
               <div
                 key={i}
-                className="glass-card rounded-xl p-4 md:p-6 text-center"
+                className="rounded-xl border border-border/60 bg-card/80 backdrop-blur p-4 md:p-5 text-center shadow-sm hover:border-primary/30 transition-colors"
               >
-                <stat.icon className="w-6 h-6 text-primary mx-auto mb-2" />
-                <p className="font-display text-2xl md:text-3xl font-bold gradient-text">
+                <stat.icon className="w-5 h-5 text-primary mx-auto mb-2 opacity-90" />
+                <p className="font-display text-xl md:text-2xl font-bold tabular-nums gradient-text">
                   {stat.value}
                 </p>
-                <p className="text-xs md:text-sm text-muted-foreground">{stat.label}</p>
+                <p className="text-xs text-muted-foreground">{stat.label}</p>
               </div>
             ))}
           </motion.div>

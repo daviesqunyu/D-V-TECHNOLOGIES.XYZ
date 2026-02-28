@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Monitor, Wrench, Wifi, Building2, Cpu, Shield, ArrowRight, Globe, Camera, BarChart3, CircuitBoard, Cloud, Brain } from "lucide-react";
+import { Monitor, Wrench, Wifi, Building2, Cpu, Shield, ArrowRight, Globe, Camera, BarChart3, CircuitBoard, Cloud, Brain, LineChart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -55,8 +55,14 @@ const services = [
   {
     icon: BarChart3,
     title: "Data Analytics & BI",
-    description: "Business intelligence dashboards, data visualization, reporting, and actionable insights for decision-making.",
+    description: "Business intelligence dashboards, data visualization, KPI reporting, and actionable insights for decision-making.",
     color: "from-violet-500 to-purple-500",
+  },
+  {
+    icon: LineChart,
+    title: "Data Science",
+    description: "Statistical modeling, predictive analytics, data pipelines, A/B testing, and ML-driven insights for growth and operations.",
+    color: "from-indigo-500 to-violet-500",
   },
   {
     icon: CircuitBoard,

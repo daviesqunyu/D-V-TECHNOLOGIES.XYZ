@@ -3,23 +3,26 @@ import { ExternalLink, Instagram } from "lucide-react";
 
 const TRUSTED_PARTNERS = [
   {
-    name: "BRIDAN DESIGN BUILD",
+    name: "Bridan Design Build",
     tagline: "Design & Build",
-    url: "https://buildwithbridan.xyz",
-    logoUrl: "https://www.google.com/s2/favicons?domain=buildwithbridan.xyz&sz=128",
-    logoAlt: "BRIDAN DESIGN BUILD",
+    domain: "buildwithbridan.com",
+    url: "https://buildwithbridan.com",
+    logoUrl: "https://www.google.com/s2/favicons?domain=buildwithbridan.com&sz=128",
+    logoAlt: "Bridan Design Build",
   },
   {
-    name: "VarraTek Security",
+    name: "VarraTek",
     tagline: "Protect Your Digital World",
-    url: "https://varrateksecurity.xyz",
-    logoUrl: "https://www.google.com/s2/favicons?domain=varrateksecurity.xyz&sz=128",
-    logoAlt: "VarraTek Security",
+    domain: "varratek.xyz",
+    url: "https://varratek.xyz",
+    logoUrl: "https://www.google.com/s2/favicons?domain=varratek.xyz&sz=128",
+    logoAlt: "VarraTek",
     instagram: "https://www.instagram.com/varrateksecurity/",
   },
   {
     name: "D&V Technologies",
     tagline: "Next-Gen Tech",
+    domain: "dvtechnologies.xyz",
     url: "https://dvtechnologies.xyz",
     logoUrl: "/favicon.svg",
     logoAlt: "D&V Technologies",
@@ -84,7 +87,7 @@ export function TrustedClientsSection() {
                   </p>
                   <p className="text-sm text-muted-foreground">{partner.tagline}</p>
                   <p className="text-xs text-primary mt-1 truncate" title={partner.url}>
-                    {partner.url.replace(/^https?:\/\//, "")}
+                    {"domain" in partner ? partner.domain : partner.url.replace(/^https?:\/\//, "")}
                   </p>
                 </div>
                 <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-primary flex-shrink-0" />

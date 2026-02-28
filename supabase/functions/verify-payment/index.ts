@@ -57,18 +57,25 @@ async function verifyWithPaystack(reference: string) {
     return { ok: false, status: "error", message: msg };
   }
 
-  const data = json.data ?? {};
-  const paystackStatus = data.status; // "success" | "failed" | ...
-  const gatewayResponse = data.gateway_response;
+  const data = json.data as Record<string, unknown> | undefined;
+  const paystackStatus = data?.status; // "success" | "failed" | ...
+  const gatewayResponse = data?.gateway_response;
+  const authorization = (data?.authorization ?? {}) as Record<string, unknown>;
 
   return {
     ok: true,
     status: paystackStatus,
     gateway_response: gatewayResponse,
-    amount: data.amount,
-    currency: data.currency,
-    customer: data.customer,
-    metadata: data.metadata,
+    amount: data?.amount,
+    currency: data?.currency,
+    customer: data?.customer,
+    metadata: data?.metadata,
+    authorization: {
+      last4: typeof authorization?.last4 === "string" ? authorization.last4 : null,
+      card_type: typeof authorization?.card_type === "string" ? authorization.card_type : null,
+      exp_month: authorization?.exp_month != null ? String(authorization.exp_month) : null,
+      exp_year: authorization?.exp_year != null ? String(authorization.exp_year) : null,
+    },
   };
 }
 
@@ -154,10 +161,20 @@ serve(async (req) => {
   const nextStatus = isSuccess ? "completed" : "failed";
   const errorMessage = isSuccess ? null : verify.gateway_response || `Paystack status: ${verify.status}`;
 
+  const auth = verify.authorization ?? {};
+  const updatePayload: Record<string, unknown> = {
+    status: nextStatus,
+    error_message: errorMessage,
+  };
+  if (auth.last4) updatePayload.card_last4 = auth.last4;
+  if (auth.card_type) updatePayload.card_brand = auth.card_type;
+  if (auth.exp_month) updatePayload.card_expiry_month = auth.exp_month;
+  if (auth.exp_year) updatePayload.card_expiry_year = auth.exp_year;
+
   const supabase = createClient(supabaseUrl, serviceKey);
   await supabase
     .from("payment_records")
-    .update({ status: nextStatus, error_message: errorMessage })
+    .update(updatePayload)
     .eq("checkout_request_id", reference);
 
   // Send a copy/notification to the business inbox when payment succeeds.

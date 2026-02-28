@@ -16,6 +16,7 @@ import {
   Globe,
   Camera,
   BarChart3,
+  LineChart,
   CircuitBoard,
   Brain,
 } from "lucide-react";
@@ -119,7 +120,18 @@ const services = [
       "BI Dashboard Development",
       "Data Visualization",
       "Custom Reports & Analytics",
-      "Predictive Modeling",
+      "KPI Dashboards",
+    ],
+  },
+  {
+    icon: LineChart,
+    title: "Data Science",
+    description: "Statistical modeling, predictive analytics, and ML-driven insights for growth and operations.",
+    features: [
+      "Statistical Modeling & A/B Testing",
+      "Data Pipelines & ETL",
+      "Predictive Analytics",
+      "ML for Business Insights",
     ],
   },
   {
@@ -169,7 +181,7 @@ const Services = () => {
                 Our <span className="gradient-text">Services</span>
               </h1>
               <p className="text-lg text-muted-foreground">
-                11 comprehensive IT, hardware, software, and AI solutions designed for 
+                12 comprehensive IT, hardware, software, data, and AI solutions designed for 
                 modern businesses in Kenya and East Africa.
               </p>
             </motion.div>
