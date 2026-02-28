@@ -1,26 +1,57 @@
 import { useState } from "react";
-import { Bitcoin, Copy, Check, Smartphone } from "lucide-react";
+import { Bitcoin, Copy, Check, Loader2, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { api, authHeaders } from "@/lib/api";
 
 const BTC_ADDRESS = "1PZPhUGugY5ecF9hYFYvpffsYUFUk2hK6i";
-// M-Pesa: display number; for STK Push / Paybill use Safaricom Daraja API (env: VITE_MPESA_CONSUMER_KEY, etc.)
-const MPESA_NUMBER = "0759 075 816";
-const MPESA_NUMBER_RAW = "254759075816";
 
-function MpesaIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="10" fill="#00A651"/>
-      <path d="M7 8h10v1.5H7V8zm0 2.5h10v1H7v-1zm0 2.5h7v1H7v-1z" fill="#fff"/>
-      <text x="12" y="16" textAnchor="middle" fill="#fff" fontSize="6" fontWeight="bold" fontFamily="Arial">M</text>
-    </svg>
-  );
+const USD_TO_KES_RATE = Number(import.meta.env.VITE_USD_TO_KES_RATE ?? 129);
+
+type PlanKey = "basic" | "premium" | "exclusive";
+
+const PLANS: Record<PlanKey, { label: string; usd: number }> = {
+  basic: { label: "Basic", usd: 300 },
+  premium: { label: "Premium", usd: 650 },
+  exclusive: { label: "Exclusive", usd: 900 },
+} as const;
+
+function usdToKes(usd: number) {
+  const safeRate = Number.isFinite(USD_TO_KES_RATE) && USD_TO_KES_RATE > 0 ? USD_TO_KES_RATE : 129;
+  return Math.round(usd * safeRate);
+}
+
+function formatKes(amount: number) {
+  try {
+    return new Intl.NumberFormat("en-KE", {
+      style: "currency",
+      currency: "KES",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `KES ${amount}`;
+  }
+}
+
+function formatUsd(amount: number) {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `$${amount}`;
+  }
 }
 
 export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "card" }) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [planKey, setPlanKey] = useState<PlanKey>("basic");
+  const [email, setEmail] = useState("");
+  const [loadingPaystack, setLoadingPaystack] = useState(false);
 
   const copyBtc = () => {
     navigator.clipboard.writeText(BTC_ADDRESS);
@@ -33,6 +64,52 @@ export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "c
   };
 
   const isCard = variant === "card";
+  const selected = PLANS[planKey];
+  const amountKes = usdToKes(selected.usd);
+  const startPaystack = async () => {
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail) {
+      toast({ title: "Enter your email address", variant: "destructive" });
+      return;
+    }
+
+    setLoadingPaystack(true);
+    try {
+      const res = await fetch(api.initiatePayment, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({
+          method: "paystack",
+          plan: selected.label,
+          amount: amountKes,
+          email: trimmedEmail,
+        }),
+      });
+
+      const data = (await res.json().catch(() => null)) as
+        | { success?: boolean; authorization_url?: string; reference?: string; error?: string; message?: string }
+        | null;
+
+      if (res.ok && data?.success && data.authorization_url) {
+        window.location.href = data.authorization_url;
+        return;
+      }
+
+      toast({
+        title: "Paystack error",
+        description: data?.error || data?.message || "Could not start card checkout. Please try again.",
+        variant: "destructive",
+      });
+    } catch (e) {
+      toast({
+        title: "Connection error",
+        description: e instanceof Error ? e.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPaystack(false);
+    }
+  };
 
   return (
     <div className={isCard ? "space-y-3" : "space-y-2"}>
@@ -54,23 +131,62 @@ export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "c
         <Button
           variant="outline"
           size={isCard ? "default" : "sm"}
-          className="border-emerald-500/50 hover:bg-emerald-500/10 hover:border-emerald-500 gap-2"
-          asChild
+          className="border-primary/50 hover:bg-primary/10 hover:border-primary gap-2"
+          onClick={startPaystack}
+          disabled={loadingPaystack}
         >
-          <a href={`tel:${MPESA_NUMBER_RAW}`} title={`M-Pesa: ${MPESA_NUMBER}`}>
-            <MpesaIcon className="w-5 h-5" />
-            <span>Pay via M-Pesa</span>
-            <Smartphone className="w-4 h-4 text-muted-foreground" />
-          </a>
+          {loadingPaystack ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
+          <span>Pay with Paystack</span>
         </Button>
       </div>
-      {isCard && (
-        <p className="text-xs text-muted-foreground">
-          BTC: <code className="bg-muted px-1 rounded">{BTC_ADDRESS}</code>
-          <br />
-          M-Pesa: <strong>{MPESA_NUMBER}</strong>
+
+      {/* Paystack details */}
+      <div className={isCard ? "space-y-2" : "space-y-2"}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <label className="text-xs text-muted-foreground">
+            Plan
+            <select
+              value={planKey}
+              onChange={(e) => setPlanKey(e.target.value as PlanKey)}
+              className="mt-1 w-full h-10 rounded-md border border-border bg-background px-3 text-sm"
+              disabled={loadingPaystack}
+            >
+              <option value="basic">Basic</option>
+              <option value="premium">Premium</option>
+              <option value="exclusive">Exclusive</option>
+            </select>
+          </label>
+          <div />
+        </div>
+
+        <label className="text-xs text-muted-foreground block">
+          Email (Paystack receipt)
+          <Input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="mt-1 h-10 bg-muted/30"
+            type="email"
+            autoComplete="email"
+            disabled={loadingPaystack}
+          />
+        </label>
+
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Amount: <span className="font-medium text-foreground">{formatKes(amountKes)}</span>{" "}
+            <span className="text-muted-foreground/70">({formatUsd(selected.usd)})</span>
+          </p>
+          <Button variant={isCard ? "hero" : "outline"} size={isCard ? "default" : "sm"} onClick={startPaystack} disabled={loadingPaystack} className="gap-2">
+            {loadingPaystack ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
+            Paystack Checkout
+          </Button>
+        </div>
+
+        <p className="text-[11px] text-muted-foreground">
+          You will be redirected to Paystack to choose Card, M-Pesa, or other available methods.
         </p>
-      )}
+      </div>
     </div>
   );
 }

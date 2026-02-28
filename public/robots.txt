@@ -1,5 +1,26 @@
+# robots.txt for D&V Technologies
+# https://dvtechnologies.xyz
+
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /admin/
 
-# Sitemap for dvtechnologies.xyz (update base URL when deploying)
+# Sitemap location
 Sitemap: https://dvtechnologies.xyz/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 10
+
+# Popular search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /

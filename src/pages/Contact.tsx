@@ -15,10 +15,20 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { PaymentOptions } from "@/components/PaymentOptions";
-
-const CONTACT_API = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contact-form`;
+import { api, authHeaders } from "@/lib/api";
+import { SEOHead } from "@/components/SEOHead";
 const WHATSAPP_NUMBER = "254759075816";
 const WHATSAPP_BASE = `https://wa.me/${WHATSAPP_NUMBER}`;
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready: (cb: () => void) => void;
+      execute: (key: string, opts: { action: string }) => Promise<string>;
+    };
+  }
+}
 
 const Contact = () => {
   const { toast } = useToast();
@@ -31,23 +41,38 @@ const Contact = () => {
     message: "",
   });
 
+  const getRecaptchaToken = async () => {
+    if (!RECAPTCHA_SITE_KEY || !window.grecaptcha) return undefined;
+    return new Promise<string | undefined>((resolve) => {
+      window.grecaptcha?.ready(async () => {
+        try {
+          const token = await window.grecaptcha?.execute(RECAPTCHA_SITE_KEY, {
+            action: "contact_submit",
+          });
+          resolve(token);
+        } catch {
+          resolve(undefined);
+        }
+      });
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(CONTACT_API, {
+      const recaptchaToken = await getRecaptchaToken();
+      const res = await fetch(api.contactForm, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
+        headers: authHeaders(),
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
           phone: formData.phone || undefined,
           subject: formData.subject,
           message: formData.message,
+          recaptchaToken,
         }),
       });
 
@@ -91,8 +116,13 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Contact D&V Technologies"
+        description="Talk to D&V Technologies about software, AI, cybersecurity, and IT support projects. Reach us via form, email, or WhatsApp."
+        canonicalPath="/contact"
+      />
       <Navbar />
-      <main className="pt-20 lg:pt-24">
+      <main id="main-content" className="pt-20 lg:pt-24">
         {/* Hero */}
         <section className="py-16 lg:py-24 hero-pattern">
           <div className="container mx-auto px-4 lg:px-8">
@@ -138,8 +168,11 @@ const Contact = () => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Name</label>
+                      <label htmlFor="contact-name" className="block text-sm font-medium mb-2">
+                        Name
+                      </label>
                       <Input
+                        id="contact-name"
                         placeholder="Your name"
                         value={formData.name}
                         onChange={(e) =>
@@ -150,8 +183,11 @@ const Contact = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Email</label>
+                      <label htmlFor="contact-email" className="block text-sm font-medium mb-2">
+                        Email
+                      </label>
                       <Input
+                        id="contact-email"
                         type="email"
                         placeholder="your@email.com"
                         value={formData.email}
@@ -165,8 +201,11 @@ const Contact = () => {
                   </div>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Phone</label>
+                      <label htmlFor="contact-phone" className="block text-sm font-medium mb-2">
+                        Phone
+                      </label>
                       <Input
+                        id="contact-phone"
                         placeholder="0759 075 816"
                         value={formData.phone}
                         onChange={(e) =>
@@ -176,8 +215,11 @@ const Contact = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Subject</label>
+                      <label htmlFor="contact-subject" className="block text-sm font-medium mb-2">
+                        Subject
+                      </label>
                       <Input
+                        id="contact-subject"
                         placeholder="How can we help?"
                         value={formData.subject}
                         onChange={(e) =>
@@ -189,8 +231,11 @@ const Contact = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Message</label>
+                    <label htmlFor="contact-message" className="block text-sm font-medium mb-2">
+                      Message
+                    </label>
                     <Textarea
+                      id="contact-message"
                       placeholder="Tell us about your project..."
                       rows={5}
                       value={formData.message}
@@ -245,9 +290,9 @@ const Contact = () => {
                   </div>
                 </div>
 
-                {/* Pay with Bitcoin or M-Pesa */}
+                {/* Pay with Bitcoin or Paystack */}
                 <div className="glass-card rounded-2xl p-6">
-                  <h3 className="font-semibold mb-4">Pay with Bitcoin or M-Pesa</h3>
+                  <h3 className="font-semibold mb-4">Pay with Bitcoin or Paystack</h3>
                   <PaymentOptions variant="card" />
                 </div>
 

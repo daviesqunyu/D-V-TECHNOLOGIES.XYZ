@@ -1,20 +1,33 @@
-import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Bot, Home, Briefcase, Phone, Users, Target, Zap, MessageSquare, HelpCircle, Mail, ArrowRight } from "lucide-react";
+import { Menu, X, Bot, Home, Briefcase, Phone, Users, Target, Zap, MessageSquare, HelpCircle, ArrowRight, DollarSign, Mail, Info, FolderKanban, Newspaper, Scale, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
-const navLinks = [
+/** Main nav: shown in header (keeps space for logo & name) */
+const mainNavLinks = [
   { path: "/", label: "Home", icon: Home },
   { path: "/services", label: "Services", icon: Briefcase },
-  { path: "/ai-assistant", label: "AI Assistant", icon: Bot },
   { path: "/contact", label: "Contact", icon: Phone },
 ];
 
+/** All pages: used in mobile menu only */
+const allNavLinks = [
+  ...mainNavLinks,
+  { path: "/portfolio", label: "Portfolio", icon: FolderKanban },
+  { path: "/blog", label: "Blog", icon: Newspaper },
+  // Route to the homepage packages section.
+  { path: "/#pricing", label: "Pricing", icon: DollarSign },
+  { path: "/careers", label: "Careers", icon: Users },
+  { path: "/ai-assistant", label: "AI Assistant", icon: Bot },
+];
+
 const sectionLinks = [
-  { hash: "#who-trust-us", label: "Who Trust Us", icon: Users },
+  { hash: "#who-trust-us", label: "Why Trust Us", icon: Users },
   { hash: "#mission", label: "Our Mission", icon: Target },
   { hash: "#why-choose-us", label: "Why Choose Us", icon: Zap },
+  { hash: "#pricing", label: "Pricing", icon: DollarSign },
   { hash: "#ai", label: "AI & Innovation", icon: MessageSquare },
   { hash: "#faq", label: "FAQ", icon: HelpCircle },
   { hash: "#newsletter", label: "Newsletter", icon: Mail },
@@ -23,10 +36,38 @@ const sectionLinks = [
 
 export function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
+  const scrollToSection = useCallback(
+    (hash: string) => {
+      setIsOpen(false);
+      const id = hash.replace("#", "");
+
+      const tryScroll = () => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          return true;
+        }
+        return false;
+      };
+
+      if (location.pathname === "/") {
+        if (!tryScroll()) {
+          setTimeout(tryScroll, 150);
+        }
+      } else {
+        navigate("/");
+        setTimeout(tryScroll, 300);
+        setTimeout(tryScroll, 600);
+      }
+    },
+    [location.pathname, navigate]
+  );
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass-card">
+    <nav className="fixed top-0 left-0 right-0 z-50 glass-card" aria-label="Primary">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo - 3D rotating tech icon */}
@@ -44,9 +85,9 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - main links only for logo/name space */}
           <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => {
+            {mainNavLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
                 <Link
@@ -74,8 +115,9 @@ export function Navbar() {
             })}
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden lg:flex items-center gap-4">
+          {/* CTA Button & Theme Toggle */}
+          <div className="hidden lg:flex items-center gap-2">
+            <ThemeToggle />
             <Link to="/contact">
               <Button variant="hero" size="default">
                 Get Started
@@ -83,13 +125,17 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-          >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile Theme Toggle & Menu Button */}
+          <div className="lg:hidden flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              aria-label={isOpen ? "Close mobile menu" : "Open mobile menu"}
+            >
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -108,7 +154,7 @@ export function Navbar() {
                 Main
               </p>
               <div className="space-y-1">
-                {navLinks.map((link) => {
+                {allNavLinks.map((link) => {
                   const isActive = location.pathname === link.path;
                   return (
                     <Link
@@ -133,15 +179,14 @@ export function Navbar() {
               </p>
               <div className="space-y-1">
                 {sectionLinks.map((item) => (
-                  <Link
+                  <button
                     key={item.hash}
-                    to={{ pathname: "/", hash: item.hash.replace("#", "") }}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+                    onClick={() => scrollToSection(item.hash)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all w-full text-left"
                   >
                     <item.icon className="w-5 h-5 flex-shrink-0" />
                     {item.label}
-                  </Link>
+                  </button>
                 ))}
               </div>
 
@@ -157,6 +202,20 @@ export function Navbar() {
                     Try AI Assistant
                   </Button>
                 </Link>
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <Link to="/privacy" onClick={() => setIsOpen(false)} className="block">
+                    <Button variant="outline" className="w-full">
+                      <FileText className="w-4 h-4" />
+                      Privacy
+                    </Button>
+                  </Link>
+                  <Link to="/terms" onClick={() => setIsOpen(false)} className="block">
+                    <Button variant="outline" className="w-full">
+                      <Scale className="w-4 h-4" />
+                      Terms
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           </motion.div>

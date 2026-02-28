@@ -5,8 +5,8 @@ const TRUSTED_PARTNERS = [
   {
     name: "BRIDAN DESIGN BUILD",
     tagline: "Design & Build",
-    url: "https://buildwithbridan.com",
-    logoUrl: "https://www.google.com/s2/favicons?domain=buildwithbridan.com&sz=128",
+    url: "https://buildwithbridan.xyz",
+    logoUrl: "https://www.google.com/s2/favicons?domain=buildwithbridan.xyz&sz=128",
     logoAlt: "BRIDAN DESIGN BUILD",
   },
   {
@@ -38,7 +38,7 @@ export function TrustedClientsSection() {
           className="text-center mb-12 lg:mb-16"
         >
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Who <span className="gradient-text">Trust Us</span>
+            Why <span className="gradient-text">Trust Us</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Organizations and partners who trust us with their technology and growth.

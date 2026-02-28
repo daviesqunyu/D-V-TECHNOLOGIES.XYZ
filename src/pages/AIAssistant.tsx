@@ -6,21 +6,83 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Bot, User, Send, Loader2, Sparkles, Trash2 } from "lucide-react";
+import {
+  Bot,
+  User,
+  Send,
+  Loader2,
+  Sparkles,
+  Trash2,
+  Code,
+  FileText,
+  Calculator,
+  Globe,
+  Briefcase,
+  Palette,
+  Brain,
+  MessageSquare,
+  Copy,
+  Check,
+  Zap,
+} from "lucide-react";
+import { api, authHeaders } from "@/lib/api";
+import { SEOHead } from "@/components/SEOHead";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
 };
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
-
-const quickQuestions = [
-  "What services do you offer?",
-  "How can you help my business?",
-  "What is your pricing?",
-  "Tell me about your AI solutions",
+const capabilities = [
+  { icon: Code, label: "Write Code", color: "text-blue-400" },
+  { icon: FileText, label: "Write Content", color: "text-green-400" },
+  { icon: Calculator, label: "Solve Math", color: "text-yellow-400" },
+  { icon: Globe, label: "Any Language", color: "text-purple-400" },
+  { icon: Briefcase, label: "Business Plans", color: "text-orange-400" },
+  { icon: Palette, label: "Creative Writing", color: "text-pink-400" },
+  { icon: Brain, label: "Research & Analysis", color: "text-cyan-400" },
+  { icon: Zap, label: "D&V Services", color: "text-primary" },
 ];
+
+const quickPrompts = [
+  { text: "Write a Python web scraper", icon: Code },
+  { text: "Create a business plan for a tech startup in Nairobi", icon: Briefcase },
+  { text: "Explain quantum computing simply", icon: Brain },
+  { text: "What services does D&V Technologies offer?", icon: MessageSquare },
+  { text: "Write a React component for a dashboard", icon: Code },
+  { text: "Help me with a math problem", icon: Calculator },
+  { text: "Translate this to Swahili: Hello, how are you?", icon: Globe },
+  { text: "Write a professional email template", icon: FileText },
+];
+
+function CodeBlock({ children, className }: { children: string; className?: string }) {
+  const [copied, setCopied] = useState(false);
+  const lang = className?.replace("language-", "") || "";
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(children);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="relative group rounded-lg overflow-hidden my-3 bg-[#0d1117] border border-border/50">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-border/30">
+        <span className="text-xs text-muted-foreground font-mono">{lang || "code"}</span>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+          {copied ? "Copied" : "Copy"}
+        </button>
+      </div>
+      <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
+        <code className={`${className || ""} text-[#e6edf3]`}>{children}</code>
+      </pre>
+    </div>
+  );
+}
 
 const AIAssistant = () => {
   const { toast } = useToast();
@@ -38,6 +100,13 @@ const AIAssistant = () => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 160) + "px";
+    }
+  }, [input]);
+
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
 
@@ -50,38 +119,24 @@ const AIAssistant = () => {
     const allMessages = [...messages, userMsg];
 
     try {
-      const resp = await fetch(CHAT_URL, {
+      const resp = await fetch(api.aiChat, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ messages: allMessages }),
+        headers: authHeaders(),
+        body: JSON.stringify({ messages: allMessages, model: "gpt-4o-mini" }),
       });
 
-      if (resp.status === 429) {
-        toast({
-          title: "Rate Limit Exceeded",
-          description: "Please wait a moment and try again.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
+      if (!resp.ok) {
+        // ai-chat returns JSON errors when misconfigured (e.g. missing OPENAI_API_KEY).
+        const raw = await resp.text().catch(() => "");
+        try {
+          const parsed = JSON.parse(raw) as { error?: string; message?: string };
+          throw new Error(parsed.error || parsed.message || `AI request failed (${resp.status})`);
+        } catch {
+          throw new Error(raw || `AI request failed (${resp.status})`);
+        }
       }
 
-      if (resp.status === 402) {
-        toast({
-          title: "Service Unavailable",
-          description: "AI service temporarily unavailable. Please try again later.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      if (!resp.ok || !resp.body) {
-        throw new Error("Failed to start stream");
-      }
+      if (!resp.body) throw new Error("AI stream not available.");
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -123,7 +178,9 @@ const AIAssistant = () => {
 
           try {
             const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            const content = parsed.choices?.[0]?.delta?.content as
+              | string
+              | undefined;
             if (content) upsertAssistant(content);
           } catch {
             textBuffer = line + "\n" + textBuffer;
@@ -132,7 +189,6 @@ const AIAssistant = () => {
         }
       }
 
-      // Flush remaining buffer
       if (textBuffer.trim()) {
         for (let raw of textBuffer.split("\n")) {
           if (!raw) continue;
@@ -143,7 +199,9 @@ const AIAssistant = () => {
           if (jsonStr === "[DONE]") continue;
           try {
             const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            const content = parsed.choices?.[0]?.delta?.content as
+              | string
+              | undefined;
             if (content) upsertAssistant(content);
           } catch {
             /* ignore */
@@ -151,10 +209,12 @@ const AIAssistant = () => {
         }
       }
     } catch (error) {
-      console.error("Chat error:", error);
+      if (import.meta.env.DEV) {
+        console.error("Chat error:", error);
+      }
       toast({
         title: "Connection Error",
-        description: "Failed to connect to AI. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to connect. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -180,49 +240,86 @@ const AIAssistant = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEOHead
+        title="AI Assistant | D&V Technologies"
+        description="Use the D&V Technologies AI assistant for writing, coding, analysis, and business support tasks."
+        canonicalPath="/ai-assistant"
+      />
       <Navbar />
-      <main className="flex-1 pt-20 lg:pt-24 flex flex-col">
-        <div className="container mx-auto px-4 lg:px-8 py-8 flex flex-col flex-1 max-w-4xl">
+      <main id="main-content" className="flex-1 pt-20 lg:pt-24 flex flex-col">
+        <div className="container mx-auto px-4 lg:px-8 py-6 flex flex-col flex-1 max-w-5xl">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-6"
+            className="text-center mb-4"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-4">
-              <Bot className="w-5 h-5 text-primary" />
-              <span className="font-medium text-primary">AI Assistant</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-3">
+              <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+              <span className="font-medium text-primary text-sm">
+                Powered by GPT-4o
+              </span>
             </div>
-            <h1 className="font-display text-2xl md:text-3xl font-bold mb-2">
-              Chat with <span className="gradient-text">D&V AI</span>
+            <h1 className="font-display text-2xl md:text-4xl font-bold mb-2">
+              <span className="gradient-text">D&V AI</span> — Your All-in-One
+              Assistant
             </h1>
-            <p className="text-muted-foreground text-sm">
-              Get instant answers about our services, pricing, and solutions.
+            <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
+              Code, write, solve math, create content, analyze data, and more.
+              As capable as ChatGPT — plus it knows everything about D&V
+              Technologies.
             </p>
           </motion.div>
 
           {/* Chat Container */}
-          <div className="flex-1 glass-card rounded-2xl flex flex-col overflow-hidden min-h-[500px]">
+          <div className="flex-1 glass-card rounded-2xl flex flex-col overflow-hidden min-h-[550px]">
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4">
               {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center">
-                  <Bot className="w-16 h-16 text-primary/50 mb-4" />
-                  <h3 className="font-display text-lg font-semibold mb-2">
-                    How can I help you today?
+                <div className="h-full flex flex-col items-center justify-center text-center py-4">
+                  {/* Logo */}
+                  <div className="relative mb-6">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                      <Bot className="w-10 h-10 text-primary-foreground" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-green-500 border-2 border-background flex items-center justify-center">
+                      <Zap className="w-3 h-3 text-white" />
+                    </div>
+                  </div>
+
+                  <h3 className="font-display text-xl font-bold mb-2">
+                    What can I help you with?
                   </h3>
-                  <p className="text-muted-foreground text-sm mb-6 max-w-md">
-                    I know everything about D&V Technologies. Ask me about our services, 
-                    pricing, AI solutions, or anything else!
+                  <p className="text-muted-foreground text-sm mb-6 max-w-lg">
+                    I can write code, solve problems, create content, translate
+                    languages, build business plans, and answer any question.
                   </p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {quickQuestions.map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => sendMessage(q)}
-                        className="px-4 py-2 rounded-full bg-muted hover:bg-primary/10 hover:text-primary text-sm transition-all"
+
+                  {/* Capability pills */}
+                  <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-lg">
+                    {capabilities.map((cap) => (
+                      <div
+                        key={cap.label}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50 text-xs font-medium"
                       >
-                        {q}
+                        <cap.icon className={`w-3 h-3 ${cap.color}`} />
+                        {cap.label}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Quick prompts */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-2xl w-full">
+                    {quickPrompts.map((q) => (
+                      <button
+                        key={q.text}
+                        onClick={() => sendMessage(q.text)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/30 hover:bg-primary/10 hover:border-primary/30 border border-border/30 text-left text-sm transition-all group"
+                      >
+                        <q.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary flex-shrink-0 transition-colors" />
+                        <span className="text-muted-foreground group-hover:text-foreground transition-colors line-clamp-1">
+                          {q.text}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -236,51 +333,85 @@ const AIAssistant = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={`flex gap-3 ${
-                          msg.role === "user" ? "justify-end" : "justify-start"
+                          msg.role === "user"
+                            ? "justify-end"
+                            : "justify-start"
                         }`}
                       >
                         {msg.role === "assistant" && (
-                          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                            <Bot className="w-4 h-4 text-primary" />
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 mt-1">
+                            <Bot className="w-4 h-4 text-primary-foreground" />
                           </div>
                         )}
                         <div
-                          className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                          className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                             msg.role === "user"
                               ? "chat-message-user text-primary-foreground"
                               : "chat-message-assistant"
                           }`}
                         >
                           {msg.role === "assistant" ? (
-                            <div className="prose-chat text-sm">
-                              <ReactMarkdown>{msg.content}</ReactMarkdown>
+                            <div className="prose-chat text-sm leading-relaxed">
+                              <ReactMarkdown
+                                components={{
+                                  code({ className, children, ...props }) {
+                                    const isInline = !className;
+                                    if (isInline) {
+                                      return (
+                                        <code
+                                          className="bg-muted/50 px-1.5 py-0.5 rounded text-primary text-[13px] font-mono"
+                                          {...props}
+                                        >
+                                          {children}
+                                        </code>
+                                      );
+                                    }
+                                    return (
+                                      <CodeBlock className={className}>
+                                        {String(children).replace(/\n$/, "")}
+                                      </CodeBlock>
+                                    );
+                                  },
+                                  pre({ children }) {
+                                    return <>{children}</>;
+                                  },
+                                }}
+                              >
+                                {msg.content}
+                              </ReactMarkdown>
                             </div>
                           ) : (
-                            <p className="text-sm">{msg.content}</p>
+                            <p className="text-sm whitespace-pre-wrap">
+                              {msg.content}
+                            </p>
                           )}
                         </div>
                         {msg.role === "user" && (
-                          <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0 mt-1">
                             <User className="w-4 h-4 text-accent" />
                           </div>
                         )}
                       </motion.div>
                     ))}
                   </AnimatePresence>
-                  {isLoading && messages[messages.length - 1]?.role === "user" && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex gap-3"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                        <Bot className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="chat-message-assistant rounded-2xl px-4 py-3">
-                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                      </div>
-                    </motion.div>
-                  )}
+                  {isLoading &&
+                    messages[messages.length - 1]?.role === "user" && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex gap-3"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                          <Bot className="w-4 h-4 text-primary-foreground" />
+                        </div>
+                        <div className="chat-message-assistant rounded-2xl px-4 py-3 flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                          <span className="text-xs text-muted-foreground">
+                            Thinking...
+                          </span>
+                        </div>
+                      </motion.div>
+                    )}
                   <div ref={messagesEndRef} />
                 </>
               )}
@@ -288,15 +419,15 @@ const AIAssistant = () => {
 
             {/* Input */}
             <div className="border-t border-border p-4">
-              <form onSubmit={handleSubmit} className="flex gap-3">
+              <form onSubmit={handleSubmit} className="flex gap-3 items-end">
                 <div className="flex-1 relative">
                   <Textarea
                     ref={textareaRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask me anything about D&V Technologies..."
-                    className="resize-none bg-muted/50 min-h-[48px] max-h-32 pr-12"
+                    placeholder="Ask anything — code, math, writing, business, D&V services..."
+                    className="resize-none bg-muted/50 min-h-[48px] max-h-40 pr-4 text-sm"
                     rows={1}
                     disabled={isLoading}
                   />
@@ -307,9 +438,10 @@ const AIAssistant = () => {
                     variant="ghost"
                     size="icon"
                     onClick={clearChat}
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 h-10 w-10"
+                    title="Clear chat"
                   >
-                    <Trash2 className="w-5 h-5" />
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 )}
                 <Button
@@ -317,19 +449,24 @@ const AIAssistant = () => {
                   variant="hero"
                   size="icon"
                   disabled={!input.trim() || isLoading}
-                  className="flex-shrink-0"
+                  className="flex-shrink-0 h-10 w-10"
                 >
                   {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <Send className="w-5 h-5" />
+                    <Send className="w-4 h-4" />
                   )}
                 </Button>
               </form>
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                <Sparkles className="w-3 h-3 inline mr-1" />
-                Powered by D&V Technologies AI
-              </p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-[10px] text-muted-foreground">
+                  Shift+Enter for new line
+                </p>
+                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  D&V AI &mdash; GPT-4o &mdash; dvtechnologies.xyz
+                </p>
+              </div>
             </div>
           </div>
         </div>

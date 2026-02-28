@@ -43,6 +43,64 @@ export type Database = {
           created_at?: string;
         };
       };
+      payment_records: {
+        Row: {
+          id: string;
+          method: string;
+          plan: string;
+          amount: number;
+          phone: string | null;
+          email: string | null;
+          name: string | null;
+          status: string;
+          checkout_request_id: string | null;
+          error_message: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          method: string;
+          plan: string;
+          amount: number;
+          phone?: string | null;
+          email?: string | null;
+          name?: string | null;
+          status?: string;
+          checkout_request_id?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          method?: string;
+          plan?: string;
+          amount?: number;
+          phone?: string | null;
+          email?: string | null;
+          name?: string | null;
+          status?: string;
+          checkout_request_id?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+        };
+      };
+      newsletter_subscribers: {
+        Row: {
+          id: string;
+          email: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          created_at?: string;
+        };
+      };
     }
     Views: {
       [_ in never]: never

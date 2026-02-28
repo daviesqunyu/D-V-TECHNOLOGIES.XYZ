@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Monitor, Wrench, Wifi, Building2, Cpu, Shield, ArrowRight } from "lucide-react";
+import { Monitor, Wrench, Wifi, Building2, Cpu, Shield, ArrowRight, Globe, Camera, BarChart3, CircuitBoard, Cloud, Brain } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -7,26 +7,68 @@ const services = [
   {
     icon: Monitor,
     title: "IT Support & Maintenance",
-    description: "Comprehensive IT support to keep your business running smoothly. From troubleshooting to system optimization.",
+    description: "24/7 remote & on-site support to keep your business running smoothly. Troubleshooting to system optimization.",
     color: "from-primary to-primary/60",
   },
   {
     icon: Wrench,
     title: "Hardware Repair & Solutions",
-    description: "Expert repair and maintenance for all your hardware needs. Computers, servers, and peripherals.",
+    description: "Expert repair and maintenance for computers, servers, printers, and all peripherals with fast turnaround.",
     color: "from-accent to-accent/60",
   },
   {
     icon: Wifi,
     title: "Networking & Internet",
-    description: "Reliable networking solutions and internet connectivity for homes and businesses across Kenya.",
+    description: "Network design, Wi-Fi deployment, VPN setup, and reliable internet connectivity for homes and businesses.",
     color: "from-primary to-accent",
   },
   {
     icon: Building2,
-    title: "Business Solutions",
-    description: "End-to-end digital transformation for enterprises. Cloud migration, ERP, and custom software.",
+    title: "Business Solutions & ERP",
+    description: "End-to-end digital transformation — ERP implementation, custom software, and business process automation.",
     color: "from-accent to-primary",
+  },
+  {
+    icon: Cloud,
+    title: "Cloud Services",
+    description: "Cloud migration, SaaS implementation, data backup & recovery, and full infrastructure management.",
+    color: "from-blue-500 to-cyan-500",
+  },
+  {
+    icon: Shield,
+    title: "Cybersecurity",
+    description: "Security audits, firewall configuration, anti-malware solutions, and staff cybersecurity training.",
+    color: "from-red-500 to-orange-500",
+  },
+  {
+    icon: Globe,
+    title: "Web & App Development",
+    description: "Custom websites, e-commerce platforms, mobile apps (React Native, Flutter), and progressive web apps.",
+    color: "from-green-500 to-emerald-500",
+  },
+  {
+    icon: Camera,
+    title: "CCTV & Surveillance",
+    description: "Security camera installation, remote monitoring systems, and smart home & office surveillance solutions.",
+    color: "from-yellow-500 to-amber-500",
+  },
+  {
+    icon: BarChart3,
+    title: "Data Analytics & BI",
+    description: "Business intelligence dashboards, data visualization, reporting, and actionable insights for decision-making.",
+    color: "from-violet-500 to-purple-500",
+  },
+  {
+    icon: CircuitBoard,
+    title: "IoT Solutions",
+    description: "Smart office & home automation, sensor networks, and industrial IoT solutions for East African businesses.",
+    color: "from-teal-500 to-cyan-500",
+  },
+  {
+    icon: Brain,
+    title: "AI & Machine Learning",
+    description: "Deep learning, NLP for Swahili & English, predictive analytics, and intelligent automation bots.",
+    color: "from-primary to-pink-500",
   },
 ];
 
@@ -60,7 +102,7 @@ export function ServicesSection() {
         </motion.div>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {services.map((service, i) => (
             <motion.div
               key={service.title}

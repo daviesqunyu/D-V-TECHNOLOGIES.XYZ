@@ -71,9 +71,17 @@ export function Footer() {
             <ul className="space-y-2">
               {[
                 { label: "Home", path: "/" },
+                { label: "About Us", path: "/about" },
                 { label: "Services", path: "/services" },
+                { label: "Portfolio", path: "/portfolio" },
+                { label: "Blog", path: "/blog" },
+                // Pricing is a homepage section.
+                { label: "Pricing", path: "/#pricing" },
+                { label: "Careers", path: "/careers" },
                 { label: "AI Assistant", path: "/ai-assistant" },
                 { label: "Contact", path: "/contact" },
+                { label: "Privacy Policy", path: "/privacy" },
+                { label: "Terms of Service", path: "/terms" },
               ].map((link) => (
                 <li key={link.path}>
                   <Link
@@ -148,8 +156,17 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             © 2025 D&V Technologies. All rights reserved.
           </p>
+          <p className="text-sm text-muted-foreground">
+            <Link to="/privacy" className="hover:text-primary transition-colors">
+              Privacy
+            </Link>{" "}
+            ·{" "}
+            <Link to="/terms" className="hover:text-primary transition-colors">
+              Terms
+            </Link>
+          </p>
           <p className="text-sm text-muted-foreground text-center">
-            🌍 Proudly driving Nairobi's journey to become Africa's Silicon Savannah by 2030!
+            Proudly driving Nairobi's journey to become Africa's Silicon Savannah by 2030.
           </p>
         </div>
       </div>

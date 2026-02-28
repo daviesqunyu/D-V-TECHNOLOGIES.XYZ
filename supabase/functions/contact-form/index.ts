@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") || "*",
+  "Access-Control-Allow-Methods": "POST,OPTIONS",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
@@ -17,21 +18,57 @@ type ContactBody = {
   phone?: string;
   subject: string;
   message: string;
+  recaptchaToken?: string;
 };
 
+const MAX_NAME_LENGTH = 200;
+const MAX_EMAIL_LENGTH = 255;
+const MAX_SUBJECT_LENGTH = 200;
+const MAX_MESSAGE_LENGTH = 5000;
+const MAX_PHONE_LENGTH = 20;
+
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email) && email.length <= MAX_EMAIL_LENGTH;
+}
+
 function validate(body: unknown): body is ContactBody {
+  if (typeof body !== "object" || body === null) return false;
+  const payload = body as ContactBody;
   return (
-    typeof body === "object" &&
-    body !== null &&
-    "name" in body &&
-    "email" in body &&
-    "subject" in body &&
-    "message" in body &&
-    typeof (body as ContactBody).name === "string" &&
-    typeof (body as ContactBody).email === "string" &&
-    typeof (body as ContactBody).subject === "string" &&
-    typeof (body as ContactBody).message === "string"
+    typeof payload.name === "string" &&
+    payload.name.trim().length > 0 &&
+    payload.name.trim().length <= MAX_NAME_LENGTH &&
+    typeof payload.email === "string" &&
+    isValidEmail(payload.email.trim().toLowerCase()) &&
+    typeof payload.subject === "string" &&
+    payload.subject.trim().length > 0 &&
+    payload.subject.trim().length <= MAX_SUBJECT_LENGTH &&
+    typeof payload.message === "string" &&
+    payload.message.trim().length > 0 &&
+    payload.message.trim().length <= MAX_MESSAGE_LENGTH &&
+    (payload.phone === undefined ||
+      (typeof payload.phone === "string" && payload.phone.trim().length <= MAX_PHONE_LENGTH))
   );
+}
+
+async function verifyRecaptcha(token: string): Promise<boolean> {
+  const secret = Deno.env.get("RECAPTCHA_SECRET_KEY");
+  if (!secret) return true;
+  const body = new URLSearchParams({
+    secret,
+    response: token,
+  });
+  const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+  });
+  if (!res.ok) return false;
+  const json = await res.json().catch(() => null);
+  return Boolean(json?.success);
 }
 
 async function sendEmail(
@@ -80,8 +117,17 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    if (body.recaptchaToken) {
+      const verified = await verifyRecaptcha(body.recaptchaToken);
+      if (!verified) {
+        return new Response(
+          JSON.stringify({ error: "reCAPTCHA validation failed." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error("Supabase env not set");

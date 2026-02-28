@@ -9,7 +9,69 @@
 
 @layer base {
   :root {
-    /* Dark theme base */
+    /* Light theme base - Professional light mode */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Cyan/Teal Primary - Tech Innovation */
+    --primary: 175 84% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Light gray */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    /* Orange Accent - African Energy */
+    --accent: 25 95% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 175 84% 40%;
+
+    --radius: 0.75rem;
+
+    /* Custom gradients - Light mode */
+    --gradient-primary: linear-gradient(135deg, hsl(175 84% 40%) 0%, hsl(190 80% 35%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(25 95% 50%) 0%, hsl(35 90% 45%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(0 0% 98%) 0%, hsl(0 0% 100%) 100%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(175 84% 40% / 0.08) 0%, transparent 70%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 99%) 0%, hsl(210 40% 98%) 50%, hsl(175 84% 95%) 100%);
+    
+    /* Glass effect - Light */
+    --glass-bg: hsl(0 0% 100% / 0.8);
+    --glass-border: hsl(175 84% 40% / 0.2);
+    
+    /* Shadows - Light */
+    --shadow-glow: 0 0 60px -15px hsl(175 84% 40% / 0.2);
+    --shadow-accent: 0 0 40px -10px hsl(25 95% 50% / 0.15);
+    --shadow-card: 0 4px 20px -4px hsl(222 47% 11% / 0.1);
+
+    /* Sidebar - Light */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 175 84% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 175 84% 40%;
+  }
+
+  .dark {
+    /* Dark theme base - Professional dark blue */
     --background: 222 47% 6%;
     --foreground: 210 40% 98%;
 
@@ -43,23 +105,23 @@
 
     --radius: 0.75rem;
 
-    /* Custom gradients */
+    /* Custom gradients - Dark */
     --gradient-primary: linear-gradient(135deg, hsl(175 84% 50%) 0%, hsl(190 80% 45%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(25 95% 55%) 0%, hsl(35 90% 50%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(222 47% 6%) 0%, hsl(222 47% 4%) 100%);
     --gradient-glow: radial-gradient(ellipse at center, hsl(175 84% 50% / 0.15) 0%, transparent 70%);
     --gradient-hero: linear-gradient(135deg, hsl(222 47% 8%) 0%, hsl(222 47% 4%) 50%, hsl(175 84% 10% / 0.3) 100%);
     
-    /* Glass effect */
+    /* Glass effect - Dark */
     --glass-bg: hsl(222 47% 10% / 0.8);
     --glass-border: hsl(175 84% 50% / 0.2);
     
-    /* Shadows */
+    /* Shadows - Dark */
     --shadow-glow: 0 0 60px -15px hsl(175 84% 50% / 0.4);
     --shadow-accent: 0 0 40px -10px hsl(25 95% 55% / 0.3);
     --shadow-card: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
 
-    /* Sidebar */
+    /* Sidebar - Dark */
     --sidebar-background: 222 47% 5%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 175 84% 50%;
@@ -68,10 +130,6 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 222 30% 15%;
     --sidebar-ring: 175 84% 50%;
-  }
-
-  .dark {
-    /* Already dark by default */
   }
 }
 

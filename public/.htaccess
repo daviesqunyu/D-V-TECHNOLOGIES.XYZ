@@ -1,0 +1,213 @@
+# .htaccess for D&V Technologies (dvtechnologies.xyz)
+# React SPA + Supabase Backend Configuration
+
+# Enable RewriteEngine
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Force HTTPS (redirect HTTP to HTTPS)
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Force WWW or non-WWW (choose one - currently non-WWW)
+  # Redirect www to non-www
+  RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+  RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+  # Handle React Router - Send all requests to index.html
+  # Skip if file exists (images, css, js, etc)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-l
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+  # Prevent clickjacking attacks
+  Header always set X-Frame-Options "SAMEORIGIN"
+  
+  # Prevent MIME type sniffing
+  Header always set X-Content-Type-Options "nosniff"
+  
+  # Enable XSS protection
+  Header always set X-XSS-Protection "1; mode=block"
+  
+  # Referrer Policy
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Enforce HTTPS for supported browsers
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+  
+  # Content Security Policy (adjust as needed)
+  Header always set Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://www.google.com https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://fonts.googleapis.com https://www.google-analytics.com wss://*.supabase.co; frame-src 'self' https://accounts.google.com https://www.google.com https://www.google.com/recaptcha/;"
+  
+  # Permissions Policy (formerly Feature Policy)
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+  
+  # Remove X-Powered-By header for security
+  Header unset X-Powered-By
+  Header unset Server
+</IfModule>
+
+# Compression - Enable GZIP
+<IfModule mod_deflate.c>
+  # Compress HTML, CSS, JavaScript, Text, XML and fonts
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE application/rss+xml
+  AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+  AddOutputFilterByType DEFLATE application/x-font-ttf
+  AddOutputFilterByType DEFLATE application/x-javascript
+  AddOutputFilterByType DEFLATE application/x-web-app-manifest+json
+  AddOutputFilterByType DEFLATE application/xhtml+xml
+  AddOutputFilterByType DEFLATE application/xml
+  AddOutputFilterByType DEFLATE font/opentype
+  AddOutputFilterByType DEFLATE font/otf
+  AddOutputFilterByType DEFLATE font/ttf
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE image/x-icon
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE text/plain
+  AddOutputFilterByType DEFLATE text/xml
+</IfModule>
+
+# Browser Caching
+<IfModule mod_expires.c>
+  ExpiresActive On
+  
+  # Default expiration: 1 week
+  ExpiresDefault "access plus 1 week"
+  
+  # HTML - 0 seconds (always check for updates)
+  ExpiresByType text/html "access plus 0 seconds"
+  
+  # CSS and JavaScript - 1 year
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType application/x-javascript "access plus 1 year"
+  
+  # Images - 1 year
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  
+  # Fonts - 1 year
+  ExpiresByType font/ttf "access plus 1 year"
+  ExpiresByType font/otf "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType application/font-woff "access plus 1 year"
+  
+  # JSON - 0 seconds
+  ExpiresByType application/json "access plus 0 seconds"
+  
+  # Manifest - 1 week
+  ExpiresByType application/manifest+json "access plus 1 week"
+</IfModule>
+
+# Cache-Control Headers
+<IfModule mod_headers.c>
+  # Cache static assets for 1 year
+  <FilesMatch "\.(ico|jpg|jpeg|png|gif|svg|webp|js|css|woff|woff2|ttf|otf|eot)$">
+    Header set Cache-Control "max-age=31536000, public, immutable"
+  </FilesMatch>
+  
+  # Don't cache HTML
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes
+
+# Follow symbolic links
+Options +FollowSymLinks
+
+# Default charset
+AddDefaultCharset UTF-8
+
+# MIME Types
+<IfModule mod_mime.c>
+  # JavaScript
+  AddType application/javascript js mjs
+  AddType application/json json map
+  
+  # Fonts
+  AddType font/woff woff
+  AddType font/woff2 woff2
+  AddType application/vnd.ms-fontobject eot
+  AddType font/ttf ttf
+  AddType font/otf otf
+  
+  # Images
+  AddType image/svg+xml svg svgz
+  AddType image/webp webp
+  
+  # Other
+  AddType application/manifest+json webmanifest
+  AddType text/cache-manifest appcache
+</IfModule>
+
+# Protect sensitive files
+<FilesMatch "(^\.htaccess|^\.env|^package\.json|^composer\.json|^\.git)">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
+
+# Prevent access to hidden files (starting with .)
+<FilesMatch "^\.">
+  Order allow,deny
+  Deny from all
+</FilesMatch>
+
+# Error pages (create custom error pages if needed)
+ErrorDocument 404 /index.html
+ErrorDocument 403 /index.html
+ErrorDocument 500 /index.html
+
+# Protect against DOS attacks by limiting file upload size (adjust as needed)
+LimitRequestBody 10485760
+
+# Enable keep-alive connections
+<IfModule mod_headers.c>
+  Header set Connection keep-alive
+</IfModule>
+
+# UTF-8 encoding
+<IfModule mod_mime.c>
+  AddCharset utf-8 .atom .css .js .json .rss .vtt .xml
+</IfModule>
+
+# Allow CORS for fonts (if needed)
+<IfModule mod_headers.c>
+  <FilesMatch "\.(ttf|ttc|otf|eot|woff|woff2|font.css|svg)$">
+    Header set Access-Control-Allow-Origin "*"
+  </FilesMatch>
+</IfModule>
+
+# Supabase Edge Functions routing (if using custom domain)
+# Uncomment if you need to proxy Supabase requests
+# <IfModule mod_rewrite.c>
+#   RewriteCond %{REQUEST_URI} ^/api/
+#   RewriteRule ^api/(.*)$ https://YOUR-PROJECT-REF.supabase.co/rest/v1/$1 [P,L]
+# </IfModule>
+
+# Prevent PHP execution in uploads folder (security)
+<FilesMatch "\.php$">
+  Order Deny,Allow
+  Deny from all
+</FilesMatch>
+
+# End of .htaccess

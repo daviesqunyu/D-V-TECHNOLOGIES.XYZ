@@ -4,7 +4,15 @@ import { Target, Eye, Heart, Rocket } from "lucide-react";
 export function MissionSection() {
   return (
     <section id="mission" className="scroll-mt-24 py-20 lg:py-32 bg-card relative overflow-hidden">
-      <div className="container mx-auto px-4 lg:px-8">
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-20"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1800&q=80')",
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-background/85 via-background/80 to-background/90" />
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Content */}
           <motion.div

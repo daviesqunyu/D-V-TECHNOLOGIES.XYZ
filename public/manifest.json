@@ -1,0 +1,21 @@
+{
+  "name": "D&V Technologies",
+  "short_name": "D&V Tech",
+  "description": "Nairobi-based software, AI, cybersecurity and IT solutions company.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f18",
+  "theme_color": "#0f0f18",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
