@@ -184,17 +184,7 @@ serve(async (req) => {
     }
 
     const resendKey = Deno.env.get("RESEND_API_KEY");
-    if (!resendKey) {
-      console.error("RESEND_API_KEY is not set. Cannot send contact/appointment emails.");
-      return new Response(
-        JSON.stringify({
-          error:
-            "Email sending is not configured on the server. Please contact us on WhatsApp while we fix this.",
-        }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
+    if (resendKey) {
       const appointmentLines: string[] = [];
       if (body.appointment?.preferredDate) {
         appointmentLines.push(
@@ -322,10 +312,10 @@ serve(async (req) => {
         success: true,
         message:
           "Message sent. We'll reply by email and you can also chat us on WhatsApp for a faster response.",
-        auto_reply_sent: true,
+        auto_reply_sent: Boolean(resendKey),
         whatsapp_url: `https://wa.me/${WHATSAPP_NUMBER}`,
       }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
     console.error("contact-form error:", e);
