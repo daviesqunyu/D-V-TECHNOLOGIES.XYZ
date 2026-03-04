@@ -7,7 +7,7 @@ Nairobi's next-generation tech company: IT, hardware & software solutions, AI, I
 - **Mission**: Transform Kenyan and African business through problem-solving and innovation.
 - **Vision**: Make Nairobi the Silicon Savannah of Africa by 2030.
 - **Offerings**: IT Support & Maintenance, Hardware Repair, Software Development, Networking, AI & Automation, Crypto-ready payments.
-- **Contact**: info@dvtechnologies.xyz | Lower Kabete, Nairobi, Kenya.
+- **Contact**: info@dvtechnologies.xyz, contact@dvtechnologies.xyz | Lower Kabete, Nairobi, Kenya.
 
 ## Tech Stack
 
@@ -19,7 +19,7 @@ Nairobi's next-generation tech company: IT, hardware & software solutions, AI, I
 
 - **AI Assistant**: Edge Function `ai-chat` uses **OpenAI API** (no Lovable). Set `OPENAI_API_KEY` in Supabase Edge Function secrets.
 - **Contact form**: Edge Function `contact-form` saves submissions to `contact_submissions` and can send email via **Resend**. Set `RESEND_API_KEY` in Supabase Edge Function secrets to enable:
-  - Email to **info@dvtechnologies.xyz** when someone submits the form
+  - Email to **info@dvtechnologies.xyz** (and optionally **contact@dvtechnologies.xyz**) when someone submits the form
   - Automated reply to the user’s email
 - **Database**: Run the migration so the contact table exists:
   - `supabase/migrations/20250215000000_contact_submissions.sql` — create `contact_submissions` table
@@ -49,4 +49,4 @@ npm run build
 ## Payments
 
 - **Bitcoin**: Address `1PZPhUGugY5ecF9hYFYvpffsYUFUk2hK6i`; copy via "Pay with Bitcoin" button.
-- **M-Pesa**: Number `0759 075 816`; "Pay via M-Pesa" links to call. For STK Push / Paybill, integrate [Safaricom Daraja API](https://developer.safaricom.co.ke/) (consumer key, secret, till/paybill) via your backend.
+- **M-Pesa**: Main number `0719 576 326` (primary), alternative `0759 075 816`; "Pay via M-Pesa" links to call. For STK Push / Paybill, integrate [Safaricom Daraja API](https://developer.safaricom.co.ke/) (consumer key, secret, till/paybill) via your backend.

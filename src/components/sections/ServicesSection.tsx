@@ -80,10 +80,25 @@ const services = [
 
 export function ServicesSection() {
   return (
-    <section id="services" className="scroll-mt-24 py-20 lg:py-32 bg-card relative overflow-hidden">
+    <section
+      id="services"
+      className="scroll-mt-24 py-20 lg:py-32 bg-card relative overflow-hidden"
+    >
+      {/* Background image */}
+      <div className="absolute inset-0 -z-10">
+        <div
+          className="w-full h-full bg-cover bg-center opacity-60 dark:opacity-70"
+          style={{
+            backgroundImage:
+              'url("https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1600&q=80")',
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/75 to-background/93" />
+      </div>
+
       {/* Background decorations */}
-      <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-accent/5 rounded-full blur-3xl" />
+      <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-accent/10 rounded-full blur-3xl" />
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         {/* Header */}

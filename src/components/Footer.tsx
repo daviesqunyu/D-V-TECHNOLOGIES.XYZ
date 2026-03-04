@@ -4,8 +4,10 @@ import { PaymentOptions } from "@/components/PaymentOptions";
 
 const WHATSAPP_NUMBER = "254759075816";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
-const EMAIL = "info@dvtechnologies.xyz";
-const PHONE = "0759 075 816";
+const PRIMARY_EMAIL = "info@dvtechnologies.xyz";
+const SECONDARY_EMAIL = "contact@dvtechnologies.xyz";
+const PRIMARY_PHONE = "0719 576 326";
+const SECONDARY_PHONE = "0759 075 816";
 const WEBSITE = "https://dvtechnologies.xyz";
 const ADDRESS = "Lower Kabete, Nairobi, Kenya";
 
@@ -40,14 +42,14 @@ export function Footer() {
                 <MessageCircle className="w-4 h-4" />
               </a>
               <a
-                href={`mailto:${EMAIL}`}
+                href={`mailto:${PRIMARY_EMAIL}`}
                 title="Email us"
                 className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"
               >
                 <Mail className="w-4 h-4" />
               </a>
               <a
-                href={`tel:+254759075816`}
+                href={`tel:+254719576326`}
                 title="Call us"
                 className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"
               >
@@ -71,15 +73,14 @@ export function Footer() {
             <ul className="space-y-2">
               {[
                 { label: "Home", path: "/" },
-                { label: "About Us", path: "/about" },
                 { label: "Services", path: "/services" },
+                { label: "Pricing", path: "/#pricing" }, // homepage section
                 { label: "Portfolio", path: "/portfolio" },
                 { label: "Blog", path: "/blog" },
-                // Pricing is a homepage section.
-                { label: "Pricing", path: "/#pricing" },
                 { label: "Careers", path: "/careers" },
                 { label: "AI Assistant", path: "/ai-assistant" },
                 { label: "Contact", path: "/contact" },
+                { label: "About Us", path: "/about" },
                 { label: "Privacy Policy", path: "/privacy" },
                 { label: "Terms of Service", path: "/terms" },
               ].map((link) => (
@@ -119,25 +120,33 @@ export function Footer() {
                   className="flex items-center gap-3 text-sm text-muted-foreground hover:text-[#25D366] transition-colors"
                 >
                   <MessageCircle className="w-4 h-4 text-[#25D366]" />
-                  WhatsApp: {PHONE}
+                  WhatsApp: {SECONDARY_PHONE}
                 </a>
               </li>
               <li>
                 <a
-                  href={`mailto:${EMAIL}`}
+                  href={`mailto:${PRIMARY_EMAIL}`}
                   className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Mail className="w-4 h-4 text-primary" />
-                  {EMAIL}
+                  <span className="flex flex-col">
+                    <span>{PRIMARY_EMAIL}</span>
+                    <span className="text-xs text-muted-foreground">
+                      Alt: {SECONDARY_EMAIL}
+                    </span>
+                  </span>
                 </a>
               </li>
               <li>
                 <a
-                  href="tel:+254759075816"
+                  href="tel:+254719576326"
                   className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Phone className="w-4 h-4 text-primary" />
-                  {PHONE}
+                  {PRIMARY_PHONE}{" "}
+                  <span className="text-xs text-muted-foreground">
+                    (alt: {SECONDARY_PHONE})
+                  </span>
                 </a>
               </li>
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -154,7 +163,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2025 D&V Technologies. All rights reserved.
+            © 2026 D&V Technologies. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground">
             <Link to="/privacy" className="hover:text-primary transition-colors">

@@ -5,13 +5,30 @@ import { Link } from "react-router-dom";
 import { PaymentOptions } from "@/components/PaymentOptions";
 
 const WHATSAPP_URL = "https://wa.me/254759075816";
-const EMAIL = "info@dvtechnologies.xyz";
-const PHONE = "0759 075 816";
+const PRIMARY_EMAIL = "info@dvtechnologies.xyz";
+const SECONDARY_EMAIL = "contact@dvtechnologies.xyz";
+const PRIMARY_PHONE = "0719 576 326";
+const SECONDARY_PHONE = "0759 075 816";
 const ADDRESS = "Lower Kabete, Nairobi, Kenya";
 
 export function ContactSection() {
   return (
-    <section id="contact" className="scroll-mt-24 py-20 lg:py-32 relative overflow-hidden">
+    <section
+      id="contact"
+      className="scroll-mt-24 py-20 lg:py-32 relative overflow-hidden"
+    >
+      {/* Background image */}
+      <div className="absolute inset-0 -z-10">
+        <div
+          className="w-full h-full bg-cover bg-center opacity-60 dark:opacity-75"
+          style={{
+            backgroundImage:
+              'url("https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=80")',
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/88 via-background/78 to-background/94" />
+      </div>
+
       <div className="container mx-auto px-4 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
           {/* Left: Contact Info */}
@@ -37,14 +54,29 @@ export function ContactSection() {
               className="inline-flex items-center gap-3 w-full sm:w-auto justify-center rounded-xl px-6 py-3 mb-6 bg-[#25D366] hover:bg-[#20BD5A] text-white font-semibold transition-colors"
             >
               <MessageCircle className="w-5 h-5" />
-              Chat on WhatsApp — {PHONE}
+              Chat on WhatsApp — {SECONDARY_PHONE}
             </a>
 
             <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
               {[
-                { icon: MessageCircle, label: "WhatsApp", value: PHONE, href: WHATSAPP_URL },
-                { icon: Mail, label: "Email", value: EMAIL, href: `mailto:${EMAIL}` },
-                { icon: Phone, label: "Phone", value: PHONE, href: "tel:+254759075816" },
+                {
+                  icon: MessageCircle,
+                  label: "WhatsApp",
+                  value: SECONDARY_PHONE,
+                  href: WHATSAPP_URL,
+                },
+                {
+                  icon: Mail,
+                  label: "Email",
+                  value: `${PRIMARY_EMAIL}, ${SECONDARY_EMAIL}`,
+                  href: `mailto:${PRIMARY_EMAIL}`,
+                },
+                {
+                  icon: Phone,
+                  label: "Phone",
+                  value: `${PRIMARY_PHONE} (primary), ${SECONDARY_PHONE} (alt)`,
+                  href: "tel:+254719576326",
+                },
                 { icon: MapPin, label: "Location", value: ADDRESS, href: null },
                 { icon: Clock, label: "Hours", value: "Mon - Sat: 8AM - 6PM EAT", href: null },
               ].map((item, i) => (

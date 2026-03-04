@@ -38,83 +38,77 @@ serve(async (req) => {
     });
   }
 
-  function extractOpenAiErrorMessage(raw: string): string | null {
-    try {
-      const parsed = JSON.parse(raw) as { error?: { message?: string; type?: string; code?: string } };
-      const msg = parsed?.error?.message;
-      return typeof msg === "string" && msg.trim() ? msg.trim() : null;
-    } catch {
-      return null;
-    }
-  }
-
   try {
     const body = await req.json();
     const messages = body.messages || [];
-    // Use a cheaper default to reduce 429s on fresh accounts.
-    const model = body.model || "gpt-4o-mini";
+    const accountId = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
+    const apiToken = Deno.env.get("CLOUDFLARE_API_TOKEN");
+    const model =
+      Deno.env.get("CLOUDFLARE_AI_MODEL") || "@cf/meta/llama-3.1-8b-instruct";
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) {
-      console.error("OPENAI_API_KEY is not configured");
+    if (!accountId || !apiToken) {
+      console.error("Cloudflare Workers AI env vars missing");
       return jsonError(
         500,
-        "AI service not configured. Set OPENAI_API_KEY in Supabase Edge Function secrets."
+        "AI service not configured. Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN in Supabase Edge Function secrets."
       );
     }
 
     console.log(
-      `Chat request: ${messages?.length || 0} messages, model: ${model}`
+      `Chat request (Cloudflare): ${messages?.length || 0} messages, model: ${model}`
     );
 
-    const response = await fetch(
-      "https://api.openai.com/v1/chat/completions",
+    const cfResponse = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${encodeURIComponent(
+        model
+      )}`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          Authorization: `Bearer ${apiToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model,
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             ...messages,
           ],
-          stream: true,
-          temperature: 0.7,
-          // Keep responses smaller to reduce spend / rate-limit pressure.
-          max_tokens: 900,
         }),
       }
     );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenAI API error:", response.status, errorText);
-      const openAiMsg = extractOpenAiErrorMessage(errorText);
-      const retryAfter = response.headers.get("retry-after");
+    const json = await cfResponse.json().catch(() => null as unknown);
 
-      if (response.status === 429) {
-        // OpenAI uses 429 for both "rate limit" and "insufficient_quota".
-        const msg =
-          openAiMsg ||
-          "OpenAI returned 429. This can mean rate-limit OR no credit/quota. Check your OpenAI usage/billing.";
-        return jsonError(429, msg, retryAfter ? { "Retry-After": retryAfter } : undefined);
-      }
-
-      if (response.status === 401) {
-        return jsonError(500, openAiMsg || "AI service not configured.");
-      }
-
-      return jsonError(500, openAiMsg || "AI service error. Please try again.");
+    if (!cfResponse.ok || !json) {
+      console.error("Cloudflare AI error:", cfResponse.status, json);
+      const msg =
+        (json as { errors?: { message?: string }[] })?.errors?.[0]?.message ||
+        "AI service error. Please try again.";
+      return jsonError(
+        cfResponse.status === 429 ? 429 : 500,
+        msg
+      );
     }
 
-    console.log("Streaming response from OpenAI");
+    const result = (json as { result?: { response?: string; output_text?: string } })
+      .result;
+    const content = result?.response || result?.output_text;
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-    });
+    if (!content) {
+      console.error("Cloudflare AI returned no content", json);
+      return jsonError(500, "AI service did not return any content.");
+    }
+
+    return new Response(
+      JSON.stringify({ content }),
+      {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      }
+    );
   } catch (error) {
     console.error("Chat function error:", error);
     return new Response(

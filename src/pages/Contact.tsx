@@ -19,6 +19,8 @@ import { api, authHeaders } from "@/lib/api";
 import { SEOHead } from "@/components/SEOHead";
 const WHATSAPP_NUMBER = "254759075816";
 const WHATSAPP_BASE = `https://wa.me/${WHATSAPP_NUMBER}`;
+const PRIMARY_PHONE = "0719 576 326";
+const SECONDARY_PHONE = "0759 075 816";
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 declare global {
@@ -145,7 +147,7 @@ const Contact = () => {
                 className="inline-flex items-center gap-3 rounded-xl px-6 py-4 bg-[#25D366] hover:bg-[#20BD5A] text-white font-semibold transition-colors"
               >
                 <MessageCircle className="w-6 h-6" />
-                Chat on WhatsApp — 0759 075 816
+                Chat on WhatsApp — {SECONDARY_PHONE}
               </a>
             </motion.div>
           </div>
@@ -206,7 +208,7 @@ const Contact = () => {
                       </label>
                       <Input
                         id="contact-phone"
-                        placeholder="0759 075 816"
+                        placeholder={PRIMARY_PHONE}
                         value={formData.phone}
                         onChange={(e) =>
                           setFormData({ ...formData, phone: e.target.value })
@@ -272,9 +274,21 @@ const Contact = () => {
                   </h2>
                   <div className="space-y-6">
                     {[
-                      { icon: Mail, label: "Email", value: "info@dvtechnologies.xyz" },
-                      { icon: Phone, label: "Phone", value: "0759 075 816" },
-                      { icon: MapPin, label: "Address", value: "Lower Kabete, Nairobi, Kenya" },
+                      {
+                        icon: Mail,
+                        label: "Email",
+                        value: "info@dvtechnologies.xyz, contact@dvtechnologies.xyz",
+                      },
+                      {
+                        icon: Phone,
+                        label: "Phone",
+                        value: `${PRIMARY_PHONE} (primary), ${SECONDARY_PHONE} (alt)`,
+                      },
+                      {
+                        icon: MapPin,
+                        label: "Address",
+                        value: "Lower Kabete, Nairobi, Kenya",
+                      },
                       { icon: Clock, label: "Hours", value: "Mon - Sat: 8AM - 6PM EAT" },
                     ].map((item) => (
                       <div key={item.label} className="flex items-start gap-4">
