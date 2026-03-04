@@ -41,26 +41,13 @@ export function Navbar() {
 
   const scrollToSection = useCallback(
     (hash: string) => {
+      // Close mobile menu and use router hash navigation so Index page
+      // can handle smooth scrolling in one consistent place.
       setIsOpen(false);
-      const id = hash.replace("#", "");
-
-      const tryScroll = () => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
-          return true;
-        }
-        return false;
-      };
-
       if (location.pathname === "/") {
-        if (!tryScroll()) {
-          setTimeout(tryScroll, 150);
-        }
+        navigate({ pathname: "/", hash });
       } else {
-        navigate("/");
-        setTimeout(tryScroll, 300);
-        setTimeout(tryScroll, 600);
+        navigate({ pathname: "/", hash });
       }
     },
     [location.pathname, navigate]

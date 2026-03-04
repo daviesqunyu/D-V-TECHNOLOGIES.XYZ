@@ -83,10 +83,17 @@ serve(async (req) => {
       console.error("Cloudflare AI error:", cfResponse.status, json);
       const msg =
         (json as { errors?: { message?: string }[] })?.errors?.[0]?.message ||
-        "AI service error. Please try again.";
-      return jsonError(
-        cfResponse.status === 429 ? 429 : 500,
-        msg
+        "Our AI service is temporarily unavailable. Please try again in a few moments or use the contact/WhatsApp options on the site.";
+      // Fall back to a friendly assistant message instead of failing the request,
+      // so the frontend does not show a connection error toast.
+      return new Response(
+        JSON.stringify({
+          content: msg,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
@@ -96,7 +103,16 @@ serve(async (req) => {
 
     if (!content) {
       console.error("Cloudflare AI returned no content", json);
-      return jsonError(500, "AI service did not return any content.");
+      return new Response(
+        JSON.stringify({
+          content:
+            "Our AI service did not return a response this time. Please try again, or reach us via the contact page or WhatsApp for immediate help.",
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     return new Response(
