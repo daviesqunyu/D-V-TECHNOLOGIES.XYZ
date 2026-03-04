@@ -202,6 +202,8 @@ serve(async (req) => {
         );
       }
 
+      const isAppointment = appointmentLines.length > 0;
+
       const toBusiness = `
         <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #020817; padding: 20px;">
           <div style="max-width: 640px; margin: 0 auto; background: linear-gradient(135deg, #020817, #020617); border-radius: 16px; border: 1px solid #1e293b; padding: 24px; color: #e5e7eb;">
@@ -241,10 +243,12 @@ serve(async (req) => {
           </div>
         </div>
       `;
-      // Send admin notification to primary address
-      await sendEmail(BUSINESS_EMAIL, `[D&V Contact] ${body.subject}`, toBusiness, resendKey);
-      // Also send to alternate address (Cloudflare routing can fan these out further)
-      await sendEmail(BUSINESS_EMAIL_ALT, `[D&V Contact] ${body.subject}`, toBusiness, resendKey);
+      // Send admin notification to primary and secondary business emails
+      const adminSubject = isAppointment
+        ? `[D&V Appointment] ${body.subject}`
+        : `[D&V Contact] ${body.subject}`;
+      await sendEmail(BUSINESS_EMAIL, adminSubject, toBusiness, resendKey);
+      await sendEmail(BUSINESS_EMAIL_ALT, adminSubject, toBusiness, resendKey);
 
       const autoReply = `
         <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #020817; padding: 20px;">
@@ -300,10 +304,9 @@ serve(async (req) => {
           </div>
         </div>
       `;
-      const userSubject =
-        appointmentLines.length > 0
-          ? `We received your appointment request — ${BUSINESS_NAME}`
-          : `We received your message — ${BUSINESS_NAME}`;
+      const userSubject = isAppointment
+        ? `Your appointment request with ${BUSINESS_NAME}`
+        : `We received your message — ${BUSINESS_NAME}`;
       await sendEmail(body.email.trim(), userSubject, autoReply, resendKey);
     }
 
