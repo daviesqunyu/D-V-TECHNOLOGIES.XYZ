@@ -35,12 +35,16 @@ declare global {
 const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [quickMessage, setQuickMessage] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     subject: "",
     message: "",
+    preferredDate: "",
+    preferredTime: "",
+    preferredChannel: "",
   });
 
   const getRecaptchaToken = async () => {
@@ -72,8 +76,13 @@ const Contact = () => {
           name: formData.name,
           email: formData.email,
           phone: formData.phone || undefined,
-          subject: formData.subject,
+          subject: formData.subject || "Appointment request from website",
           message: formData.message,
+          appointment: {
+            preferredDate: formData.preferredDate || undefined,
+            preferredTime: formData.preferredTime || undefined,
+            preferredChannel: formData.preferredChannel || undefined,
+          },
           recaptchaToken,
         }),
       });
@@ -90,12 +99,26 @@ const Contact = () => {
         return;
       }
 
+      const autoReplyNote = data.auto_reply_sent
+        ? " Check your inbox (and spam) for an automatic confirmation from us."
+        : "";
       toast({
-        title: "Message sent!",
-        description: "We'll reply by email. For a faster response, chat us on WhatsApp.",
+        title: "Appointment request sent!",
+        description:
+          "We have your details and will confirm by email." + autoReplyNote +
+          " For a faster response, you can also chat us on WhatsApp.",
       });
 
-      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+        preferredDate: "",
+        preferredTime: "",
+        preferredChannel: "",
+      });
 
       if (data.whatsapp_url) {
         const prefill = encodeURIComponent(
@@ -114,6 +137,32 @@ const Contact = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleWhatsAppSend = () => {
+    if (!quickMessage.trim()) {
+      toast({
+        title: "Add a message first",
+        description: "Type a short message before sending it via WhatsApp.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const intro = formData.name
+      ? `Hi, I'm ${formData.name}.\n\n`
+      : "Hi D&V Technologies,\n\n";
+
+    const detailsLines: string[] = [];
+    if (formData.email) detailsLines.push(`Email: ${formData.email}`);
+    if (formData.phone) detailsLines.push(`Phone: ${formData.phone}`);
+
+    const details =
+      detailsLines.length > 0 ? `\n\n${detailsLines.join("\n")}` : "";
+
+    const text = encodeURIComponent(`${intro}${quickMessage.trim()}${details}`);
+    const url = `${WHATSAPP_BASE}?text=${text}`;
+    window.open(url, "_blank", "noopener");
   };
 
   return (
@@ -157,109 +206,222 @@ const Contact = () => {
         <section className="py-16 lg:py-24 bg-card">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
-              {/* Form */}
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="glass-card rounded-2xl p-6 lg:p-8"
-              >
-                <h2 className="font-display text-2xl font-bold mb-6">
-                  Send Us a Message
-                </h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="contact-name" className="block text-sm font-medium mb-2">
-                        Name
-                      </label>
-                      <Input
-                        id="contact-name"
-                        placeholder="Your name"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        required
-                        className="bg-muted/50"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="contact-email" className="block text-sm font-medium mb-2">
-                        Email
-                      </label>
-                      <Input
-                        id="contact-email"
-                        type="email"
-                        placeholder="your@email.com"
-                        value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                        required
-                        className="bg-muted/50"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="contact-phone" className="block text-sm font-medium mb-2">
-                        Phone
-                      </label>
-                      <Input
-                        id="contact-phone"
-                        placeholder={PRIMARY_PHONE}
-                        value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
-                        className="bg-muted/50"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="contact-subject" className="block text-sm font-medium mb-2">
-                        Subject
-                      </label>
-                      <Input
-                        id="contact-subject"
-                        placeholder="How can we help?"
-                        value={formData.subject}
-                        onChange={(e) =>
-                          setFormData({ ...formData, subject: e.target.value })
-                        }
-                        required
-                        className="bg-muted/50"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="contact-message" className="block text-sm font-medium mb-2">
-                      Message
-                    </label>
-                    <Textarea
-                      id="contact-message"
-                      placeholder="Tell us about your project..."
-                      rows={5}
-                      value={formData.message}
-                      onChange={(e) =>
-                        setFormData({ ...formData, message: e.target.value })
-                      }
-                      required
-                      className="bg-muted/50 resize-none"
-                    />
-                  </div>
+              {/* Left column: WhatsApp message + appointment form */}
+              <div className="space-y-8">
+                {/* WhatsApp message section */}
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  className="glass-card rounded-2xl p-6 lg:p-8"
+                >
+                  <h2 className="font-display text-2xl font-bold mb-2">
+                    Send a WhatsApp Message
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Write a quick message and we&apos;ll open WhatsApp with everything filled in
+                    for you to send.
+                  </p>
+                  <Textarea
+                    id="whatsapp-message"
+                    placeholder="Type your question or request here..."
+                    rows={4}
+                    value={quickMessage}
+                    onChange={(e) => setQuickMessage(e.target.value)}
+                    className="bg-muted/50 resize-none mb-4"
+                  />
                   <Button
-                    type="submit"
+                    type="button"
                     variant="hero"
                     size="lg"
                     className="w-full"
-                    disabled={isSubmitting}
+                    onClick={handleWhatsAppSend}
                   >
-                    {isSubmitting ? "Sending..." : "Send Message"}
-                    <Send className="w-5 h-5" />
+                    Send via WhatsApp
+                    <MessageCircle className="w-5 h-5" />
                   </Button>
-                </form>
-              </motion.div>
+                  <p className="mt-2 text-[11px] text-muted-foreground">
+                    WhatsApp uses your phone number and data. No email is sent from this section.
+                  </p>
+                </motion.div>
+
+                {/* Appointment form */}
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="glass-card rounded-2xl p-6 lg:p-8"
+                >
+                  <h2 className="font-display text-2xl font-bold mb-2">
+                    Book an Appointment (Email)
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Submissions go to info@dvtechnologies.xyz and contact@dvtechnologies.xyz. You will receive an automatic reply to the email you provide.
+                  </p>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="contact-name" className="block text-sm font-medium mb-2">
+                          Name
+                        </label>
+                        <Input
+                          id="contact-name"
+                          placeholder="Your name"
+                          value={formData.name}
+                          onChange={(e) =>
+                            setFormData({ ...formData, name: e.target.value })
+                          }
+                          required
+                          className="bg-muted/50"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="contact-email" className="block text-sm font-medium mb-2">
+                          Email
+                        </label>
+                        <Input
+                          id="contact-email"
+                          type="email"
+                          placeholder="your@email.com"
+                          value={formData.email}
+                          onChange={(e) =>
+                            setFormData({ ...formData, email: e.target.value })
+                          }
+                          required
+                          className="bg-muted/50"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="contact-phone" className="block text-sm font-medium mb-2">
+                          Phone
+                        </label>
+                        <Input
+                          id="contact-phone"
+                          placeholder={PRIMARY_PHONE}
+                          value={formData.phone}
+                          onChange={(e) =>
+                            setFormData({ ...formData, phone: e.target.value })
+                          }
+                          className="bg-muted/50"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="contact-subject" className="block text-sm font-medium mb-2">
+                          Subject
+                        </label>
+                        <Input
+                          id="contact-subject"
+                          placeholder="Appointment about which service?"
+                          value={formData.subject}
+                          onChange={(e) =>
+                            setFormData({ ...formData, subject: e.target.value })
+                          }
+                          className="bg-muted/50"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="contact-message" className="block text-sm font-medium mb-2">
+                        Extra details for the appointment <span className="text-destructive">*</span>
+                      </label>
+                      <Textarea
+                        id="contact-message"
+                        placeholder="Tell us about your project, goals, or questions..."
+                        rows={4}
+                        value={formData.message}
+                        onChange={(e) =>
+                          setFormData({ ...formData, message: e.target.value })
+                        }
+                        required
+                        minLength={1}
+                        className="bg-muted/50 resize-none"
+                      />
+                    </div>
+
+                    {/* Appointment request */}
+                    <div className="mt-4 border-t border-border pt-4 space-y-4">
+                      <h3 className="font-display text-lg font-semibold">
+                        Preferred Appointment Slot
+                      </h3>
+                      <div className="grid sm:grid-cols-3 gap-4">
+                        <div className="sm:col-span-1">
+                          <label
+                            htmlFor="appointment-date"
+                            className="block text-sm font-medium mb-2"
+                          >
+                            Preferred Date
+                          </label>
+                          <Input
+                            id="appointment-date"
+                            type="date"
+                            value={formData.preferredDate}
+                            onChange={(e) =>
+                              setFormData({ ...formData, preferredDate: e.target.value })
+                            }
+                            className="bg-muted/50"
+                          />
+                        </div>
+                        <div className="sm:col-span-1">
+                          <label
+                            htmlFor="appointment-time"
+                            className="block text-sm font-medium mb-2"
+                          >
+                            Preferred Time
+                          </label>
+                          <Input
+                            id="appointment-time"
+                            type="time"
+                            value={formData.preferredTime}
+                            onChange={(e) =>
+                              setFormData({ ...formData, preferredTime: e.target.value })
+                            }
+                            className="bg-muted/50"
+                          />
+                        </div>
+                        <div className="sm:col-span-1">
+                          <label
+                            htmlFor="appointment-channel"
+                            className="block text-sm font-medium mb-2"
+                          >
+                            Preferred Channel
+                          </label>
+                          <select
+                            id="appointment-channel"
+                            value={formData.preferredChannel}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                preferredChannel: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          >
+                            <option value="">No preference</option>
+                            <option value="WhatsApp">WhatsApp</option>
+                            <option value="Phone Call">Phone Call</option>
+                            <option value="Email">Email</option>
+                            <option value="Office Visit">Office Visit</option>
+                            <option value="Video Call">Video Call</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      variant="hero"
+                      size="lg"
+                      className="w-full mt-2"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Sending..." : "Send Appointment Request"}
+                      <Send className="w-5 h-5" />
+                    </Button>
+                  </form>
+                </motion.div>
+              </div>
 
               {/* Contact Info */}
               <motion.div
@@ -273,34 +435,72 @@ const Contact = () => {
                     Contact Information
                   </h2>
                   <div className="space-y-6">
-                    {[
-                      {
-                        icon: Mail,
-                        label: "Email",
-                        value: "info@dvtechnologies.xyz, contact@dvtechnologies.xyz",
-                      },
-                      {
-                        icon: Phone,
-                        label: "Phone",
-                        value: `${PRIMARY_PHONE} (primary), ${SECONDARY_PHONE} (alt)`,
-                      },
-                      {
-                        icon: MapPin,
-                        label: "Address",
-                        value: "Lower Kabete, Nairobi, Kenya",
-                      },
-                      { icon: Clock, label: "Hours", value: "Mon - Sat: 8AM - 6PM EAT" },
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <item.icon className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">{item.label}</p>
-                          <p className="font-medium">{item.value}</p>
+                    {/* Email */}
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Mail className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Email</p>
+                        <div className="flex flex-col gap-1 text-sm">
+                          <a
+                            href="mailto:info@dvtechnologies.xyz"
+                            className="font-medium hover:text-primary transition-colors"
+                          >
+                            info@dvtechnologies.xyz
+                          </a>
+                          <a
+                            href="mailto:contact@dvtechnologies.xyz"
+                            className="font-medium hover:text-primary transition-colors"
+                          >
+                            contact@dvtechnologies.xyz
+                          </a>
                         </div>
                       </div>
-                    ))}
+                    </div>
+                    {/* Phone */}
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Phone className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Phone</p>
+                        <div className="flex flex-col gap-1 text-sm">
+                          <a
+                            href={`tel:+254719576326`}
+                            className="font-medium hover:text-primary transition-colors"
+                          >
+                            {PRIMARY_PHONE} <span className="text-xs text-muted-foreground">(primary)</span>
+                          </a>
+                          <a
+                            href={`tel:+254759075816`}
+                            className="font-medium hover:text-primary transition-colors"
+                          >
+                            {SECONDARY_PHONE} <span className="text-xs text-muted-foreground">(alt)</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Address */}
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <MapPin className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Address</p>
+                        <p className="font-medium">Lower Kabete, Nairobi, Kenya</p>
+                      </div>
+                    </div>
+                    {/* Hours */}
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Clock className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Hours</p>
+                        <p className="font-medium">Mon - Sat: 8AM - 6PM EAT</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -308,17 +508,6 @@ const Contact = () => {
                 <div className="glass-card rounded-2xl p-6">
                   <h3 className="font-semibold mb-4">Pay with Bitcoin or Paystack</h3>
                   <PaymentOptions variant="card" />
-                </div>
-
-                {/* Map placeholder */}
-                <div className="glass-card rounded-2xl overflow-hidden h-64">
-                  <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                    <div className="text-center">
-                      <MapPin className="w-12 h-12 text-primary mx-auto mb-2" />
-                      <p className="font-medium">Lower Kabete, Nairobi</p>
-                      <p className="text-sm text-muted-foreground">Kenya</p>
-                    </div>
-                  </div>
                 </div>
               </motion.div>
             </div>
