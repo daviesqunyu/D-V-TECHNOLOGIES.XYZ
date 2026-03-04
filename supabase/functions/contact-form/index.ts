@@ -258,7 +258,7 @@ serve(async (req) => {
               body.name,
             )},</p>
             <p style="margin: 0 0 12px; font-size: 14px;">
-              Thank you for reaching out to <strong>${BUSINESS_NAME}</strong>. Your message is safely in our inbox and our team will review it shortly.
+              Thank you for reaching out to <strong>${BUSINESS_NAME}</strong>. Your message is safely in our inbox and our team will review it shortly. For most enquiries we aim to respond within a few business hours (and always within one business day).
             </p>
 
             ${

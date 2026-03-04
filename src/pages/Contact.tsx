@@ -17,8 +17,10 @@ import {
 import { PaymentOptions } from "@/components/PaymentOptions";
 import { api, authHeaders } from "@/lib/api";
 import { SEOHead } from "@/components/SEOHead";
-const WHATSAPP_NUMBER = "254759075816";
-const WHATSAPP_BASE = `https://wa.me/${WHATSAPP_NUMBER}`;
+const PRIMARY_WHATSAPP_NUMBER = "254719576326";
+const SECONDARY_WHATSAPP_NUMBER = "254759075816";
+const WHATSAPP_BASE_PRIMARY = `https://wa.me/${PRIMARY_WHATSAPP_NUMBER}`;
+const WHATSAPP_BASE_SECONDARY = `https://wa.me/${SECONDARY_WHATSAPP_NUMBER}`;
 const PRIMARY_PHONE = "0719 576 326";
 const SECONDARY_PHONE = "0759 075 816";
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
@@ -161,7 +163,7 @@ const Contact = () => {
       detailsLines.length > 0 ? `\n\n${detailsLines.join("\n")}` : "";
 
     const text = encodeURIComponent(`${intro}${quickMessage.trim()}${details}`);
-    const url = `${WHATSAPP_BASE}?text=${text}`;
+    const url = `${WHATSAPP_BASE_SECONDARY}?text=${text}`;
     window.open(url, "_blank", "noopener");
   };
 
@@ -190,7 +192,7 @@ const Contact = () => {
                 Ready to transform your business? Chat us on WhatsApp for the fastest response.
               </p>
               <a
-                href={WHATSAPP_BASE}
+                href={WHATSAPP_BASE_SECONDARY}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 rounded-xl px-6 py-4 bg-[#25D366] hover:bg-[#20BD5A] text-white font-semibold transition-colors"
@@ -198,6 +200,17 @@ const Contact = () => {
                 <MessageCircle className="w-6 h-6" />
                 Chat on WhatsApp — {SECONDARY_PHONE}
               </a>
+              <div className="mt-3 flex justify-center">
+                <a
+                  href={WHATSAPP_BASE_PRIMARY}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 rounded-xl px-6 py-3 border border-[#25D366] text-[#25D366] hover:bg-[#25D366]/10 font-semibold transition-colors text-sm"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Chat on WhatsApp — {PRIMARY_PHONE}
+                </a>
+              </div>
             </motion.div>
           </div>
         </section>
