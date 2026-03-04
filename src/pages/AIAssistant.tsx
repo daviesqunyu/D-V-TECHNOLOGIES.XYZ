@@ -33,26 +33,19 @@ type Message = {
   content: string;
 };
 
+// Keep the assistant focused and simple around D&V Technologies.
 const capabilities = [
-  { icon: Code, label: "Write Code", color: "text-blue-400" },
-  { icon: FileText, label: "Write Content", color: "text-green-400" },
-  { icon: Calculator, label: "Solve Math", color: "text-yellow-400" },
-  { icon: Globe, label: "Any Language", color: "text-purple-400" },
-  { icon: Briefcase, label: "Business Plans", color: "text-orange-400" },
-  { icon: Palette, label: "Creative Writing", color: "text-pink-400" },
-  { icon: Brain, label: "Research & Analysis", color: "text-cyan-400" },
   { icon: Zap, label: "D&V Services", color: "text-primary" },
+  { icon: Briefcase, label: "Packages & Pricing", color: "text-orange-400" },
+  { icon: MessageSquare, label: "Project & Support Questions", color: "text-blue-400" },
+  { icon: Globe, label: "How to Work With D&V", color: "text-purple-400" },
 ];
 
 const quickPrompts = [
-  { text: "Write a Python web scraper", icon: Code },
-  { text: "Create a business plan for a tech startup in Nairobi", icon: Briefcase },
-  { text: "Explain quantum computing simply", icon: Brain },
   { text: "What services does D&V Technologies offer?", icon: MessageSquare },
-  { text: "Write a React component for a dashboard", icon: Code },
-  { text: "Help me with a math problem", icon: Calculator },
-  { text: "Translate this to Swahili: Hello, how are you?", icon: Globe },
-  { text: "Write a professional email template", icon: FileText },
+  { text: "Explain the Basic, Premium, and Exclusive packages.", icon: Briefcase },
+  { text: "How can I contact D&V Technologies for a new project?", icon: MessageSquare },
+  { text: "Do you work with businesses outside Nairobi or Kenya?", icon: Globe },
 ];
 
 function CodeBlock({ children, className }: { children: string; className?: string }) {
@@ -257,17 +250,15 @@ const AIAssistant = () => {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-3">
               <Sparkles className="w-4 h-4 text-primary animate-pulse" />
               <span className="font-medium text-primary text-sm">
-                Powered by GPT-4o
+                Simple AI assistant for D&V Technologies
               </span>
             </div>
             <h1 className="font-display text-2xl md:text-4xl font-bold mb-2">
-              <span className="gradient-text">D&V AI</span> — Your All-in-One
-              Assistant
+              <span className="gradient-text">D&V AI Assistant</span>
             </h1>
             <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
-              Code, write, solve math, create content, analyze data, and more.
-              As capable as ChatGPT — plus it knows everything about D&V
-              Technologies.
+              Ask clear questions about D&V Technologies &mdash; our services, packages,
+              pricing, and how to get started with your project.
             </p>
           </motion.div>
 
@@ -288,11 +279,11 @@ const AIAssistant = () => {
                   </div>
 
                   <h3 className="font-display text-xl font-bold mb-2">
-                    What can I help you with?
+                    Ask anything about D&V Technologies
                   </h3>
                   <p className="text-muted-foreground text-sm mb-6 max-w-lg">
-                    I can write code, solve problems, create content, translate
-                    languages, build business plans, and answer any question.
+                    I&apos;m here to help you understand D&V Technologies: what we do,
+                    our pricing, and the best way we can support your business.
                   </p>
 
                   {/* Capability pills */}
@@ -426,7 +417,7 @@ const AIAssistant = () => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask anything — code, math, writing, business, D&V services..."
+                    placeholder="Ask about D&V services, pricing, or how to start a project..."
                     className="resize-none bg-muted/50 min-h-[48px] max-h-40 pr-4 text-sm"
                     rows={1}
                     disabled={isLoading}

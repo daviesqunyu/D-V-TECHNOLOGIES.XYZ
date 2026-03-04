@@ -6,33 +6,33 @@ import { Button } from "@/components/ui/button";
 const aiFeatures = [
   {
     icon: Brain,
-    title: "Deep Learning",
-    description: "Advanced neural networks for image, speech, and data recognition.",
+    title: "Smart Business Support",
+    description: "Use AI to answer common client questions and guide them to the right D&V solution.",
   },
   {
     icon: MessageSquare,
-    title: "Natural Language Processing",
-    description: "Chatbots, sentiment analysis, and language understanding for Swahili and English apps.",
+    title: "AI Chat for Your Site",
+    description: "Simple assistants that help visitors understand your services, pricing, and next steps.",
   },
   {
     icon: TrendingUp,
-    title: "Predictive Analytics",
-    description: "Forecast trends and automate decisions for Kenyan businesses with AI-powered analytics.",
+    title: "Insights & Reporting",
+    description: "Turn your data into clear dashboards and reports for better decisions.",
   },
   {
     icon: Code,
-    title: "JavaScript AI",
-    description: "Interactive AI features in web apps using TensorFlow.js and modern frameworks.",
+    title: "Custom Integrations",
+    description: "Connect AI into your existing systems, websites, and internal tools.",
   },
   {
     icon: Coffee,
-    title: "Java AI",
-    description: "Enterprise-grade AI solutions built with Java and open-source libraries.",
+    title: "Local & Remote Support",
+    description: "Hands-on help for Kenyan businesses plus remote support for clients worldwide.",
   },
   {
     icon: Bot,
-    title: "Automation Bots",
-    description: "Automate repetitive tasks and workflows with intelligent bots for Kenyan SMEs.",
+    title: "Process Automation",
+    description: "Automate repetitive tasks and workflows so your team can focus on real work.",
   },
 ];
 
@@ -59,8 +59,8 @@ export function AISection() {
             AI Features & <span className="gradient-text">Technologies</span>
           </h2>
           <p className="text-muted-foreground text-lg">
-            Cutting-edge artificial intelligence solutions designed for the African market. 
-            From deep learning to automation.
+            Practical, business-ready AI from D&amp;V Technologies &mdash; focused on real results
+            for Kenyan and African businesses, not just buzzwords.
           </p>
         </motion.div>
 
@@ -97,11 +97,11 @@ export function AISection() {
           <div className="glass-card rounded-2xl p-8 lg:p-12 max-w-3xl mx-auto">
             <Bot className="w-16 h-16 text-primary mx-auto mb-6" />
             <h3 className="font-display text-2xl lg:text-3xl font-bold mb-4">
-              Try Our AI Assistant
+              Talk to the D&amp;V AI Assistant
             </h3>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Chat with our intelligent AI assistant that knows everything about 
-              D&V Technologies. Get instant answers about our services, pricing, and solutions.
+              Ask simple questions about D&amp;V Technologies &mdash; services, pricing, and how we can
+              help your business grow.
             </p>
             <Link to="/ai-assistant">
               <Button variant="hero" size="lg" className="pulse-glow">
