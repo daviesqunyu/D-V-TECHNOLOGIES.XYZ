@@ -184,7 +184,17 @@ serve(async (req) => {
     }
 
     const resendKey = Deno.env.get("RESEND_API_KEY");
-    if (resendKey) {
+    if (!resendKey) {
+      console.error("RESEND_API_KEY is not set. Cannot send contact/appointment emails.");
+      return new Response(
+        JSON.stringify({
+          error:
+            "Email sending is not configured on the server. Please contact us on WhatsApp while we fix this.",
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
       const appointmentLines: string[] = [];
       if (body.appointment?.preferredDate) {
         appointmentLines.push(
@@ -300,20 +310,22 @@ serve(async (req) => {
           </div>
         </div>
       `;
-      const userSubject = appointmentLines.length > 0
-        ? `We received your appointment request — ${BUSINESS_NAME}`
-        : `We received your message — ${BUSINESS_NAME}`;
+      const userSubject =
+        appointmentLines.length > 0
+          ? `We received your appointment request — ${BUSINESS_NAME}`
+          : `We received your message — ${BUSINESS_NAME}`;
       await sendEmail(body.email.trim(), userSubject, autoReply, resendKey);
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Message sent. We'll reply by email and you can also chat us on WhatsApp for a faster response.",
-        auto_reply_sent: Boolean(resendKey),
+        message:
+          "Message sent. We'll reply by email and you can also chat us on WhatsApp for a faster response.",
+        auto_reply_sent: true,
         whatsapp_url: `https://wa.me/${WHATSAPP_NUMBER}`,
       }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
     console.error("contact-form error:", e);
