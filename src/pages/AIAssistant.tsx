@@ -1,87 +1,63 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { SEOHead } from "@/components/SEOHead";
+import { localAIRespond } from "@/lib/localAI";
+import { QUICK_PROMPTS } from "@/data/dvKnowledge";
 import {
-  Bot,
-  User,
   Send,
-  Loader2,
-  Sparkles,
   Trash2,
-  Code,
-  FileText,
-  Calculator,
-  Globe,
-  Briefcase,
-  Palette,
-  Brain,
-  MessageSquare,
+  Sparkles,
   Copy,
   Check,
   Zap,
+  MapPin,
+  Phone,
+  Mail,
+  ChevronRight,
+  Bot,
+  User,
 } from "lucide-react";
-import { api, authHeaders } from "@/lib/api";
-import { SEOHead } from "@/components/SEOHead";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
+  followUps?: string[];
+  id: string;
 };
-
-// Keep the assistant focused and simple around D&V Technologies.
-const capabilities = [
-  { icon: Zap, label: "D&V Services", color: "text-primary" },
-  { icon: Briefcase, label: "Packages & Pricing", color: "text-orange-400" },
-  { icon: MessageSquare, label: "Project & Support Questions", color: "text-blue-400" },
-  { icon: Globe, label: "How to Work With D&V", color: "text-purple-400" },
-];
-
-const quickPrompts = [
-  { text: "What services does D&V Technologies offer?", icon: MessageSquare },
-  { text: "Explain the Basic, Premium, and Exclusive packages.", icon: Briefcase },
-  { text: "How can I contact D&V Technologies for a new project?", icon: MessageSquare },
-  { text: "Do you work with businesses outside Nairobi or Kenya?", icon: Globe },
-];
 
 function CodeBlock({ children, className }: { children: string; className?: string }) {
   const [copied, setCopied] = useState(false);
-  const lang = className?.replace("language-", "") || "";
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(children);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
+  const lang = className?.replace("language-", "") || "code";
   return (
-    <div className="relative group rounded-lg overflow-hidden my-3 bg-[#0d1117] border border-border/50">
-      <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-border/30">
-        <span className="text-xs text-muted-foreground font-mono">{lang || "code"}</span>
+    <div className="relative rounded-lg overflow-hidden my-2 bg-[#0d1117] border border-border/50 text-xs">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[#161b22] border-b border-border/30">
+        <span className="text-muted-foreground font-mono">{lang}</span>
         <button
-          onClick={handleCopy}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          onClick={() => { navigator.clipboard.writeText(children); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+          className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
         >
           {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
+      <pre className="overflow-x-auto p-3 text-sm leading-relaxed">
         <code className={`${className || ""} text-[#e6edf3]`}>{children}</code>
       </pre>
     </div>
   );
 }
 
+const TYPING_DELAY_MS = 600;
+
 const AIAssistant = () => {
-  const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -89,74 +65,42 @@ const AIAssistant = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  useEffect(() => { scrollToBottom(); }, [messages, isTyping]);
 
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 160) + "px";
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 140) + "px";
     }
   }, [input]);
 
-  const sendMessage = async (messageText: string) => {
-    if (!messageText.trim() || isLoading) return;
-
-    const userMsg: Message = { role: "user", content: messageText.trim() };
-    setMessages((prev) => [...prev, userMsg]);
+  const sendMessage = useCallback((text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isTyping) return;
     setInput("");
-    setIsLoading(true);
 
-    const allMessages = [...messages, userMsg];
+    const userMsg: Message = {
+      role: "user",
+      content: trimmed,
+      id: `u-${Date.now()}`,
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setIsTyping(true);
 
-    try {
-      const resp = await fetch(api.aiChat, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ messages: allMessages }),
-      });
-
-      if (!resp.ok) {
-        const raw = await resp.text().catch(() => "");
-        try {
-          const parsed = JSON.parse(raw) as { error?: string; message?: string };
-          throw new Error(
-            parsed.error || parsed.message || `AI request failed (${resp.status})`
-          );
-        } catch {
-          throw new Error(raw || `AI request failed (${resp.status})`);
-        }
-      }
-
-      const data = (await resp.json().catch(() => null)) as
-        | { content?: string }
-        | { error?: string }
-        | null;
-
-      const assistantText =
-        (data && "content" in data && data.content) ||
-        (data && "error" in data && data.error) ||
-        "";
-
-      if (!assistantText) {
-        throw new Error("AI response was empty.");
-      }
-
-      setMessages((prev) => [...prev, { role: "assistant", content: assistantText }]);
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error("Chat error:", error);
-      }
-      toast({
-        title: "Connection Error",
-        description: error instanceof Error ? error.message : "Failed to connect. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // Simulate realistic "thinking" delay
+    const delay = Math.min(TYPING_DELAY_MS + trimmed.length * 2, 1800);
+    setTimeout(() => {
+      const { response, followUps } = localAIRespond(trimmed);
+      const botMsg: Message = {
+        role: "assistant",
+        content: response,
+        followUps,
+        id: `a-${Date.now()}`,
+      };
+      setMessages((prev) => [...prev, botMsg]);
+      setIsTyping(false);
+    }, delay);
+  }, [isTyping]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,200 +114,238 @@ const AIAssistant = () => {
     }
   };
 
-  const clearChat = () => {
-    setMessages([]);
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="AI Assistant | D&V Technologies"
-        description="Use the D&V Technologies AI assistant for writing, coding, analysis, and business support tasks."
+        title="DIVA — D&V AI Assistant | D&V Technologies"
+        description="Ask DIVA, D&V Technologies' intelligent assistant, about our services, pricing, contact info, and how to get started."
         canonicalPath="/ai-assistant"
       />
       <Navbar />
+
       <main id="main-content" className="flex-1 pt-20 lg:pt-24 flex flex-col">
-        <div className="container mx-auto px-4 lg:px-8 py-6 flex flex-col flex-1 max-w-5xl">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-4"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-3">
-              <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-              <span className="font-medium text-primary text-sm">
-                Simple AI assistant for D&V Technologies
-              </span>
-            </div>
-            <h1 className="font-display text-2xl md:text-4xl font-bold mb-2">
-              <span className="gradient-text">D&V AI Assistant</span>
-            </h1>
-            <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
-              Ask clear questions about D&V Technologies &mdash; our services, packages,
-              pricing, and how to get started with your project.
-            </p>
-          </motion.div>
+        {/* Hero strip */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-background via-primary/5 to-accent/5 border-b border-border/50 py-8 lg:py-12">
+          <div className="absolute inset-0 hero-pattern opacity-20" />
+          <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              {/* Animated DIVA icon */}
+              <div className="relative inline-flex mb-4">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 rounded-2xl"
+                  style={{
+                    background: "conic-gradient(from 0deg, #00e5ff, #a000ff, #ff6b00, #00e5ff)",
+                    padding: "2px",
+                  }}
+                >
+                  <div className="w-full h-full rounded-[14px] bg-background" />
+                </motion.div>
+                <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/20">
+                  <motion.div
+                    animate={{ scale: [1, 1.15, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Sparkles className="w-8 h-8 text-primary" />
+                  </motion.div>
+                </div>
+                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-green-500 border-2 border-background flex items-center justify-center">
+                  <Zap className="w-2.5 h-2.5 text-white" />
+                </div>
+              </div>
 
-          {/* Chat Container */}
-          <div className="flex-1 glass-card rounded-2xl flex flex-col overflow-hidden min-h-[550px]">
+              <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">
+                <span className="gradient-text">DIVA</span>{" "}
+                <span className="text-foreground/60 font-normal text-2xl md:text-3xl">— D&V AI Assistant</span>
+              </h1>
+              <p className="text-muted-foreground max-w-xl mx-auto text-sm md:text-base">
+                Ask me anything about D&V Technologies — services, pricing, location, contact, payments, and more.
+                I know everything about this company.
+              </p>
+
+              {/* Quick contact bar */}
+              <div className="flex flex-wrap items-center justify-center gap-4 mt-5 text-xs text-muted-foreground">
+                <a href="https://wa.me/254719576326" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 hover:text-green-400 transition-colors">
+                  <Phone className="w-3.5 h-3.5" /> +254 719 576 326
+                </a>
+                <a href="mailto:info@dvtechnologies.xyz"
+                  className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                  <Mail className="w-3.5 h-3.5" /> info@dvtechnologies.xyz
+                </a>
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5" /> Lower Kabete, Nairobi
+                </span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Chat area */}
+        <div className="flex-1 container mx-auto px-4 lg:px-8 py-6 flex flex-col max-w-4xl">
+          <div className="flex-1 glass-card rounded-2xl flex flex-col overflow-hidden" style={{ minHeight: 520 }}>
+
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-5">
               {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center py-4">
-                  {/* Logo */}
-                  <div className="relative mb-6">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                      <Bot className="w-10 h-10 text-primary-foreground" />
-                    </div>
-                    <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-green-500 border-2 border-background flex items-center justify-center">
-                      <Zap className="w-3 h-3 text-white" />
-                    </div>
-                  </div>
-
-                  <h3 className="font-display text-xl font-bold mb-2">
-                    Ask anything about D&V Technologies
-                  </h3>
-                  <p className="text-muted-foreground text-sm mb-6 max-w-lg">
-                    I&apos;m here to help you understand D&V Technologies: what we do,
-                    our pricing, and the best way we can support your business.
+                /* Welcome screen */
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="h-full flex flex-col items-center justify-center text-center py-8"
+                >
+                  <h3 className="font-display text-xl font-bold mb-1">What would you like to know?</h3>
+                  <p className="text-muted-foreground text-sm mb-8 max-w-md">
+                    I'm fully trained on D&V Technologies — ask about services, pricing, contact, how to pay, or anything else.
                   </p>
-
-                  {/* Capability pills */}
-                  <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-lg">
-                    {capabilities.map((cap) => (
-                      <div
-                        key={cap.label}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50 text-xs font-medium"
-                      >
-                        <cap.icon className={`w-3 h-3 ${cap.color}`} />
-                        {cap.label}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Quick prompts */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-2xl w-full">
-                    {quickPrompts.map((q) => (
-                      <button
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-2xl">
+                    {QUICK_PROMPTS.map((q) => (
+                      <motion.button
                         key={q.text}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => sendMessage(q.text)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/30 hover:bg-primary/10 hover:border-primary/30 border border-border/30 text-left text-sm transition-all group"
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/40 hover:bg-primary/10 hover:border-primary/30 border border-border/40 text-left text-sm transition-all group"
                       >
-                        <q.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary flex-shrink-0 transition-colors" />
-                        <span className="text-muted-foreground group-hover:text-foreground transition-colors line-clamp-1">
+                        <ChevronRight className="w-4 h-4 text-primary flex-shrink-0" />
+                        <span className="text-muted-foreground group-hover:text-foreground transition-colors">
                           {q.text}
                         </span>
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               ) : (
                 <>
                   <AnimatePresence initial={false}>
-                    {messages.map((msg, i) => (
+                    {messages.map((msg) => (
                       <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 10 }}
+                        key={msg.id}
+                        initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`flex gap-3 ${
-                          msg.role === "user"
-                            ? "justify-end"
-                            : "justify-start"
-                        }`}
+                        transition={{ duration: 0.3 }}
+                        className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                       >
+                        {/* Bot avatar */}
                         {msg.role === "assistant" && (
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 mt-1">
-                            <Bot className="w-4 h-4 text-primary-foreground" />
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 mt-0.5 shadow-md">
+                            <Bot className="w-4 h-4 text-white" />
                           </div>
                         )}
-                        <div
-                          className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                            msg.role === "user"
-                              ? "chat-message-user text-primary-foreground"
-                              : "chat-message-assistant"
-                          }`}
-                        >
-                          {msg.role === "assistant" ? (
-                            <div className="prose-chat text-sm leading-relaxed">
-                              <ReactMarkdown
-                                components={{
-                                  code({ className, children, ...props }) {
-                                    const isInline = !className;
-                                    if (isInline) {
+
+                        <div className="flex flex-col gap-2 max-w-[88%]">
+                          {/* Bubble */}
+                          <div
+                            className={`rounded-2xl px-4 py-3 ${
+                              msg.role === "user"
+                                ? "chat-message-user text-primary-foreground rounded-tr-sm"
+                                : "chat-message-assistant rounded-tl-sm"
+                            }`}
+                          >
+                            {msg.role === "assistant" ? (
+                              <div className="prose-chat text-sm leading-relaxed">
+                                <ReactMarkdown
+                                  components={{
+                                    code({ className, children, ...props }) {
+                                      const isInline = !className;
+                                      if (isInline) {
+                                        return (
+                                          <code
+                                            className="bg-muted/50 px-1.5 py-0.5 rounded text-primary text-[13px] font-mono"
+                                            {...props}
+                                          >
+                                            {children}
+                                          </code>
+                                        );
+                                      }
                                       return (
-                                        <code
-                                          className="bg-muted/50 px-1.5 py-0.5 rounded text-primary text-[13px] font-mono"
-                                          {...props}
-                                        >
-                                          {children}
-                                        </code>
+                                        <CodeBlock className={className}>
+                                          {String(children).replace(/\n$/, "")}
+                                        </CodeBlock>
                                       );
-                                    }
-                                    return (
-                                      <CodeBlock className={className}>
-                                        {String(children).replace(/\n$/, "")}
-                                      </CodeBlock>
-                                    );
-                                  },
-                                  pre({ children }) {
-                                    return <>{children}</>;
-                                  },
-                                }}
-                              >
-                                {msg.content}
-                              </ReactMarkdown>
+                                    },
+                                    pre({ children }) { return <>{children}</>; },
+                                  }}
+                                >
+                                  {msg.content}
+                                </ReactMarkdown>
+                              </div>
+                            ) : (
+                              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            )}
+                          </div>
+
+                          {/* Follow-up suggestion chips */}
+                          {msg.role === "assistant" && msg.followUps && msg.followUps.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-1">
+                              {msg.followUps.slice(0, 3).map((fu) => (
+                                <button
+                                  key={fu}
+                                  onClick={() => sendMessage(fu)}
+                                  className="text-xs px-3 py-1 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                                >
+                                  {fu}
+                                </button>
+                              ))}
                             </div>
-                          ) : (
-                            <p className="text-sm whitespace-pre-wrap">
-                              {msg.content}
-                            </p>
                           )}
                         </div>
+
+                        {/* User avatar */}
                         {msg.role === "user" && (
-                          <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0 mt-1">
+                          <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/30 flex items-center justify-center flex-shrink-0 mt-0.5">
                             <User className="w-4 h-4 text-accent" />
                           </div>
                         )}
                       </motion.div>
                     ))}
                   </AnimatePresence>
-                  {isLoading &&
-                    messages[messages.length - 1]?.role === "user" && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex gap-3"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                          <Bot className="w-4 h-4 text-primary-foreground" />
-                        </div>
-                        <div className="chat-message-assistant rounded-2xl px-4 py-3 flex items-center gap-2">
-                          <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                          <span className="text-xs text-muted-foreground">
-                            Thinking...
-                          </span>
-                        </div>
-                      </motion.div>
-                    )}
+
+                  {/* Typing indicator */}
+                  {isTyping && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex gap-3"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
+                        <Bot className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="chat-message-assistant rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+                        {[0, 1, 2].map((i) => (
+                          <motion.div
+                            key={i}
+                            animate={{ y: [0, -5, 0] }}
+                            transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+                            className="w-2 h-2 rounded-full bg-primary/60"
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
                   <div ref={messagesEndRef} />
                 </>
               )}
             </div>
 
-            {/* Input */}
-            <div className="border-t border-border p-4">
-              <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+            {/* Input bar */}
+            <div className="border-t border-border/60 p-4 bg-background/50 backdrop-blur-sm">
+              <form onSubmit={handleSubmit} className="flex gap-2 items-end">
                 <div className="flex-1 relative">
                   <Textarea
                     ref={textareaRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask about D&V services, pricing, or how to start a project..."
-                    className="resize-none bg-muted/50 min-h-[48px] max-h-40 pr-4 text-sm"
+                    placeholder="Ask about D&V services, pricing, contact, location…"
+                    className="resize-none bg-muted/40 min-h-[46px] max-h-36 pr-3 text-sm rounded-xl border-border/50 focus:border-primary/50"
                     rows={1}
-                    disabled={isLoading}
+                    disabled={isTyping}
                   />
                 </div>
                 {messages.length > 0 && (
@@ -371,8 +353,8 @@ const AIAssistant = () => {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    onClick={clearChat}
-                    className="flex-shrink-0 h-10 w-10"
+                    onClick={() => setMessages([])}
+                    className="h-10 w-10 flex-shrink-0 rounded-xl"
                     title="Clear chat"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -382,29 +364,46 @@ const AIAssistant = () => {
                   type="submit"
                   variant="hero"
                   size="icon"
-                  disabled={!input.trim() || isLoading}
-                  className="flex-shrink-0 h-10 w-10"
+                  disabled={!input.trim() || isTyping}
+                  className="h-10 w-10 flex-shrink-0 rounded-xl"
                 >
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4" />
-                  )}
+                  <Send className="w-4 h-4" />
                 </Button>
               </form>
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-[10px] text-muted-foreground">
-                  Shift+Enter for new line
-                </p>
+              <div className="flex items-center justify-between mt-2 px-1">
+                <p className="text-[10px] text-muted-foreground">Shift+Enter for new line</p>
                 <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  D&V AI &mdash; GPT-4o &mdash; dvtechnologies.xyz
+                  <Sparkles className="w-3 h-3 text-primary" />
+                  DIVA — Powered by D&V Knowledge Base
                 </p>
               </div>
             </div>
           </div>
+
+          {/* Bottom info strip */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-center"
+          >
+            {[
+              { icon: Zap, label: "Always Online", sub: "No API keys — instant replies" },
+              { icon: Sparkles, label: "D&V Knowledge", sub: "Trained on all our services & info" },
+              { icon: Phone, label: "Need More Help?", sub: "WhatsApp +254 719 576 326" },
+            ].map((item) => (
+              <div key={item.label} className="glass-card rounded-xl px-4 py-3 flex items-center gap-3 text-left">
+                <item.icon className="w-5 h-5 text-primary flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold">{item.label}</p>
+                  <p className="text-[11px] text-muted-foreground">{item.sub}</p>
+                </div>
+              </div>
+            ))}
+          </motion.div>
         </div>
       </main>
+
       <Footer />
     </div>
   );
