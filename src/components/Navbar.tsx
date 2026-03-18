@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Bot, Home, Briefcase, Phone, Users, Target, Zap, MessageSquare, HelpCircle, ArrowRight, DollarSign, Mail, Info, FolderKanban, Newspaper, Scale, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LogoIcon } from "@/components/LogoIcon";
 
 /** Main nav: shown in header (keeps space for logo & name) */
 const mainNavLinks = [
@@ -57,19 +58,17 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 glass-card" aria-label="Primary">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo - 3D rotating tech icon */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden logo-3d">
-              <img
-                src="/favicon.svg"
-                alt="D&V Technologies"
-                className="w-6 h-6 object-contain"
-              />
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3 group">
+            <LogoIcon size={44} />
+            <div className="flex flex-col leading-none">
+              <span className="font-display font-black text-lg tracking-tight gradient-text">
+                D&amp;V Technologies
+              </span>
+              <span className="text-[10px] tracking-[0.18em] text-muted-foreground uppercase font-medium">
+                Silicon Savannah
+              </span>
             </div>
-            <span className="font-display font-bold text-xl">
-              <span className="gradient-text">D&V</span>
-              <span className="text-foreground"> Technologies</span>
-            </span>
           </Link>
 
           {/* Desktop Navigation - main links only for logo/name space */}

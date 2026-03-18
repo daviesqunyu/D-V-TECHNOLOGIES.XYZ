@@ -13,6 +13,7 @@ import { AISection } from "@/components/sections/AISection";
 import { FAQSection } from "@/components/sections/FAQSection";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { ContactSection } from "@/components/sections/ContactSection";
+import { ShowcaseSection } from "@/components/sections/ShowcaseSection";
 import { SEOHead } from "@/components/SEOHead";
 
 const Index = () => {
@@ -53,6 +54,7 @@ const Index = () => {
         <TrustedClientsSection />
         <TestimonialsSection />
         <MissionSection />
+        <ShowcaseSection />
         <WhyChooseUsSection />
         <AISection />
         <FAQSection />

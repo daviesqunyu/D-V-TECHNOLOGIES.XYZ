@@ -12,8 +12,8 @@ export function HeroSection() {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroBg})` }}
       />
-      {/* Dark overlay for text readability - strong enough so text is never hidden */}
-      <div className="absolute inset-0 bg-background/80 z-[1]" aria-hidden="true" />
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-background/70 z-[1]" aria-hidden="true" />
       
       {/* Animated background elements - behind content */}
       <div className="absolute inset-0 pointer-events-none hero-pattern z-[2]" aria-hidden="true">

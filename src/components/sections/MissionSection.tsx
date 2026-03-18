@@ -5,10 +5,10 @@ export function MissionSection() {
   return (
     <section id="mission" className="scroll-mt-24 py-20 lg:py-32 bg-card relative overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-20"
+        className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1800&q=80')",
+            "url('https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=1800')",
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-br from-background/85 via-background/80 to-background/90" />
@@ -62,7 +62,7 @@ export function MissionSection() {
             </div>
           </motion.div>
 
-          {/* Visual */}
+          {/* Visual — real photo collage */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -70,48 +70,36 @@ export function MissionSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/20 to-accent/20 p-1">
-              <div className="w-full h-full rounded-3xl bg-card flex items-center justify-center relative overflow-hidden">
-                {/* Animated circles */}
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-8 border-2 border-dashed border-primary/20 rounded-full"
-                />
-                <motion.div
-                  animate={{ rotate: -360 }}
-                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-16 border-2 border-dashed border-accent/20 rounded-full"
-                />
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-24 border-2 border-dashed border-primary/30 rounded-full"
-                />
-                
-                {/* Center content */}
-                <div className="text-center z-10">
-                  <p className="font-display text-6xl lg:text-8xl font-bold gradient-text">2030</p>
-                  <p className="text-muted-foreground mt-2">Silicon Savannah Vision</p>
-                </div>
-
-                {/* Floating elements */}
-                <motion.div
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                  className="absolute top-12 right-12 w-16 h-16 rounded-xl bg-primary/20 flex items-center justify-center"
-                >
-                  <Rocket className="w-8 h-8 text-primary" />
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, 10, 0] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                  className="absolute bottom-12 left-12 w-16 h-16 rounded-xl bg-accent/20 flex items-center justify-center"
-                >
-                  <Target className="w-8 h-8 text-accent" />
-                </motion.div>
-              </div>
+            {/* Main large image */}
+            <div className="rounded-3xl overflow-hidden aspect-[4/3] shadow-2xl border border-primary/20">
+              <img
+                src="https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=900"
+                alt="African tech professionals collaborating"
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent rounded-3xl" />
             </div>
+
+            {/* Floating stat card — bottom left */}
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="absolute -bottom-6 -left-6 bg-card border border-primary/30 rounded-2xl p-4 shadow-xl backdrop-blur-sm"
+            >
+              <p className="font-display text-3xl font-bold gradient-text">100+</p>
+              <p className="text-xs text-muted-foreground">Businesses Served</p>
+            </motion.div>
+
+            {/* Floating tag — top right */}
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 3.5, repeat: Infinity }}
+              className="absolute -top-4 -right-4 bg-primary text-primary-foreground rounded-xl px-4 py-2 shadow-lg flex items-center gap-2"
+            >
+              <Rocket className="w-4 h-4" />
+              <span className="text-sm font-semibold">Silicon Savannah 2030</span>
+            </motion.div>
           </motion.div>
         </div>
       </div>

@@ -18,6 +18,7 @@ const TESTIMONIALS = [
     rating: 5,
     text: "D&V Technologies transformed our IT infrastructure completely. Their expertise in AI and cloud solutions helped us scale our operations seamlessly. Highly professional team!",
     avatar: "JK",
+    photo: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
   {
     id: 2,
@@ -27,6 +28,7 @@ const TESTIMONIALS = [
     rating: 5,
     text: "Working with D&V has been a game-changer for our business. They fixed our network issues and set up a robust security system. Plus, accepting M-Pesa payments made everything easier!",
     avatar: "GW",
+    photo: "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
   {
     id: 3,
@@ -36,6 +38,7 @@ const TESTIMONIALS = [
     rating: 5,
     text: "The AI solutions they provided are exactly what we needed to stay competitive in the Silicon Savannah ecosystem. Their support team is always responsive and professional.",
     avatar: "DO",
+    photo: "https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
   {
     id: 4,
@@ -45,6 +48,7 @@ const TESTIMONIALS = [
     rating: 5,
     text: "D&V Technologies helped us digitize our patient records and implement a secure IT system. Their attention to detail and commitment to quality is outstanding!",
     avatar: "MA",
+    photo: "https://images.pexels.com/photos/3756679/pexels-photo-3756679.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
   {
     id: 5,
@@ -54,6 +58,7 @@ const TESTIMONIALS = [
     rating: 5,
     text: "Best tech partner we've ever worked with! From hardware repairs to software development, they handle everything professionally. The Bitcoin payment option is a nice touch too.",
     avatar: "PM",
+    photo: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
   {
     id: 6,
@@ -63,6 +68,7 @@ const TESTIMONIALS = [
     rating: 5,
     text: "D&V Technologies delivered beyond our expectations. Their IoT solutions and digital transformation services positioned us for growth. True Silicon Savannah pioneers!",
     avatar: "SN",
+    photo: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
 ];
 
@@ -129,10 +135,19 @@ export function TestimonialsSection() {
 
                       {/* Author Info */}
                       <div className="flex items-center gap-4 pt-4 border-t border-border">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
-                          <span className="font-display font-bold text-white text-sm">
-                            {testimonial.avatar}
-                          </span>
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-primary/30">
+                          {testimonial.photo ? (
+                            <img
+                              src={testimonial.photo}
+                              alt={testimonial.name}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="font-display font-bold text-white text-sm">
+                              {testimonial.avatar}
+                            </span>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-display font-semibold text-foreground">
