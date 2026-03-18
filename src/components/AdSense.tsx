@@ -13,17 +13,23 @@ type AdSenseProps = {
   className?: string;
 };
 
+// Only render on production (not on localhost / dev server)
+const isProduction =
+  typeof window !== "undefined" &&
+  !["localhost", "127.0.0.1", "172.16.0.1"].some((h) =>
+    window.location.hostname.startsWith(h)
+  );
+
 export function AdSense({
   adSlot = "9239832518",
   adFormat = "auto",
   fullWidthResponsive = true,
   className = "",
 }: AdSenseProps) {
-  const adRef = useRef<HTMLModElement>(null);
   const pushed = useRef(false);
 
   useEffect(() => {
-    if (pushed.current) return;
+    if (!isProduction || pushed.current) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       pushed.current = true;
@@ -32,10 +38,11 @@ export function AdSense({
     }
   }, []);
 
+  if (!isProduction) return null;
+
   return (
-    <div className={`adsense-container ${className}`}>
+    <div className={`adsense-container overflow-hidden ${className}`}>
       <ins
-        ref={adRef}
         className="adsbygoogle"
         style={{ display: "block" }}
         data-ad-client="ca-pub-4079400519004955"
