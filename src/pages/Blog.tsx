@@ -3,7 +3,6 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { CalendarDays, ArrowRight } from "lucide-react";
-import { AdSense } from "@/components/AdSense";
 
 const posts = [
   {
@@ -88,9 +87,6 @@ export default function Blog() {
                   </button>
                 </motion.article>
               ))}
-            </div>
-            <div className="mt-8">
-              <AdSense className="max-w-4xl mx-auto" />
             </div>
           </div>
         </section>

@@ -11,7 +11,6 @@ import {
 import { PricingSection } from "@/components/sections/PricingSection";
 import { SEOHead } from "@/components/SEOHead";
 import { servicesData } from "@/data/services";
-import { AdSense } from "@/components/AdSense";
 
 const Services = () => {
   return (
@@ -93,10 +92,6 @@ const Services = () => {
             </div>
           </div>
         </section>
-
-        <div className="container mx-auto px-4 py-6">
-          <AdSense className="max-w-4xl mx-auto" />
-        </div>
 
         {/* Pricing */}
         <PricingSection />

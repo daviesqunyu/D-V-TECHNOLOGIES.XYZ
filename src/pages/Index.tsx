@@ -14,7 +14,6 @@ import { FAQSection } from "@/components/sections/FAQSection";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { ContactSection } from "@/components/sections/ContactSection";
 import { SEOHead } from "@/components/SEOHead";
-import { AdSense } from "@/components/AdSense";
 
 const Index = () => {
   const { hash } = useLocation();
@@ -53,16 +52,10 @@ const Index = () => {
         <PricingSection />
         <TrustedClientsSection />
         <TestimonialsSection />
-        <div className="container mx-auto px-4 py-6">
-          <AdSense className="max-w-4xl mx-auto" />
-        </div>
         <MissionSection />
         <WhyChooseUsSection />
         <AISection />
         <FAQSection />
-        <div className="container mx-auto px-4 py-6">
-          <AdSense className="max-w-4xl mx-auto" />
-        </div>
         <NewsletterSection />
         <ContactSection />
       </main>
