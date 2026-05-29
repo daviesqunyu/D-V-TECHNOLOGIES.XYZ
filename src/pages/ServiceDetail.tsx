@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, ArrowRight, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -8,20 +8,56 @@ import { PaymentOptions } from "@/components/PaymentOptions";
 import { SEOHead } from "@/components/SEOHead";
 import { servicesData } from "@/data/services";
 
+/**
+ * ServiceDetail Component
+ * Displays detailed information for a specific service
+ * Features:
+ * - Dynamic routing based on service slug
+ * - Feature showcase with animations
+ * - Payment options integration
+ * - Contact CTA
+ * - Accessibility improvements
+ */
 const ServiceDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const service = slug ? servicesData.find((s) => s.slug === slug) : null;
+  const WHATSAPP_URL = "https://wa.me/254759075816";
 
+  // 404 State - Service not found
   if (!service) {
     return (
       <div className="min-h-screen bg-background">
+        <SEOHead
+          title="Service Not Found | D&V Technologies"
+          description="The service you're looking for could not be found."
+          canonicalPath="/services"
+        />
         <Navbar />
         <main id="main-content" className="pt-20 lg:pt-24">
           <div className="container mx-auto px-4 lg:px-8 py-16 text-center">
-            <h1 className="font-display text-2xl font-bold mb-4">Service not found</h1>
-            <Link to="/services">
-              <Button variant="outline">Back to Services</Button>
-            </Link>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="inline-block mb-6">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/20 flex items-center justify-center">
+                  <ArrowLeft className="w-8 h-8 text-destructive" />
+                </div>
+              </div>
+              <h1 className="font-display text-3xl md:text-4xl font-bold mb-4">
+                Service Not Found
+              </h1>
+              <p className="text-muted-foreground mb-8 max-w-md mx-auto text-lg">
+                The service you're looking for doesn't exist. Browse all our services to find what you need.
+              </p>
+              <Link to="/services">
+                <Button variant="hero" size="lg">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Services
+                </Button>
+              </Link>
+            </motion.div>
           </div>
         </main>
         <Footer />
@@ -40,67 +76,177 @@ const ServiceDetail = () => {
       />
       <Navbar />
       <main id="main-content" className="pt-20 lg:pt-24">
-        <div className="container mx-auto px-4 lg:px-8 py-8 lg:py-12">
-          <Link
-            to="/services"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to all services
-          </Link>
+        {/* Breadcrumb Navigation */}
+        <motion.nav
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="border-b border-border sticky top-20 bg-background/80 backdrop-blur-sm z-40"
+          aria-label="Breadcrumb"
+        >
+          <div className="container mx-auto px-4 lg:px-8 py-3">
+            <Link
+              to="/services"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
+              aria-label="Back to all services"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              Back to all services
+            </Link>
+          </div>
+        </motion.nav>
 
+        {/* Main Content */}
+        <div className="container mx-auto px-4 lg:px-8 py-12 lg:py-16">
           <motion.article
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="max-w-4xl"
           >
-            <div className="flex items-start gap-4 mb-6">
-              <div
-                className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center flex-shrink-0`}
-              >
-                <Icon className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">
-                  Details for {service.title}
-                </h1>
-                <p className="text-muted-foreground text-lg">{service.description}</p>
-              </div>
-            </div>
+            {/* Hero Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="mb-12"
+            >
+              <div className="flex flex-col md:flex-row items-start gap-6 mb-8">
+                {/* Icon */}
+                <div className="flex-shrink-0">
+                  <motion.div
+                    whileHover={{ scale: 1.05, rotate: 2 }}
+                    className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center shadow-lg`}
+                    aria-hidden="true"
+                  >
+                    <Icon className="w-10 h-10 text-primary-foreground" />
+                  </motion.div>
+                </div>
 
-            <div className="glass-card rounded-2xl p-6 lg:p-8 mb-8">
-              <h2 className="font-display text-xl font-semibold mb-4">What we offer</h2>
-              <ul className="space-y-3">
-                {service.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                    <span>{feature}</span>
-                  </li>
+                {/* Title & Description */}
+                <div className="flex-1">
+                  <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-3 text-foreground">
+                    {service.title}
+                  </h1>
+                  <p className="text-lg text-muted-foreground leading-relaxed">
+                    {service.description}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Features Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5 }}
+              className="glass-card rounded-2xl p-6 lg:p-8 mb-8"
+              aria-labelledby="features-heading"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
+                <h2 id="features-heading" className="font-display text-2xl font-semibold">
+                  What We Offer
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {service.features.map((feature, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                    className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors group"
+                  >
+                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                    <span className="text-foreground text-sm md:text-base">{feature}</span>
+                  </motion.div>
                 ))}
-              </ul>
-            </div>
+              </div>
+            </motion.section>
 
-            <div className="glass-card rounded-2xl p-6 lg:p-8">
-              <h2 className="font-display text-xl font-semibold mb-2">Pay for this service</h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                Choose a plan and pay securely with Bitcoin or Paystack (card, M-Pesa, etc.).
-              </p>
+            {/* Pricing Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="glass-card rounded-2xl p-6 lg:p-8 mb-8"
+              aria-labelledby="pricing-heading"
+            >
+              <div className="mb-6">
+                <h2 id="pricing-heading" className="font-display text-2xl font-semibold mb-2">
+                  Get Started Today
+                </h2>
+                <p className="text-muted-foreground text-sm md:text-base">
+                  Choose from our flexible pricing plans. Pay securely with M-Pesa, Card, or Bitcoin through Paystack.
+                </p>
+              </div>
               <PaymentOptions variant="card" />
-            </div>
+            </motion.section>
 
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link to="/contact">
-                <Button variant="hero" size="lg">
-                  Request a quote
+            {/* CTA Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-2xl p-8 lg:p-10 mb-8"
+              aria-labelledby="cta-heading"
+            >
+              <h3 id="cta-heading" className="font-display text-2xl font-bold mb-4">
+                Need a Custom Solution?
+              </h3>
+              <p className="text-muted-foreground mb-6 text-sm md:text-base">
+                Every business is unique. Let's discuss your specific needs and create a tailored solution that fits perfectly.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link to="/contact">
+                  <Button variant="hero" size="lg" className="w-full sm:w-auto">
+                    <Mail className="w-5 h-5" />
+                    Request a Quote
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+                <a
+                  href={`${WHATSAPP_URL}?text=Hi%20D%26V%20Technologies%2C%20I%27m%20interested%20in%20${encodeURIComponent(
+                    service.title
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                    <Phone className="w-5 h-5" />
+                    Chat on WhatsApp
+                  </Button>
+                </a>
+              </div>
+            </motion.section>
+
+            {/* Navigation Footer */}
+            <motion.footer
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-4"
+            >
+              <Link to="/services" className="flex-1">
+                <Button variant="outline" size="lg" className="w-full">
+                  <ArrowLeft className="w-4 h-4" />
+                  View All Services
                 </Button>
               </Link>
-              <Link to="/services">
-                <Button variant="outline" size="lg">
-                  View all services
+              <Link to="/contact" className="flex-1">
+                <Button variant="ghost" size="lg" className="w-full">
+                  Contact Us
+                  <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
-            </div>
+            </motion.footer>
           </motion.article>
         </div>
       </main>
