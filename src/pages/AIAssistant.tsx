@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { SEOHead } from "@/components/SEOHead";
 import { localAIRespond } from "@/lib/localAI";
+import { chatWithAI, type ChatMessage } from "@/lib/api";
 import { QUICK_PROMPTS } from "@/data/dvKnowledge";
 import {
   Send,
@@ -74,7 +75,7 @@ const AIAssistant = () => {
     }
   }, [input]);
 
-  const sendMessage = useCallback((text: string) => {
+  const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || isTyping) return;
     setInput("");
@@ -87,9 +88,29 @@ const AIAssistant = () => {
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
-    // Simulate realistic "thinking" delay
-    const delay = Math.min(TYPING_DELAY_MS + trimmed.length * 2, 1800);
-    setTimeout(() => {
+    const minDelay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    try {
+      // Try the hosted AI (OpenAI/Cloudflare) first — fast, "thinking" delay included.
+      const started = Date.now();
+      const history: ChatMessage[] = messages.map((m) => ({
+        role: m.role === "user" ? "user" : "assistant",
+        content: m.content,
+      }));
+      const remote = await chatWithAI([...history, { role: "user", content: trimmed }]);
+      const elapsed = Date.now() - started;
+      if (elapsed < TYPING_DELAY_MS) await minDelay(TYPING_DELAY_MS - elapsed);
+
+      const botMsg: Message = {
+        role: "assistant",
+        content: remote || "Sorry, I didn't catch that. Please try again.",
+        id: `a-${Date.now()}`,
+      };
+      setMessages((prev) => [...prev, botMsg]);
+    } catch {
+      // Offline / unconfigured — fall back to the on-device knowledge base.
+      const delay = Math.min(TYPING_DELAY_MS + trimmed.length * 2, 1800);
+      await minDelay(delay);
       const { response, followUps } = localAIRespond(trimmed);
       const botMsg: Message = {
         role: "assistant",
@@ -98,9 +119,10 @@ const AIAssistant = () => {
         id: `a-${Date.now()}`,
       };
       setMessages((prev) => [...prev, botMsg]);
+    } finally {
       setIsTyping(false);
-    }, delay);
-  }, [isTyping]);
+    }
+  }, [isTyping, messages]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -5,11 +5,16 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CartProvider } from "@/lib/cart";
+import { AppShell } from "@/components/AppShell";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
 const Services = lazy(() => import("./pages/Services"));
 const ServiceDetail = lazy(() => import("./pages/ServiceDetail"));
+const Shop = lazy(() => import("./pages/Shop"));
+const Trade = lazy(() => import("./pages/Trade"));
+const Pay = lazy(() => import("./pages/Pay"));
 const Contact = lazy(() => import("./pages/Contact"));
 const AIAssistant = lazy(() => import("./pages/AIAssistant"));
 const Admin = lazy(() => import("./pages/Admin"));
@@ -38,37 +43,44 @@ const PageLoader = () => (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ErrorBoundary>
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only fixed top-2 left-2 z-[100] px-3 py-2 rounded-md bg-background border border-border"
-          >
-            Skip to content
-          </a>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/services/:slug" element={<ServiceDetail />} />
-              <Route path="/portfolio" element={<Portfolio />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/payment-return" element={<PaymentReturn />} />
-              <Route path="/careers" element={<Careers />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/ai-assistant" element={<AIAssistant />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </ErrorBoundary>
-      </BrowserRouter>
+      <CartProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ErrorBoundary>
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only fixed top-2 left-2 z-[100] px-3 py-2 rounded-md bg-background border border-border"
+            >
+              Skip to content
+            </a>
+            <Suspense fallback={<PageLoader />}>
+              <AppShell>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/services/:slug" element={<ServiceDetail />} />
+                  <Route path="/shop" element={<Shop />} />
+                  <Route path="/trade" element={<Trade />} />
+                  <Route path="/pay" element={<Pay />} />
+                  <Route path="/portfolio" element={<Portfolio />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/payment-return" element={<PaymentReturn />} />
+                  <Route path="/careers" element={<Careers />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/ai-assistant" element={<AIAssistant />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </AppShell>
+            </Suspense>
+          </ErrorBoundary>
+        </BrowserRouter>
+      </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

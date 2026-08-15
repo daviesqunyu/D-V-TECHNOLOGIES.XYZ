@@ -7,11 +7,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `You are D&V AI, the assistant for the D&V Technologies website (dvtechnologies.xyz).
+const SYSTEM_PROMPT = `You are DIVA, the AI assistant for the D&V Technologies website (dvtechnologies.xyz).
 
 Scope: ONLY help with D&V Technologies and this website/project.
-- Explain D&V services, packages, pricing, and how to contact.
-- Help users navigate site pages and use features (contact form, newsletter signup, AI assistant, admin dashboard).
+- Explain D&V services, packages, pricing, payment methods, and how to contact.
+- Help users navigate site pages and use features (shop, cart/checkout, contact form, newsletter, AI assistant, admin dashboard, trade/partner programme).
+- Answer in English or Swahili — mirror the user's language where sensible.
 
 If the user asks for unrelated general topics (e.g. coding help not about this site, school homework, random facts),
 politely redirect and ask what they want to know about D&V services or this website.
@@ -20,122 +21,126 @@ Company info:
 - Name: D&V Technologies
 - Website: https://dvtechnologies.xyz
 - Email: info@dvtechnologies.xyz
-- WhatsApp: +254 759 075 816
+- WhatsApp: +254 759 075 816 (https://wa.me/254759075816)
 - Location: Lower Kabete, Nairobi, Kenya
+- Vision: "Silicon Savannah 2030" — helping Nairobi & East African businesses grow with technology.
 
-Packages:
-- Basic ($300/mo), Premium ($650/mo), Exclusive ($900/mo)`;
+Services: IT support & maintenance, hardware repair, networking & internet, business solutions & ERP,
+cloud services, cybersecurity, web & app development, CCTV & surveillance, data analytics & BI,
+data science, IoT solutions, AI & machine learning.
+
+Support plans (payable via M-Pesa, card, or Bitcoin):
+- Budget Starter: $0.77 (one-time kickoff)
+- Essential: $300/mo
+- Advanced: $650/mo
+- Enterprise & AI: $900/mo
+- Weekly IT Support Plan: KES 100/week (promo, M-Pesa auto-billing, cancel anytime)
+
+Storefront: products are sold at /shop with transparent KES or USD pricing; checkout at /pay supports
+M-Pesa STK push, Paystack cards and Bitcoin (BTC address 1PZPhUGugY5ecF9hYFYvpffsYUFUk2hK6i).
+A 100 KSh/week promotional plan exists for individuals and startups testing the service.
+
+Keep answers concise and friendly. Use line breaks for lists. If unsure, suggest contacting the team.`;
+
+async function callOpenAI(messages: { role: string; content: string }[]): Promise<string | null> {
+  const apiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!apiKey) return null;
+
+  const model = Deno.env.get("OPENAI_MODEL") || "gpt-4o-mini";
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+      max_tokens: 800,
+      temperature: 0.6,
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    console.error("OpenAI error:", res.status, errText.slice(0, 300));
+    return null;
+  }
+
+  const json = await res.json();
+  return json?.choices?.[0]?.message?.content?.trim() ?? null;
+}
+
+async function callCloudflare(messages: { role: string; content: string }[]): Promise<string | null> {
+  const accountId = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
+  const apiToken = Deno.env.get("CLOUDFLARE_API_TOKEN");
+  if (!accountId || !apiToken) return null;
+
+  const model = Deno.env.get("CLOUDFLARE_AI_MODEL") || "@cf/meta/llama-3.1-8b-instruct";
+  const res = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${encodeURIComponent(
+      model
+    )}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages] }),
+    }
+  );
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    console.error("Cloudflare AI error:", res.status, errText.slice(0, 300));
+    return null;
+  }
+
+  const json = await res.json();
+  const result = json?.result as { response?: string; output_text?: string } | undefined;
+  return result?.response || result?.output_text || null;
+}
+
+const FALLBACK_CONTENT =
+  "Our AI service is temporarily unavailable. Please try again in a few moments, or reach us on WhatsApp (+254 759 075 816) or via the contact page for immediate help.";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  function jsonError(status: number, message: string, extraHeaders?: HeadersInit) {
-    return new Response(JSON.stringify({ error: message }), {
+  function json(status: number, payload: unknown) {
+    return new Response(JSON.stringify(payload), {
       status,
-      headers: { ...corsHeaders, "Content-Type": "application/json", ...(extraHeaders ?? {}) },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
   try {
     const body = await req.json();
-    const messages = body.messages || [];
-    const accountId = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
-    const apiToken = Deno.env.get("CLOUDFLARE_API_TOKEN");
-    const model =
-      Deno.env.get("CLOUDFLARE_AI_MODEL") || "@cf/meta/llama-3.1-8b-instruct";
+    const messages = Array.isArray(body.messages) ? body.messages : [];
 
-    if (!accountId || !apiToken) {
-      console.error("Cloudflare Workers AI env vars missing");
-      return jsonError(
-        500,
-        "AI service not configured. Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN in Supabase Edge Function secrets."
-      );
+    const openaiKey = Deno.env.get("OPENAI_API_KEY");
+    let content: string | null = null;
+
+    // OpenAI first (the "OPEN CODE" / OpenAI key), Cloudflare as fallback.
+    if (openaiKey) {
+      content = await callOpenAI(messages);
+      if (content) console.log("ai-chat: answered via OpenAI");
     }
-
-    console.log(
-      `Chat request (Cloudflare): ${messages?.length || 0} messages, model: ${model}`
-    );
-
-    const cfResponse = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${encodeURIComponent(
-        model
-      )}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...messages,
-          ],
-        }),
-      }
-    );
-
-    const json = await cfResponse.json().catch(() => null as unknown);
-
-    if (!cfResponse.ok || !json) {
-      console.error("Cloudflare AI error:", cfResponse.status, json);
-      const msg =
-        (json as { errors?: { message?: string }[] })?.errors?.[0]?.message ||
-        "Our AI service is temporarily unavailable. Please try again in a few moments or use the contact/WhatsApp options on the site.";
-      // Fall back to a friendly assistant message instead of failing the request,
-      // so the frontend does not show a connection error toast.
-      return new Response(
-        JSON.stringify({
-          content: msg,
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const result = (json as { result?: { response?: string; output_text?: string } })
-      .result;
-    const content = result?.response || result?.output_text;
 
     if (!content) {
-      console.error("Cloudflare AI returned no content", json);
-      return new Response(
-        JSON.stringify({
-          content:
-            "Our AI service did not return a response this time. Please try again, or reach us via the contact page or WhatsApp for immediate help.",
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      content = await callCloudflare(messages);
+      if (content) console.log("ai-chat: answered via Cloudflare");
     }
 
-    return new Response(
-      JSON.stringify({ content }),
-      {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    // Never fail the request — always return something friendly.
+    return json(200, { content: content ?? FALLBACK_CONTENT, source: openaiKey ? "openai" : "cloudflare" });
   } catch (error) {
-    console.error("Chat function error:", error);
-    return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error ? error.message : "Something went wrong. Please try again.",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    console.error("ai-chat error:", error);
+    return json(500, {
+      error: error instanceof Error ? error.message : "Something went wrong. Please try again.",
+    });
   }
 });
