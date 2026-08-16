@@ -1,19 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Bot, Home, Briefcase, Phone, Users, Target, Zap, MessageSquare, HelpCircle, ArrowRight, DollarSign, Mail, Info, FolderKanban, Newspaper, Scale, FileText, ShoppingBag, ArrowLeftRight, Wallet, ChevronDown } from "lucide-react";
+import { Menu, X, Bot, Home, Briefcase, Phone, Users, Target, Zap, MessageSquare, HelpCircle, ArrowRight, DollarSign, Mail, Info, FolderKanban, Newspaper, Scale, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LogoIcon } from "@/components/LogoIcon";
-import { useCart } from "@/lib/cart";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 
 /** Main nav: shown in header (keeps space for logo & name) */
 const mainNavLinks = [
@@ -25,9 +16,6 @@ const mainNavLinks = [
 /** All pages: used in mobile menu only */
 const allNavLinks = [
   ...mainNavLinks,
-  { path: "/shop", label: "Shop", icon: ShoppingBag },
-  { path: "/trade", label: "Trade", icon: ArrowLeftRight },
-  { path: "/pay", label: "Pay", icon: Wallet },
   { path: "/portfolio", label: "Portfolio", icon: FolderKanban },
   { path: "/blog", label: "Blog", icon: Newspaper },
   // Route to the homepage packages section.
@@ -47,25 +35,9 @@ const sectionLinks = [
   { hash: "#contact", label: "Get in Touch", icon: ArrowRight },
 ];
 
-const desktopMenuItems = [
-  { label: "Home", to: "/", icon: Home },
-  { label: "Shop", to: "/shop", icon: ShoppingBag },
-  { label: "Trade", to: "/trade", icon: ArrowLeftRight },
-  { label: "Pay", to: "/pay", icon: Wallet },
-  { label: "AI Assistant", to: "/ai-assistant", icon: Bot },
-  { label: "Services", to: "/services", icon: Briefcase },
-  { label: "Portfolio", to: "/portfolio", icon: FolderKanban },
-  { label: "Blog", to: "/blog", icon: Newspaper },
-  { label: "Pricing", to: "/#pricing", icon: DollarSign },
-  { label: "Careers", to: "/careers", icon: Users },
-  { label: "About", to: "/about", icon: Info },
-  { label: "Contact", to: "/contact", icon: Phone },
-];
-
 export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { count } = useCart();
   const [isOpen, setIsOpen] = useState(false);
 
   const scrollToSection = useCallback(
@@ -130,72 +102,8 @@ export function Navbar() {
           </div>
 
           {/* CTA Button & Theme Toggle */}
-          <div className="hidden lg:flex items-center gap-1.5">
+          <div className="hidden lg:flex items-center gap-2">
             <ThemeToggle />
-            <Link
-              to="/pay"
-              className="relative p-2.5 rounded-lg hover:bg-muted transition-colors"
-              aria-label={`Cart with ${count} items`}
-              title="View cart & checkout"
-            >
-              <Wallet className="w-5 h-5 text-muted-foreground" />
-              {count > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-accent to-primary text-white text-[10px] font-bold flex items-center justify-center shadow-lg">
-                  {count > 99 ? "99+" : count}
-                </span>
-              )}
-            </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-lg" aria-label="Open app menu">
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 glass-card border-border">
-                <DropdownMenuLabel className="text-xs uppercase tracking-wider text-muted-foreground">
-                  App
-                </DropdownMenuLabel>
-                {desktopMenuItems.slice(0, 5).map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <DropdownMenuItem key={item.label} asChild>
-                      <Link to={item.to} className="flex items-center gap-3 cursor-pointer">
-                        <Icon className="w-4 h-4 text-primary" />
-                        {item.label}
-                      </Link>
-                    </DropdownMenuItem>
-                  );
-                })}
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Company
-                </DropdownMenuLabel>
-                {desktopMenuItems.slice(5).map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <DropdownMenuItem key={item.label} asChild>
-                      <Link to={item.to} className="flex items-center gap-3 cursor-pointer">
-                        <Icon className="w-4 h-4 text-muted-foreground" />
-                        {item.label}
-                      </Link>
-                    </DropdownMenuItem>
-                  );
-                })}
-                <DropdownMenuSeparator />
-                <div className="grid grid-cols-2 gap-1 p-1">
-                  <DropdownMenuItem asChild>
-                    <Link to="/privacy" className="cursor-pointer text-sm text-muted-foreground">
-                      Privacy
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/terms" className="cursor-pointer text-sm text-muted-foreground">
-                      Terms
-                    </Link>
-                  </DropdownMenuItem>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
             <Link to="/contact">
               <Button variant="hero" size="default">
                 Get Started
@@ -205,18 +113,6 @@ export function Navbar() {
 
           {/* Mobile Theme Toggle & Menu Button */}
           <div className="lg:hidden flex items-center gap-2">
-            <Link
-              to="/pay"
-              className="relative p-2 rounded-lg hover:bg-muted transition-colors"
-              aria-label={`Cart with ${count} items`}
-            >
-              <Wallet className="w-5 h-5 text-muted-foreground" />
-              {count > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-0.5 rounded-full bg-gradient-to-r from-accent to-primary text-white text-[9px] font-bold flex items-center justify-center shadow-lg">
-                  {count > 99 ? "99+" : count}
-                </span>
-              )}
-            </Link>
             <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}

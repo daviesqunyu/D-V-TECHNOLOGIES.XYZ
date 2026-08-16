@@ -21,7 +21,6 @@ export type ServiceItem = {
   features: string[];
   color: string;
   icon: LucideIcon;
-  category: string;
 };
 
 export const servicesData: ServiceItem[] = [
@@ -32,7 +31,6 @@ export const servicesData: ServiceItem[] = [
       "24/7 remote & on-site support to keep your business running smoothly. Troubleshooting to system optimization.",
     color: "from-primary to-primary/60",
     icon: Monitor,
-    category: "IT Support",
     features: [
       "24/7 Remote & On-site Support",
       "System Monitoring & Optimization",
@@ -47,7 +45,6 @@ export const servicesData: ServiceItem[] = [
       "Expert repair and maintenance for computers, servers, printers, and all peripherals with fast turnaround.",
     color: "from-accent to-accent/60",
     icon: Wrench,
-    category: "Hardware",
     features: [
       "Computer & Laptop Repairs",
       "Server Maintenance",
@@ -62,7 +59,6 @@ export const servicesData: ServiceItem[] = [
       "Network design, Wi-Fi deployment, VPN setup, and reliable internet connectivity for homes and businesses.",
     color: "from-primary to-accent",
     icon: Wifi,
-    category: "Networking",
     features: [
       "Network Design & Installation",
       "Wi-Fi Solutions (Home & Business)",
@@ -77,7 +73,6 @@ export const servicesData: ServiceItem[] = [
       "End-to-end digital transformation — ERP implementation, custom software, and business process automation.",
     color: "from-accent to-primary",
     icon: Building2,
-    category: "Software",
     features: [
       "ERP Implementation",
       "Custom Software Development",
@@ -92,7 +87,6 @@ export const servicesData: ServiceItem[] = [
       "Cloud migration, SaaS implementation, data backup & recovery, and full infrastructure management.",
     color: "from-blue-500 to-cyan-500",
     icon: Cloud,
-    category: "Cloud",
     features: [
       "Cloud Migration",
       "SaaS Implementation",
@@ -107,7 +101,6 @@ export const servicesData: ServiceItem[] = [
       "Security audits, firewall configuration, anti-malware solutions, and staff cybersecurity training.",
     color: "from-red-500 to-orange-500",
     icon: Shield,
-    category: "Security",
     features: [
       "Security Audits & Penetration Testing",
       "Firewall & VPN Configuration",
@@ -122,7 +115,6 @@ export const servicesData: ServiceItem[] = [
       "Custom websites, e-commerce platforms, mobile apps (React Native, Flutter), and progressive web apps.",
     color: "from-green-500 to-emerald-500",
     icon: Globe,
-    category: "Software",
     features: [
       "Custom Websites & Landing Pages",
       "E-commerce Platforms",
@@ -137,7 +129,6 @@ export const servicesData: ServiceItem[] = [
       "Security camera installation, remote monitoring systems, and smart home & office surveillance solutions.",
     color: "from-yellow-500 to-amber-500",
     icon: Camera,
-    category: "Hardware",
     features: [
       "IP Camera Installation",
       "Remote Monitoring Setup",
@@ -152,7 +143,6 @@ export const servicesData: ServiceItem[] = [
       "Business intelligence dashboards, data visualization, KPI reporting, and actionable insights for decision-making.",
     color: "from-violet-500 to-purple-500",
     icon: BarChart3,
-    category: "AI",
     features: [
       "BI Dashboard Development",
       "Data Visualization",
@@ -167,7 +157,6 @@ export const servicesData: ServiceItem[] = [
       "Statistical modeling, predictive analytics, data pipelines, A/B testing, and ML-driven insights for growth and operations.",
     color: "from-indigo-500 to-violet-500",
     icon: LineChart,
-    category: "AI",
     features: [
       "Statistical Modeling & A/B Testing",
       "Data Pipelines & ETL",
@@ -182,7 +171,6 @@ export const servicesData: ServiceItem[] = [
       "Smart office & home automation, sensor networks, and industrial IoT solutions for East African businesses.",
     color: "from-teal-500 to-cyan-500",
     icon: CircuitBoard,
-    category: "IoT",
     features: [
       "Smart Office/Home Automation",
       "Sensor Networks & Monitoring",
@@ -197,7 +185,6 @@ export const servicesData: ServiceItem[] = [
       "Deep learning, NLP for Swahili & English, predictive analytics, and intelligent automation bots.",
     color: "from-primary to-pink-500",
     icon: Brain,
-    category: "AI",
     features: [
       "Deep Learning & Neural Networks",
       "NLP (Swahili & English)",

@@ -99,39 +99,6 @@ function getFromAddress(): string {
   return `${BUSINESS_NAME} <onboarding@resend.dev>`;
 }
 
-/** Fire-and-forget push of the new message to the Telegram bot (DVTECH). */
-async function notifyTelegram(
-  supabaseUrl: string,
-  body: ContactBody,
-  appointment: AppointmentDetails | undefined
-): Promise<void> {
-  try {
-    const secret = Deno.env.get("BOT_SECRET");
-    if (!secret) return;
-    const payload = {
-      event: "New website message",
-      source: "contact-form",
-      subject: body.subject,
-      message: body.message.slice(0, 500),
-      details: {
-        Name: body.name,
-        Email: body.email,
-        Phone: body.phone || "—",
-        "Preferred date": appointment?.preferredDate || "—",
-        "Preferred time": appointment?.preferredTime || "—",
-        Channel: appointment?.preferredChannel || "—",
-      },
-    };
-    await fetch(`${supabaseUrl}/functions/v1/telegram-alert`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-bot-secret": secret },
-      body: JSON.stringify(payload),
-    });
-  } catch (error) {
-    console.error("telegram notify failed (non-fatal):", error);
-  }
-}
-
 async function sendEmail(
   to: string,
   subject: string,
@@ -342,9 +309,6 @@ serve(async (req) => {
         : `We received your message — ${BUSINESS_NAME}`;
       await sendEmail(body.email.trim(), userSubject, autoReply, resendKey);
     }
-
-    // Push to Telegram (DVTECH bot) — never blocks or fails the request.
-    await notifyTelegram(supabaseUrl, body, body.appointment);
 
     return new Response(
       JSON.stringify({

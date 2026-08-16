@@ -61,20 +61,3 @@ export function authHeaders() {
     Authorization: `Bearer ${ANON_KEY}`,
   };
 }
-
-export type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
-
-export async function chatWithAI(messages: ChatMessage[], signal?: AbortSignal) {
-  ensureApiConfig();
-  const res = await fetch(api.aiChat, {
-    method: "POST",
-    headers: authHeaders(),
-    body: JSON.stringify({ messages }),
-    signal,
-  });
-  if (!res.ok) {
-    throw new Error(`AI chat failed (${res.status})`);
-  }
-  const data = (await res.json()) as { content?: string };
-  return data.content ?? "";
-}
