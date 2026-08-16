@@ -194,6 +194,11 @@
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
+    transition: box-shadow 0.4s ease, border-color 0.4s ease, transform 0.4s ease;
+  }
+
+  .glass-card:hover {
+    box-shadow: var(--shadow-card), 0 8px 32px -8px hsl(175 84% 50% / 0.12);
   }
 
   /* Gradient Text */

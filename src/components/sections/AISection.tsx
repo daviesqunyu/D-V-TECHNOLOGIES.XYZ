@@ -38,7 +38,7 @@ const aiFeatures = [
 
 export function AISection() {
   return (
-    <section id="ai" className="scroll-mt-24 py-20 lg:py-32 relative overflow-hidden">
+    <section id="ai" className="py-24 lg:py-32 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 hero-pattern opacity-50" />
       

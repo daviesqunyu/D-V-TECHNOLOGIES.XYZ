@@ -15,7 +15,7 @@ export function ContactSection() {
   return (
     <section
       id="contact"
-      className="scroll-mt-24 py-20 lg:py-32 relative overflow-hidden"
+      className="py-24 lg:py-32 relative overflow-hidden"
     >
       {/* Background image */}
       <div className="absolute inset-0 -z-10">

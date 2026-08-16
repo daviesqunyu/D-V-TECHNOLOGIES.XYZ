@@ -30,7 +30,7 @@ const reasons = [
 
 export function WhyChooseUsSection() {
   return (
-    <section id="why-choose-us" className="scroll-mt-24 py-20 lg:py-32 relative overflow-hidden">
+    <section id="why-choose-us" className="py-24 lg:py-32 relative overflow-hidden">
       <div className="absolute inset-0 hero-pattern opacity-40" />
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <motion.div

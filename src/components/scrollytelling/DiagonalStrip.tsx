@@ -60,7 +60,7 @@ export function DiagonalStrip() {
   const bandB = [...ITEMS].reverse();
 
   return (
-    <section ref={ref} className="relative py-28 lg:py-40 overflow-hidden bg-card">
+    <section ref={ref} className="relative py-24 lg:py-32 overflow-hidden bg-card">
       <div className="absolute inset-0 hero-pattern opacity-30" aria-hidden="true" />
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center mb-14 lg:mb-20">

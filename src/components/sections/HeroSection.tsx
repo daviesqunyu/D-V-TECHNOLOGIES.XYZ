@@ -6,7 +6,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 
 export function HeroSection() {
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden scroll-mt-0">
+    <section id="hero" className="relative min-h-dvh flex items-center justify-center overflow-hidden scroll-mt-0 pt-16 lg:pt-20">
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -35,7 +35,7 @@ export function HeroSection() {
         />
       </div>
 
-      <div className="container mx-auto px-4 lg:px-8 pt-20 lg:pt-24 pb-12 relative z-10">
+      <div className="container mx-auto px-4 lg:px-8 pt-8 pb-12 relative z-10">
         <div className="max-w-5xl mx-auto text-center">
           {/* Badge */}
           <motion.div

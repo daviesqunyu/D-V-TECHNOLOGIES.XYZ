@@ -95,7 +95,7 @@ export function ScrollyHero() {
     <section
       id="hero"
       ref={ref}
-      className="relative h-screen min-h-[640px] overflow-hidden scroll-mt-0 flex items-center justify-center"
+      className="relative h-dvh min-h-[640px] overflow-hidden scroll-mt-0 flex items-center justify-center pt-16 lg:pt-20"
     >
       {/* Background image (transform-only scroll zoom) */}
       <motion.div
@@ -122,7 +122,7 @@ export function ScrollyHero() {
 
       <motion.div
         style={{ opacity, y }}
-        className="container relative z-10 mx-auto px-4 lg:px-8 pt-20 lg:pt-24 pb-16"
+        className="container relative z-10 mx-auto px-4 lg:px-8 pt-8 pb-16"
       >
         <div className="max-w-4xl mx-auto text-center">
           <motion.div

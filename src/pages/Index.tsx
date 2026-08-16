@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { SectionDivider } from "@/components/SectionDivider";
 import { ScrollytellingExperience } from "@/components/scrollytelling/ScrollytellingExperience";
 import { ServicesSection } from "@/components/sections/ServicesSection";
 import { TrustedClientsSection } from "@/components/sections/TrustedClientsSection";
@@ -49,18 +50,29 @@ const Index = () => {
       <Navbar />
       <main id="main-content">
         <ScrollytellingExperience />
+        <SectionDivider />
         <ServicesSection />
         {/* Packages should appear immediately after Services */}
         <PricingSection />
+        <SectionDivider />
         <TrustedClientsSection />
+        <SectionDivider />
         <TestimonialsSection />
+        <SectionDivider />
         <MissionSection />
+        <SectionDivider />
         <ShowcaseSection />
+        <SectionDivider />
         <WhyChooseUsSection />
+        <SectionDivider />
         <AISection />
+        <SectionDivider />
         <FAQSection />
+        <SectionDivider />
         <TelegramPromoSection />
+        <SectionDivider />
         <NewsletterSection />
+        <SectionDivider />
         <ContactSection />
       </main>
       <Footer />

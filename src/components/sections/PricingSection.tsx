@@ -356,7 +356,7 @@ export function PricingSection() {
 
   return (
     <>
-      <section id="pricing" className="scroll-mt-24 py-20 lg:py-32 relative overflow-hidden">
+      <section id="pricing" className="py-24 lg:py-32 relative overflow-hidden">
         {/* Backdrop */}
         <div className="absolute inset-0 hero-pattern opacity-40" aria-hidden="true" />
         <div className="absolute inset-0 grid-pattern opacity-30" aria-hidden="true" />

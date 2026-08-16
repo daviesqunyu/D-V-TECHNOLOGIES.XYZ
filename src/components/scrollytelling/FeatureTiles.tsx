@@ -95,7 +95,7 @@ function Tile({ tile, index }: { tile: (typeof TILES)[number]; index: number }) 
 
 export function FeatureTiles() {
   return (
-    <section className="relative py-20 lg:py-28 bg-background overflow-hidden">
+    <section className="relative py-24 lg:py-32 bg-background overflow-hidden">
       <div className="absolute inset-0 grid-pattern opacity-50" aria-hidden="true" />
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="text-center mb-14 lg:mb-16">

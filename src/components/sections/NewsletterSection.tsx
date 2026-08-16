@@ -55,7 +55,7 @@ export function NewsletterSection() {
   return (
     <section
       id="newsletter"
-      className="scroll-mt-24 py-20 lg:py-32 bg-card relative overflow-hidden"
+      className="py-24 lg:py-32 bg-card relative overflow-hidden"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-background/90 via-background/85 to-background/92" />
 

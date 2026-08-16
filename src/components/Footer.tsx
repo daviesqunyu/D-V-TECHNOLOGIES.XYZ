@@ -189,8 +189,8 @@ export function Footer() {
               >
                 <ShoppingBag className="w-4 h-4" />
               </a>
-            </div>
           </div>
+        </div>
 
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">

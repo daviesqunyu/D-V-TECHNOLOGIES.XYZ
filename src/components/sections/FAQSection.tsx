@@ -31,7 +31,7 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section id="faq" className="scroll-mt-24 py-20 lg:py-32 bg-card relative overflow-hidden">
+    <section id="faq" className="py-24 lg:py-32 bg-card relative overflow-hidden">
       <div className="container mx-auto px-4 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

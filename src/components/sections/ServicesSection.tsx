@@ -37,7 +37,7 @@ export function ServicesSection() {
   return (
     <section
       id="services"
-      className="scroll-mt-24 py-20 lg:py-32 bg-card relative overflow-hidden"
+      className="py-24 lg:py-32 bg-card relative overflow-hidden"
       aria-labelledby="services-heading"
     >
       {/* Animated background decorations */}

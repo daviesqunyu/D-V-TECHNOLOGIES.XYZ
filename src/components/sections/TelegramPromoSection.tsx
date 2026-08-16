@@ -41,7 +41,7 @@ const CARDS = [
 
 export function TelegramPromoSection() {
   return (
-    <section id="telegram" className="scroll-mt-24 py-20 lg:py-32 bg-card relative overflow-hidden">
+    <section id="telegram" className="py-24 lg:py-32 bg-card relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-background" />
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">

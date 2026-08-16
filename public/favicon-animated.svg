@@ -1,39 +1,76 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <style>
-    .dv-text {
-      font-family: system-ui, Arial, sans-serif;
-      font-size: 220px;
-      font-weight: 800;
-      fill: url(#dv-grad);
-      text-anchor: middle;
-      transform-origin: 256px 260px;
-      animation: dv-spin 5s linear infinite;
-    }
-    @keyframes dv-spin {
-      from { transform: rotateY(0deg); }
-      to { transform: rotateY(360deg); }
-    }
-  </style>
   <defs>
-    <linearGradient id="dv-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="gD" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#bde6ff"/>
+    </linearGradient>
+    <linearGradient id="gV" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#ff8a3d"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#00e5ff"/>
-      <stop offset="50%" stop-color="#7c3aed"/>
-      <stop offset="100%" stop-color="#a000ff"/>
+      <stop offset="40%" stop-color="#7c3aed"/>
+      <stop offset="70%" stop-color="#ff6b00"/>
+      <stop offset="100%" stop-color="#00e5ff"/>
     </linearGradient>
-    <linearGradient id="dv-shine" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fff" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
-    </linearGradient>
-    <filter id="dv-glow" x="-20%" y="-20%" width="140%" height="140%">
+    <radialGradient id="ambient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
       <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
-      <feFlood flood-color="#a000ff" flood-opacity="0.35"/>
-      <feComposite in2="blur" operator="in"/>
-      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="18"/>
     </filter>
   </defs>
-  <!-- Transparent - no background -->
-  <g stroke="url(#dv-grad)" stroke-width="1.5" opacity="0.12">
-    <path d="M64 128 H448 M64 256 H448 M64 384 H448 M128 64 V448 M256 64 V448 M384 64 V448"/>
+
+  <!-- Dark squircle base -->
+  <rect width="512" height="512" rx="112" fill="#08080f"/>
+
+  <!-- Conic gradient ring — animated rotation -->
+  <style>
+    @keyframes ring-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes breathe { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.2; } }
+    @keyframes dot-pulse { 0%, 100% { opacity: 1; r: 12; } 50% { opacity: 0.5; r: 8; } }
+    .ring { transform-origin: 256px 256px; animation: ring-rotate 6s linear infinite; }
+    .ambient { animation: breathe 4s ease-in-out infinite; }
+    .dot { animation: dot-pulse 2s ease-in-out infinite; }
+  </style>
+  <g class="ring">
+    <rect x="6" y="6" width="500" height="500" rx="108" fill="none" stroke="url(#ring)" stroke-width="12" filter="url(#glow)"/>
   </g>
-  <text x="256" y="320" class="dv-text" filter="url(#dv-glow)">DV</text>
+
+  <!-- Soft ambient glow -->
+  <circle class="ambient" cx="256" cy="272" r="140" fill="url(#ambient)" filter="url(#softGlow)"/>
+
+  <!-- D letter -->
+  <path
+    d="M96 80 H168 C264 80 320 152 320 256 C320 360 264 432 168 432 H96 Z
+       M152 144 H172 C232 144 260 192 260 256 C260 320 232 368 172 368 H152 Z"
+    fill="url(#gD)" fill-rule="evenodd" filter="url(#glow)"/>
+
+  <!-- V chevron -->
+  <path
+    d="M120 120 L256 400 L392 120"
+    stroke="url(#gV)"
+    stroke-width="48"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+    filter="url(#glow)"/>
+
+  <!-- V inner line -->
+  <path
+    d="M120 120 L256 400 L392 120"
+    stroke="rgba(255,255,255,0.3)"
+    stroke-width="14"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"/>
+
+  <!-- Pulsing signal dot -->
+  <circle class="dot" cx="256" cy="8" r="12" fill="#00ff88" filter="url(#glow)"/>
 </svg>

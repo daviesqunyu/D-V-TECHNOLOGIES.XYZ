@@ -56,7 +56,7 @@ const TRUSTED_PARTNERS = [
 
 export function TrustedClientsSection() {
   return (
-    <section id="who-trust-us" className="scroll-mt-24 py-20 lg:py-32 relative overflow-hidden bg-card">
+    <section id="who-trust-us" className="py-24 lg:py-32 relative overflow-hidden bg-card">
       {/* Background decoration */}
       <div className="absolute inset-0 hero-pattern opacity-30" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-3xl" />

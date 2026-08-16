@@ -42,7 +42,7 @@ const PHOTOS = [
 
 export function ShowcaseSection() {
   return (
-    <section className="py-20 lg:py-32 bg-background relative overflow-hidden">
+    <section className="py-24 lg:py-32 bg-background relative overflow-hidden">
       <div className="absolute inset-0 hero-pattern opacity-30" />
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <motion.div
