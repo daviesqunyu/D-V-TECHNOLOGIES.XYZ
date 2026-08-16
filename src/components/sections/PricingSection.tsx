@@ -1,6 +1,19 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X as XIcon, ArrowRight, Sparkles, Bitcoin, Copy, Loader2, MessageCircle, CreditCard, Zap, TrendingDown } from "lucide-react";
+import {
+  Check,
+  X as XIcon,
+  ArrowRight,
+  Sparkles,
+  Bitcoin,
+  Copy,
+  Loader2,
+  MessageCircle,
+  CreditCard,
+  CircleDollarSign,
+  Smartphone,
+  ShieldCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
@@ -21,8 +34,6 @@ interface Plan {
   features: Feature[];
   highlighted: boolean;
   cta: string;
-  isPromo?: boolean;
-  billingType?: "monthly" | "weekly";
 }
 
 type Currency = "USD" | "KES";
@@ -51,31 +62,6 @@ function formatKes(amount: number) {
 }
 
 const plans: Plan[] = [
-  {
-    tier: "BUDGET",
-    name: "Budget Starter",
-    priceUsd: 0.77,
-    description:
-      "Perfect for testing! Affordable weekly billing. Billed as 100 KES weekly (~1 month).",
-    features: [
-      { text: "Remote IT support (business hours)", included: true },
-      { text: "Basic troubleshooting & guidance", included: true },
-      { text: "Email setup assistance", included: true },
-      { text: "Weekly automated billing via M-Pesa", included: true },
-      { text: "Cancel anytime, no lock-in", included: true },
-      { text: "Hardware troubleshooting", included: false },
-      { text: "On-site visits", included: false },
-      { text: "24/7 support", included: false },
-      { text: "Custom software development", included: false },
-      { text: "Cloud migration & management", included: false },
-      { text: "Cybersecurity audit & firewall", included: false },
-      { text: "AI & automation solutions", included: false },
-    ],
-    highlighted: false,
-    cta: "Subscribe Now",
-    isPromo: true,
-    billingType: "weekly",
-  },
   {
     tier: "BASIC",
     name: "Essential Support",
@@ -147,6 +133,12 @@ const plans: Plan[] = [
   },
 ];
 
+const PAYMENTS = [
+  { icon: Smartphone, label: "M-Pesa" },
+  { icon: CreditCard, label: "Cards & Apple Pay" },
+  { icon: Bitcoin, label: "Bitcoin" },
+] as const;
+
 function PaymentModal({
   plan,
   currency,
@@ -192,7 +184,6 @@ function PaymentModal({
           amount: amountKes,
           email: trimmed,
           name: name.trim() || undefined,
-          billingType: plan.billingType || "monthly",
         }),
       });
       const data = (await res.json().catch(() => null)) as
@@ -238,7 +229,7 @@ function PaymentModal({
           <div>
             <h3 className="font-display text-xl font-bold">Pay for {plan.name}</h3>
             <p className="text-sm text-muted-foreground">
-              {displayPrice}/{plan.billingType === "weekly" ? "week" : "month"}{" "}
+              {displayPrice}/month{" "}
               <span className="text-muted-foreground/70">
                 {currency === "KES" ? `(${formatUsd(amountUsd)})` : `(~${formatKes(amountKes)})`}
               </span>
@@ -288,7 +279,7 @@ function PaymentModal({
             </div>
             <a
               href={`${WHATSAPP_URL}?text=${encodeURIComponent(
-                `Hi D&V Technologies, I've sent BTC payment for the ${plan.name} plan (${formatUsd(amountUsd)}/${plan.billingType === "weekly" ? "week" : "month"}). Transaction ID: `
+                `Hi D&V Technologies, I've sent BTC payment for the ${plan.name} plan (${formatUsd(amountUsd)}/month). Transaction ID: `
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -306,13 +297,9 @@ function PaymentModal({
         ) : (
           <div className="space-y-4">
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3">
-              <p className="text-sm font-medium">
-                {plan.billingType === "weekly" ? "Weekly M-Pesa Subscription" : "Card payment details"}
-              </p>
+              <p className="text-sm font-medium">Card payment details</p>
               <p className="text-xs text-muted-foreground">
-                {plan.billingType === "weekly"
-                  ? `Your M-Pesa account will be charged ${displayPrice} every week. Auto-renewal active. Add your details to start.`
-                  : "Add your name and email here. You will be redirected to Paystack to enter card number, CVV and expiry securely — we never see or store them."}
+                Add your name and email here. You will be redirected to Paystack to enter card number, CVV and expiry securely — we never see or store them. Apple Pay appears automatically on supported devices.
               </p>
               <div className="space-y-3">
                 <div>
@@ -344,106 +331,16 @@ function PaymentModal({
               ) : (
                 <>
                   <CreditCard className="w-5 h-5" />
-                  {plan.billingType === "weekly"
-                    ? `Subscribe ${formatKes(amountKes)}/week`
-                    : `Pay ${formatKes(amountKes)} with card`}
+                  Pay {formatKes(amountKes)} with card
                 </>
               )}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              {plan.billingType === "weekly"
-                ? "Your subscription will auto-renew weekly. Cancel anytime."
-                : "You will be redirected to Paystack to complete payment. The record is saved for your receipt and our records."}
+              You will be redirected to Paystack to complete payment. The record is saved for your receipt and our records.
             </p>
           </div>
         )}
       </motion.div>
-    </motion.div>
-  );
-}
-
-// Promotional Banner Component
-function PromoBanner() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
-      className="mb-12 relative overflow-hidden"
-    >
-      {/* Animated background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-red-500/20" />
-      <div className="absolute inset-0 hero-pattern opacity-30" />
-
-      {/* Floating badges */}
-      <motion.div
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 4, repeat: Infinity }}
-        className="absolute -top-8 -right-8 w-24 h-24 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full blur-2xl opacity-40"
-      />
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 5, repeat: Infinity, delay: 0.5 }}
-        className="absolute -bottom-8 -left-8 w-32 h-32 bg-gradient-to-tr from-red-400 to-amber-400 rounded-full blur-3xl opacity-30"
-      />
-
-      {/* Content */}
-      <div className="relative z-10 rounded-3xl border-2 border-amber-300/50 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-8 lg:p-10">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              <span className="inline-block text-xs font-black tracking-widest px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white">
-                🎉 LIMITED TIME OFFER
-              </span>
-            </div>
-            <h3 className="font-display text-2xl lg:text-3xl font-black mb-2 text-amber-950 dark:text-amber-200">
-              100 KES Weekly Budget Plan
-            </h3>
-            <p className="text-amber-900 dark:text-amber-100 font-medium mb-3">
-              Test our services risk-free. Auto-charging every week via M-Pesa. Cancel anytime!
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-2 text-sm text-amber-900 dark:text-amber-100 font-semibold">
-                <TrendingDown className="w-4 h-4" />
-                <span>Perfect for testing</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-amber-900 dark:text-amber-100 font-semibold">
-                <Check className="w-4 h-4" />
-                <span>No long contracts</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-amber-900 dark:text-amber-100 font-semibold">
-                <Zap className="w-4 h-4" />
-                <span>Instant access</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-shrink-0">
-            <div className="relative">
-              {/* Pulsing ring */}
-              <motion.div
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 blur opacity-75"
-              />
-              <div className="relative rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-2xl">
-                <p className="text-xs text-amber-600 dark:text-amber-300 font-semibold tracking-widest mb-2">
-                  WEEKLY BILLING
-                </p>
-                <p className="font-display text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">
-                  100
-                </p>
-                <p className="text-sm font-bold text-amber-900 dark:text-amber-100">KES per week</p>
-                <p className="text-xs text-muted-foreground mt-2">~1 month equivalent</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </motion.div>
   );
 }
@@ -460,8 +357,16 @@ export function PricingSection() {
   return (
     <>
       <section id="pricing" className="scroll-mt-24 py-20 lg:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 hero-pattern opacity-40" />
+        {/* Backdrop */}
+        <div className="absolute inset-0 hero-pattern opacity-40" aria-hidden="true" />
+        <div className="absolute inset-0 grid-pattern opacity-30" aria-hidden="true" />
+        <div
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[44rem] h-[28rem] bg-primary/10 rounded-full blur-3xl pointer-events-none"
+          aria-hidden="true"
+        />
+
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
+          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -469,15 +374,20 @@ export function PricingSection() {
             transition={{ duration: 0.6 }}
             className="text-center mb-12 lg:mb-16"
           >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-6">
+              <CircleDollarSign className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Simple, transparent pricing</span>
+            </div>
             <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-              Service <span className="gradient-text">Packages</span>
+              Packages that <span className="gradient-text">scale with you</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Choose a plan that fits your business. Pay with M-Pesa, Card, or Bitcoin.
+              Choose the level of support your business needs — no lock-in, cancel anytime.
+              Pay your way: M-Pesa, cards, Apple Pay or Bitcoin.
             </p>
 
             {/* Currency toggle */}
-            <div className="mt-6 flex items-center justify-center gap-3">
+            <div className="mt-7 flex items-center justify-center gap-3">
               <div className="inline-flex rounded-xl bg-muted p-1 border border-border">
                 <button
                   type="button"
@@ -502,174 +412,161 @@ export function PricingSection() {
             </div>
           </motion.div>
 
-          {/* Promotional Banner */}
-          <PromoBanner />
-
           {/* Plans Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-7xl mx-auto items-stretch">
-            {plans.map((plan, i) => (
-              <motion.div
-                key={plan.tier}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className={`rounded-2xl p-[1px] ${
-                  plan.isPromo
-                    ? "bg-gradient-to-b from-amber-400 via-orange-400 to-red-400 shadow-xl"
-                    : plan.highlighted
-                    ? "bg-gradient-to-b from-primary via-primary/60 to-accent"
-                    : ""
-                }`}
-              >
-                <div
-                  className={`h-full rounded-2xl p-6 lg:p-8 flex flex-col relative ${
-                    plan.isPromo
-                      ? "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-0 shadow-inner"
-                      : plan.highlighted
-                      ? "bg-card border-0"
-                      : "glass-card border border-border"
-                  }`}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
+            {plans.map((plan, i) => {
+              const lastOnMd = plans.length - 1;
+              return (
+                <motion.div
+                  key={plan.tier}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className={`${i === lastOnMd ? "md:col-span-2 lg:col-span-1" : ""} ${
+                    plan.highlighted ? "lg:-translate-y-3" : ""
+                  } relative`}
                 >
-                  {/* Promo badge */}
-                  {plan.isPromo && (
-                    <motion.div
-                      animate={{ rotate: [0, 5, -5, 0] }}
-                      transition={{ duration: 4, repeat: Infinity }}
-                      className="absolute -top-4 -right-4 z-20"
-                    >
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full blur opacity-75" />
-                        <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
-                          <div className="text-center">
-                            <p className="text-xs font-black text-white leading-none">BEST</p>
-                            <p className="text-xs font-black text-white leading-none">DEAL</p>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
+                  {/* Glow behind highlighted plan */}
+                  {plan.highlighted && (
+                    <div
+                      className="absolute -inset-1 bg-gradient-to-br from-primary/30 via-accent/20 to-primary/30 rounded-3xl blur-xl opacity-60"
+                      aria-hidden="true"
+                    />
                   )}
 
-                  <div className="mb-4">
-                    <span
-                      className={`inline-block text-xs font-bold tracking-widest px-3 py-1 rounded-full ${
-                        plan.isPromo
-                          ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white"
-                          : plan.highlighted
-                          ? "bg-primary/20 text-primary"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {plan.isPromo && "🔥 "}
-                      {plan.tier}
-                    </span>
-                  </div>
-
-                  <h3 className={`font-display text-2xl font-bold mb-2 ${plan.isPromo ? "text-amber-900 dark:text-amber-100" : ""}`}>
-                    {plan.name}
-                  </h3>
-
-                  <div className="flex items-baseline gap-1 mb-3">
-                    <span
-                      className={`font-display text-5xl font-extrabold ${
-                        plan.isPromo
-                          ? "text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600"
-                          : "gradient-text"
-                      }`}
-                    >
-                      {currency === "KES"
-                        ? formatKes(Math.round(usdToKes(plan.priceUsd)))
-                        : formatUsd(plan.priceUsd)}
-                    </span>
-                    <span
-                      className={`text-sm ${
-                        plan.isPromo ? "text-amber-700 dark:text-amber-200" : "text-muted-foreground"
-                      }`}
-                    >
-                      {plan.billingType === "weekly" ? "/week" : "/month"}
-                    </span>
-                  </div>
-
-                  <p
-                    className={`mb-6 flex-shrink-0 text-sm ${
-                      plan.isPromo ? "text-amber-800 dark:text-amber-100" : "text-muted-foreground"
+                  <div
+                    className={`relative h-full rounded-3xl p-[1px] transition-all duration-500 ${
+                      plan.highlighted
+                        ? "bg-gradient-to-b from-primary via-primary/50 to-accent shadow-2xl shadow-primary/20"
+                        : "bg-gradient-to-b from-border/60 to-border/20 hover:from-primary/50 hover:to-accent/40"
                     }`}
                   >
-                    {plan.description}
-                  </p>
+                    <div className="relative h-full rounded-[calc(1.5rem-1px)] bg-card p-6 lg:p-8 flex flex-col overflow-hidden">
+                      {/* Top accent for highlighted */}
+                      {plan.highlighted && (
+                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
+                      )}
 
-                  <ul className="space-y-3 mb-8 flex-1">
-                    {plan.features.map((f) => (
-                      <li
-                        key={f.text}
-                        className={`flex items-start gap-2 text-sm ${
-                          f.included
-                            ? plan.isPromo
-                              ? "text-amber-900 dark:text-amber-100"
-                              : "text-foreground"
-                            : "text-muted-foreground/50"
-                        }`}
-                      >
-                        {f.included ? (
-                          <Check
-                            className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
-                              plan.isPromo ? "text-amber-600 dark:text-amber-300" : "text-primary"
+                      {/* Badge */}
+                      <div className="mb-5">
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-xs font-bold tracking-widest px-3 py-1.5 rounded-full ${
+                            plan.highlighted
+                              ? "bg-gradient-to-r from-primary to-accent text-white shadow-md shadow-primary/30"
+                              : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {plan.highlighted && <Sparkles className="w-3.5 h-3.5" />}
+                          {plan.tier}
+                        </span>
+                      </div>
+
+                      <h3 className="font-display text-2xl font-bold mb-2">{plan.name}</h3>
+
+                      <div className="flex items-baseline gap-1 mb-4">
+                        <span className="font-display text-5xl font-extrabold gradient-text">
+                          {currency === "KES"
+                            ? formatKes(Math.round(usdToKes(plan.priceUsd)))
+                            : formatUsd(plan.priceUsd)}
+                        </span>
+                        <span className="text-sm text-muted-foreground">/month</span>
+                      </div>
+
+                      <p className="mb-7 flex-shrink-0 text-sm text-muted-foreground leading-relaxed">
+                        {plan.description}
+                      </p>
+
+                      {/* Divider */}
+                      <div className="h-px bg-border/60 mb-6" />
+
+                      <ul className="space-y-3 mb-8 flex-1">
+                        {plan.features.map((f) => (
+                          <li
+                            key={f.text}
+                            className={`flex items-start gap-2.5 text-sm ${
+                              f.included ? "text-foreground" : "text-muted-foreground/50"
                             }`}
-                          />
-                        ) : (
-                          <XIcon className="w-4 h-4 text-muted-foreground/40 flex-shrink-0 mt-0.5" />
-                        )}
-                        <span className={f.included ? "" : "line-through"}>{f.text}</span>
-                      </li>
-                    ))}
-                  </ul>
+                          >
+                            {f.included ? (
+                              <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <Check className="w-3 h-3" />
+                              </span>
+                            ) : (
+                              <span className="w-5 h-5 rounded-full bg-muted text-muted-foreground/50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <XIcon className="w-3 h-3" />
+                              </span>
+                            )}
+                            <span className={f.included ? "" : "line-through"}>{f.text}</span>
+                          </li>
+                        ))}
+                      </ul>
 
-                  {/* Payment CTA */}
-                  <div className="space-y-2">
-                    <Button
-                      variant={plan.isPromo ? "default" : plan.highlighted ? "hero" : "outline"}
-                      size="lg"
-                      className={`w-full group font-semibold ${
-                        plan.isPromo ? "bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white" : ""
-                      }`}
-                      onClick={() => setSelectedPlan(plan)}
-                    >
-                      {plan.highlighted && <Sparkles className="w-4 h-4" />}
-                      {plan.isPromo && <Zap className="w-4 h-4" />}
-                      {plan.cta}
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                    <div className="flex items-center justify-center gap-3 pt-1">
-                      <button
-                        onClick={() => {
-                          setSelectedPlan(plan);
-                        }}
-                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                      {/* CTA */}
+                      <Button
+                        variant={plan.highlighted ? "hero" : "outline"}
+                        size="lg"
+                        className={`w-full group font-semibold ${plan.highlighted ? "" : "hover:border-primary/50 hover:text-primary"}`}
+                        onClick={() => setSelectedPlan(plan)}
                       >
-                        <CreditCard className="w-4 h-4" /> {plan.billingType === "weekly" ? "M-Pesa" : "Paystack"}
-                      </button>
-                      <span className="text-muted-foreground/30">|</span>
-                      <button
-                        onClick={() => {
-                          setSelectedPlan(plan);
-                        }}
-                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-accent transition-colors"
-                      >
-                        <Bitcoin className="w-4 h-4" /> Bitcoin
-                      </button>
+                        {plan.highlighted && <Sparkles className="w-4 h-4" />}
+                        {plan.cta}
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+
+                      {/* Payment methods */}
+                      <div className="mt-4 flex items-center justify-center gap-3 border-t border-border/60 pt-4">
+                        {PAYMENTS.map((p, idx) => (
+                          <button
+                            key={p.label}
+                            onClick={() => setSelectedPlan(plan)}
+                            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            <p.icon className="w-4 h-4" />
+                            <span className={idx === PAYMENTS.length - 1 ? "hidden sm:inline" : ""}>
+                              {p.label}
+                            </span>
+                            {idx < PAYMENTS.length - 1 && (
+                              <span className="text-muted-foreground/30 ml-1.5">·</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
+
+          {/* Trust line */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground"
+          >
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-primary" /> Secure payments
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Smartphone className="w-4 h-4 text-primary" /> M-Pesa
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CreditCard className="w-4 h-4 text-primary" /> Visa · Mastercard · Apple Pay
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Bitcoin className="w-4 h-4 text-accent" /> Bitcoin
+            </span>
+          </motion.div>
 
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="text-center text-sm text-muted-foreground mt-10"
+            className="text-center text-sm text-muted-foreground mt-8"
           >
             Need a custom package?{" "}
             <Link to="/contact" className="text-primary hover:underline">
