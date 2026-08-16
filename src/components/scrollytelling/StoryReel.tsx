@@ -465,6 +465,7 @@ export function StoryReel() {
                 />
                 <div className="absolute inset-0 bg-background/55 dark:bg-black/55" />
                 <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
+                <div className="absolute inset-0 bg-primary/5 mix-blend-overlay" aria-hidden="true" />
                 <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background to-transparent" />
               </div>
 
@@ -480,7 +481,7 @@ export function StoryReel() {
                       <Icon className={`w-4 h-4 ${frame.accentText}`} />
                       <span className={`text-sm font-medium ${frame.accentText}`}>{frame.badge}</span>
                     </div>
-                    <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-5">
+                    <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-5">
                       {frame.titleTop}{" "}
                       <span className={`gradient-text ${frame.accentText}`}>{frame.titleAccent}</span>
                       <br />
@@ -515,8 +516,19 @@ export function StoryReel() {
                       className="relative rounded-3xl p-[1px] bg-gradient-to-br from-border via-primary/40 to-border shadow-2xl"
                       style={{ perspective: 1200 }}
                     >
-                      <div className="rounded-[calc(1.5rem-1px)] bg-background/90 backdrop-blur-xl p-6 lg:p-8">
-                        <FramePanel frame={frame} />
+                      <div className="rounded-[calc(1.5rem-1px)] bg-background/90 backdrop-blur-xl overflow-hidden">
+                        {/* window chrome */}
+                        <div className="flex items-center gap-1.5 px-4 pt-4 pb-2.5 border-b border-border/60">
+                          <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
+                          <span className="ml-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                            dvtechnologies.xyz
+                          </span>
+                        </div>
+                        <div className="p-6 lg:p-8">
+                          <FramePanel frame={frame} />
+                        </div>
                       </div>
                       {/* corner accent */}
                       <div className={`absolute -top-3 -right-3 w-16 h-16 rounded-2xl bg-gradient-to-br ${frame.orb} blur-xl`} />

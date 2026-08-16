@@ -59,7 +59,7 @@ const TILES: { icon: LucideIcon; title: string; description: string; gradient: s
     icon: Zap,
     title: "Same-Day On-Site",
     description:
-      "Nairobi-based engineers who can be at your office the same day — not next quarter.",
+      "Engineers who can be at your office the same day — not next quarter.",
     gradient: "from-amber-400 to-yellow-500",
   },
   {
@@ -108,14 +108,14 @@ export function FeatureTiles() {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/30 mb-6">
             <Zap className="w-4 h-4 text-accent" />
             <span className="text-sm font-medium text-accent uppercase tracking-wide">
-              Intelligent Features
+              Live Features &amp; Tools
             </span>
           </div>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            A website that <span className="gradient-text">works like an app</span>
+            Built to <span className="gradient-text">feel alive</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Scroll-driven storytelling, a dock-style navigation, a live cart and an AI that never sleeps.
+            24/7 support, instant payments, on-site engineers and an AI that never sleeps.
           </p>
         </div>
 

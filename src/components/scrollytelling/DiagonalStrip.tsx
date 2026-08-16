@@ -73,7 +73,7 @@ export function DiagonalStrip() {
           From desks to <span className="gradient-text">data centres</span>
         </h2>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Every layer of technology a modern African business needs — delivered as one connected service.
+          Every layer of technology a modern business needs — delivered as one connected service.
         </p>
       </div>
 
