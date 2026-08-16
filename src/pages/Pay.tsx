@@ -17,6 +17,11 @@ import {
   ArrowRight,
   CheckCircle2,
   ShieldCheck,
+  Lock,
+  Truck,
+  RotateCcw,
+  ChevronRight,
+  Package,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/lib/cart";
@@ -27,25 +32,35 @@ const PAY_METHODS = [
   {
     id: "mpesa",
     name: "M-Pesa",
-    sub: "STK push · weekly subscriptions",
+    sub: "STK push · instant",
     icon: Send,
     gradient: "from-green-500 to-emerald-500",
+    badge: "Popular",
   },
   {
     id: "paystack",
-    name: "Card (Paystack)",
-    sub: "Visa · Mastercard · secure",
+    name: "Card Payment",
+    sub: "Visa · Mastercard · Paystack",
     icon: CreditCard,
     gradient: "from-primary to-cyan-500",
+    badge: "Secure",
   },
   {
     id: "btc",
     name: "Bitcoin",
-    sub: "Global · low fees",
+    sub: "BTC · Global payments",
     icon: Bitcoin,
     gradient: "from-orange-500 to-amber-500",
+    badge: null,
   },
 ] as const;
+
+const TRUST_ITEMS = [
+  { icon: Lock, label: "Encrypted checkout" },
+  { icon: ShieldCheck, label: "Secure payments" },
+  { icon: Truck, label: "Instant delivery" },
+  { icon: RotateCcw, label: "Satisfaction guaranteed" },
+];
 
 export default function Pay() {
   const { items, count, total, updateQty, removeItem, clear } = useCart();
@@ -76,188 +91,279 @@ export default function Pay() {
         canonicalPath="/pay"
       />
       <Navbar />
-      <main id="main-content" className="pt-20 lg:pt-24 pb-10">
-        <section className="relative py-12 lg:py-16 overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage:
-                "url('https://images.pexels.com/photos/4968391/pexels-photo-4968391.jpeg?auto=compress&cs=tinysrgb&w=1600')",
-            }}
-            aria-hidden="true"
-          />
-          <div className="absolute inset-0 bg-background/85" aria-hidden="true" />
-          <div className="absolute inset-0 hero-pattern" aria-hidden="true" />
-          <div className="container mx-auto px-4 lg:px-8 relative z-10">
+      <main id="main-content" className="pt-20 lg:pt-24 pb-16">
+        <div className="container mx-auto px-4 lg:px-8">
+          {/* Header */}
+          <div className="py-10 lg:py-14">
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-3xl mb-10"
+              transition={{ duration: 0.5 }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-6">
-                <Wallet className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Secure Checkout</span>
+              {/* Breadcrumb */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+                <Link to="/shop" className="hover:text-foreground transition-colors">Shop</Link>
+                <ChevronRight className="w-3.5 h-3.5" />
+                <span className="text-foreground font-medium">Checkout</span>
               </div>
-              <h1 className="font-display text-4xl md:text-5xl font-bold mb-3">
-                Your <span className="gradient-text">cart</span>
-              </h1>
-              <p className="text-muted-foreground text-lg">
+
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Package className="w-5 h-5 text-primary" />
+                </div>
+                <h1 className="font-display text-3xl md:text-4xl font-bold">
+                  Checkout
+                </h1>
+              </div>
+              <p className="text-muted-foreground ml-[52px]">
                 {count > 0
-                  ? `${count} item${count > 1 ? "s" : ""} ready for checkout.`
-                  : "Add something from the shop first."}
+                  ? `${count} item${count > 1 ? "s" : ""} in your order`
+                  : "Your cart is empty — browse the shop to get started."}
               </p>
             </motion.div>
+          </div>
 
-            {count === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="max-w-xl mx-auto text-center rounded-3xl border border-dashed border-border bg-card/60 p-12"
-              >
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-5">
-                  <ShoppingBag className="w-8 h-8" />
+          {count === 0 ? (
+            <EmptyCart />
+          ) : (
+            <div className="grid lg:grid-cols-5 gap-8 lg:gap-10">
+              {/* Left: Cart items */}
+              <div className="lg:col-span-3">
+                {/* Step indicator */}
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">1</span>
+                    <span className="text-sm font-semibold">Cart Review</span>
+                  </div>
+                  <div className="flex-1 h-px bg-border" />
+                  <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-bold">2</span>
+                    <span className="text-sm text-muted-foreground">Payment</span>
+                  </div>
+                  <div className="flex-1 h-px bg-border" />
+                  <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-bold">3</span>
+                    <span className="text-sm text-muted-foreground">Confirm</span>
+                  </div>
                 </div>
-                <h2 className="font-display text-2xl font-bold mb-2">Your cart is empty</h2>
-                <p className="text-muted-foreground mb-6">
-                  Browse the storefront — plans, hardware, software and AI services all live there.
-                </p>
-                <Link to="/shop">
-                  <Button variant="hero" size="lg" className="group">
-                    Browse Shop
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </motion.div>
-            ) : (
-              <div className="grid lg:grid-cols-5 gap-8">
-                {/* Cart items */}
-                <div className="lg:col-span-3 space-y-3">
+
+                {/* Items */}
+                <div className="space-y-3">
                   <AnimatePresence mode="popLayout">
-                    {items.map((item) => (
+                    {items.map((item, i) => (
                       <motion.div
                         key={item.id}
                         layout
-                        initial={{ opacity: 0, y: 12 }}
+                        initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, x: -40 }}
-                        className="rounded-2xl border border-border bg-card p-4 flex items-center gap-4"
+                        exit={{ opacity: 0, x: -60, scale: 0.95 }}
+                        transition={{ delay: i * 0.05 }}
+                        className="group rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-4 md:p-5 flex items-center gap-4 hover:border-border hover:shadow-sm transition-all"
                       >
+                        {/* Item icon placeholder */}
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center flex-shrink-0 border border-border/40">
+                          <Package className="w-5 h-5 text-primary/70" />
+                        </div>
+
                         <div className="flex-1 min-w-0">
-                          <p className="font-display font-semibold truncate">{item.name}</p>
+                          <p className="font-display font-semibold text-sm md:text-base truncate">{item.name}</p>
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            {formatPrice(item.price, item.currency, item.billing)} · {item.category}
+                            {formatPrice(item.price, item.currency, item.billing)}
+                            {item.category && (
+                              <>
+                                <span className="mx-1.5 text-border">·</span>
+                                {item.category}
+                              </>
+                            )}
                           </p>
                         </div>
-                        <div className="flex items-center gap-2">
+
+                        {/* Quantity controls */}
+                        <div className="flex items-center gap-1.5 bg-muted/50 rounded-xl p-1">
                           <button
                             onClick={() => updateQty(item.id, item.qty - 1)}
-                            className="w-8 h-8 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors"
+                            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-background transition-colors"
                             aria-label={`Decrease ${item.name}`}
                           >
-                            <Minus className="w-4 h-4" />
+                            <Minus className="w-3.5 h-3.5" />
                           </button>
-                          <span className="w-8 text-center font-bold tabular-nums">{item.qty}</span>
+                          <span className="w-8 text-center font-bold text-sm tabular-nums">{item.qty}</span>
                           <button
                             onClick={() => updateQty(item.id, item.qty + 1)}
-                            className="w-8 h-8 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors"
+                            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-background transition-colors"
                             aria-label={`Increase ${item.name}`}
                           >
-                            <Plus className="w-4 h-4" />
+                            <Plus className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                        <div className="text-right w-28">
-                          <p className="font-bold gradient-text tabular-nums">
+
+                        {/* Price + remove */}
+                        <div className="text-right min-w-[90px]">
+                          <p className="font-bold gradient-text text-sm tabular-nums">
                             {formatPrice(item.price * item.qty, item.currency, item.billing)}
                           </p>
                           <button
                             onClick={() => removeItem(item.id)}
-                            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors mt-1"
+                            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors mt-1 opacity-0 group-hover:opacity-100"
                           >
-                            <Trash2 className="w-3.5 h-3.5" /> Remove
+                            <Trash2 className="w-3 h-3" /> Remove
                           </button>
                         </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
+                </div>
 
+                {/* Clear + continue shopping */}
+                <div className="flex items-center justify-between mt-5">
                   <button
                     onClick={clear}
                     className="text-sm text-muted-foreground hover:text-destructive transition-colors inline-flex items-center gap-1.5"
                   >
-                    <Trash2 className="w-4 h-4" /> Clear cart
+                    <Trash2 className="w-3.5 h-3.5" /> Clear cart
                   </button>
+                  <Link
+                    to="/shop"
+                    className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                  >
+                    Continue shopping <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
+              </div>
 
-                {/* Summary */}
-                <div className="lg:col-span-2">
-                  <div className="rounded-2xl border border-border bg-card p-6 lg:sticky lg:top-24">
-                    <h2 className="font-display text-lg font-bold mb-4">Order summary</h2>
-                    <div className="space-y-2 mb-5">
-                      {items.map((item) => (
-                        <div key={item.id} className="flex justify-between text-sm">
-                          <span className="text-muted-foreground truncate pr-2">
-                            {item.name} × {item.qty}
-                          </span>
-                          <span className="font-medium tabular-nums">
-                            {formatPrice(item.price * item.qty, item.currency, item.billing)}
-                          </span>
-                        </div>
-                      ))}
-                      <div className="border-t border-border pt-3 flex justify-between font-display text-lg font-bold">
-                        <span>Total</span>
-                        <span className="gradient-text tabular-nums">
-                          {formatPrice(total, "KES")}
+              {/* Right: Order summary */}
+              <div className="lg:col-span-2">
+                <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-6 lg:sticky lg:top-28">
+                  <h2 className="font-display text-lg font-bold mb-5">Order Summary</h2>
+
+                  {/* Line items */}
+                  <div className="space-y-3 mb-5">
+                    {items.map((item) => (
+                      <div key={item.id} className="flex justify-between text-sm">
+                        <span className="text-muted-foreground truncate pr-3">
+                          {item.name}
+                          {item.qty > 1 && <span className="text-muted-foreground/60"> &times;{item.qty}</span>}
+                        </span>
+                        <span className="font-medium tabular-nums whitespace-nowrap">
+                          {formatPrice(item.price * item.qty, item.currency, item.billing)}
                         </span>
                       </div>
-                    </div>
+                    ))}
+                  </div>
 
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                      Payment method
-                    </p>
-                    <div className="space-y-2 mb-6">
-                      {PAY_METHODS.map((m) => {
-                        const Icon = m.icon;
-                        const selected = method === m.id;
-                        return (
-                          <button
-                            key={m.id}
-                            onClick={() => setMethod(m.id)}
-                            className={`w-full flex items-center gap-3 rounded-xl border p-3 transition-all ${
-                              selected
-                                ? "border-primary/50 bg-primary/5 shadow"
-                                : "border-border hover:border-primary/30"
-                            }`}
-                          >
-                            <span className={`w-10 h-10 rounded-lg bg-gradient-to-br ${m.gradient} flex items-center justify-center`}>
-                              <Icon className="w-4 h-4 text-white" />
-                            </span>
-                            <span className="flex-1 text-left">
-                              <span className="block text-sm font-semibold">{m.name}</span>
-                              <span className="block text-xs text-muted-foreground">{m.sub}</span>
-                            </span>
-                            {selected && <CheckCircle2 className="w-5 h-5 text-primary" />}
-                          </button>
-                        );
-                      })}
+                  {/* Divider */}
+                  <div className="border-t border-border/60 pt-4 mb-6">
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-sm text-muted-foreground">Total</span>
+                      <span className="font-display text-2xl font-black gradient-text tabular-nums">
+                        {formatPrice(total, "KES")}
+                      </span>
                     </div>
+                  </div>
 
-                    <Button variant="hero" size="lg" className="w-full mb-3" onClick={checkout}>
-                      <MessageCircle className="w-5 h-5" />
-                      {confirmed ? "Opening WhatsApp…" : "Confirm on WhatsApp"}
-                    </Button>
-                    <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground text-center">
-                      <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                      Paystack &amp; M-Pesa flows are end-to-end secure. We never store card details.
-                    </p>
+                  {/* Payment methods */}
+                  <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-3">
+                    Payment Method
+                  </p>
+                  <div className="space-y-2 mb-6">
+                    {PAY_METHODS.map((m) => {
+                      const Icon = m.icon;
+                      const selected = method === m.id;
+                      return (
+                        <button
+                          key={m.id}
+                          onClick={() => setMethod(m.id)}
+                          className={`w-full flex items-center gap-3 rounded-xl border p-3.5 transition-all ${
+                            selected
+                              ? "border-primary/50 bg-primary/5 shadow-lg shadow-primary/5 ring-1 ring-primary/20"
+                              : "border-border/60 hover:border-border hover:bg-muted/30"
+                          }`}
+                        >
+                          <span className={`w-10 h-10 rounded-xl bg-gradient-to-br ${m.gradient} flex items-center justify-center flex-shrink-0 shadow-md`}>
+                            <Icon className="w-4.5 h-4.5 text-white" />
+                          </span>
+                          <span className="flex-1 text-left">
+                            <span className="block text-sm font-semibold">{m.name}</span>
+                            <span className="block text-[11px] text-muted-foreground">{m.sub}</span>
+                          </span>
+                          <div className="flex items-center gap-2">
+                            {m.badge && (
+                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                                {m.badge}
+                              </span>
+                            )}
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                              selected ? "border-primary bg-primary" : "border-border"
+                            }`}>
+                              {selected && <div className="w-2 h-2 rounded-full bg-white" />}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* CTA */}
+                  <Button
+                    variant="hero"
+                    size="lg"
+                    className="w-full mb-3 h-12 text-base"
+                    onClick={checkout}
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    {confirmed ? (
+                      <span className="inline-flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4" /> Opening WhatsApp…
+                      </span>
+                    ) : (
+                      "Confirm on WhatsApp"
+                    )}
+                  </Button>
+
+                  {/* Trust signals */}
+                  <div className="grid grid-cols-2 gap-2 mt-4">
+                    {TRUST_ITEMS.map((t) => (
+                      <div key={t.label} className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                        <t.icon className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                        {t.label}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-        </section>
+            </div>
+          )}
+        </div>
       </main>
       <Footer />
     </div>
+  );
+}
+
+/* ─── Empty cart state ─── */
+function EmptyCart() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4 }}
+      className="max-w-lg mx-auto text-center"
+    >
+      <div className="rounded-3xl border border-dashed border-border/60 bg-card/40 backdrop-blur-sm p-10 md:p-14">
+        <div className="w-16 h-16 mx-auto rounded-2xl bg-muted/50 flex items-center justify-center mb-5 border border-border/40">
+          <ShoppingBag className="w-7 h-7 text-muted-foreground" />
+        </div>
+        <h2 className="font-display text-2xl font-bold mb-2">Cart is empty</h2>
+        <p className="text-sm text-muted-foreground mb-8 max-w-xs mx-auto leading-relaxed">
+          Explore our shop for plans, hardware, software and AI services — everything in one place.
+        </p>
+        <Link to="/shop">
+          <Button variant="hero" size="lg" className="group">
+            Browse Shop
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </Link>
+      </div>
+    </motion.div>
   );
 }

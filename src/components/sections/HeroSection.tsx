@@ -6,7 +6,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 
 export function HeroSection() {
   return (
-    <section id="hero" className="relative min-h-dvh flex items-center justify-center overflow-hidden scroll-mt-0 pt-16 lg:pt-20">
+    <section id="hero" className="relative min-h-dvh flex items-start lg:items-center justify-start lg:justify-center overflow-hidden scroll-mt-0 pt-20 lg:pt-20">
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"

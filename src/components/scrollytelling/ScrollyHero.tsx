@@ -95,7 +95,7 @@ export function ScrollyHero() {
     <section
       id="hero"
       ref={ref}
-      className="relative h-dvh min-h-[640px] overflow-hidden scroll-mt-0 flex items-center justify-center pt-16 lg:pt-20"
+      className="relative min-h-dvh overflow-hidden scroll-mt-0 flex items-start lg:items-center justify-start lg:justify-center pt-20 lg:pt-20"
     >
       {/* Background image (transform-only scroll zoom) */}
       <motion.div

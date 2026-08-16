@@ -113,43 +113,64 @@ export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "c
     }
   };
 
+  /* ── Footer variant: compact icon-only badges ── */
+  if (!isCard) {
+    return (
+      <div>
+        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2.5">
+          Payments
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          <button
+            onClick={copyBtc}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground hover:border-orange-500/40 hover:text-orange-500 transition-colors"
+            title="Copy Bitcoin address"
+          >
+            <Bitcoin className="w-3.5 h-3.5" />
+            Bitcoin
+            {copied && <Check className="w-3 h-3 text-emerald-500" />}
+          </button>
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground">
+            <CreditCard className="w-3.5 h-3.5" />
+            Card
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            M-Pesa
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Card variant: full payment form (used on pricing / standalone) ── */
   return (
-    <div className={isCard ? "space-y-3" : "space-y-2"}>
-      <p className={`font-medium ${isCard ? "text-sm mb-3" : "text-xs"} text-muted-foreground`}>
-        Pay with
-      </p>
-      <div className="flex flex-wrap gap-2">
+    <div className="space-y-3">
+      <div className="flex gap-2">
         <Button
           variant="outline"
-          size={isCard ? "default" : "sm"}
+          size="default"
           className="border-accent/50 hover:bg-accent/10 hover:border-accent gap-2"
           onClick={copyBtc}
         >
           <Bitcoin className="w-4 h-4 text-accent" />
-          <span className="hidden sm:inline">Pay with Bitcoin</span>
-          <span className="sm:hidden">BTC</span>
+          Bitcoin
           {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
         </Button>
         <Button
           variant="outline"
-          size={isCard ? "default" : "sm"}
+          size="default"
           className="border-primary/50 hover:bg-primary/10 hover:border-primary gap-2"
           onClick={startPaystack}
           disabled={loadingPaystack}
         >
           {loadingPaystack ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
-          <span>Pay with Paystack</span>
+          Card (Paystack)
         </Button>
       </div>
 
-      {/* Card payment section: name + email here; card number, CVV and expiry on Paystack (PCI) */}
       <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3">
-        <div>
-          <p className="text-xs font-medium text-foreground">Card payment (Paystack)</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            Add your name and email below. You will be redirected to Paystack to enter card number, CVV and expiry securely — we never see or store them.
-          </p>
-        </div>
+        <p className="text-xs font-medium text-foreground">Card payment via Paystack</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <label className="text-xs text-muted-foreground">
             Plan
@@ -167,7 +188,7 @@ export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "c
           <div />
         </div>
         <label className="text-xs text-muted-foreground block">
-          Full name (for receipt & admin)
+          Full name
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -178,7 +199,7 @@ export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "c
           />
         </label>
         <label className="text-xs text-muted-foreground block">
-          Email (receipt & Paystack)
+          Email
           <Input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -189,20 +210,18 @@ export function PaymentOptions({ variant = "footer" }: { variant?: "footer" | "c
             disabled={loadingPaystack}
           />
         </label>
-
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <p className="text-xs text-muted-foreground">
             Amount: <span className="font-medium text-foreground">{formatKes(amountKes)}</span>{" "}
             <span className="text-muted-foreground/70">({formatUsd(selected.usd)})</span>
           </p>
-          <Button variant={isCard ? "hero" : "outline"} size={isCard ? "default" : "sm"} onClick={startPaystack} disabled={loadingPaystack} className="gap-2">
+          <Button variant="hero" size="default" onClick={startPaystack} disabled={loadingPaystack} className="gap-2">
             {loadingPaystack ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
-            Pay with card (Paystack)
+            Pay with card
           </Button>
         </div>
-
         <p className="text-[11px] text-muted-foreground">
-          You will be redirected to Paystack to complete payment (card, M-Pesa, or other methods). After payment, the record is saved for your receipt and our records.
+          Redirected to Paystack — we never store your card details.
         </p>
       </div>
     </div>
