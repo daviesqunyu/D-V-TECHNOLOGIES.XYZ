@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, useScroll, useTransform, useMotionValue, animate } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, animate } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,7 @@ function GlobeOrbital() {
   const [activeIdx, setActiveIdx] = useState(0);
   const rotation = useMotionValue(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -120,177 +121,212 @@ function GlobeOrbital() {
   const totalRotation = useTransform(scrollYProgress, [0, 1], [0, 360 * 2]);
 
   useEffect(() => {
+    if (isMobile) return; /* mobile uses tap/swipe, not scroll */
     const unsub = totalRotation.on("change", (v) => {
       rotation.set(v);
       const idx = Math.round(-v / ANGLE_PER) % N;
       setActiveIdx(((idx % N) + N) % N);
     });
     return unsub;
-  }, [totalRotation]);
+  }, [totalRotation, isMobile]);
 
-  const scrollToService = useCallback(
+  const goTo = useCallback(
     (idx: number) => {
-      const current = rotation.get();
-      const currentIdx = Math.round(-current / ANGLE_PER) % N;
-      const normalized = ((currentIdx % N) + N) % N;
-      let diff = idx - normalized;
-      if (diff > N / 2) diff -= N;
-      if (diff < -N / 2) diff += N;
-      const target = current - diff * ANGLE_PER;
-      animate(rotation, target, {
-        type: "spring",
-        stiffness: 80,
-        damping: 20,
-        onComplete: () => {
-          setActiveIdx(idx);
-        },
-      });
+      const target = idx * ANGLE_PER;
+      animate(rotation, -target, { type: "spring", stiffness: 80, damping: 20 });
+      setActiveIdx(idx);
     },
     [rotation]
   );
 
-  const radius = isMobile ? 220 : 380;
+  const goNext = useCallback(() => {
+    const next = (activeIdx + 1) % N;
+    goTo(next);
+  }, [activeIdx, goTo]);
+
+  const goPrev = useCallback(() => {
+    const prev = (activeIdx - 1 + N) % N;
+    goTo(prev);
+  }, [activeIdx, goTo]);
+
+  /* swipe handlers for mobile */
+  const onTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) goNext(); else goPrev();
+    }
+    setTouchStart(null);
+  };
+
+  const radius = 380;
 
   return (
     <section
       ref={containerRef}
       className="relative bg-card"
-      style={{ height: `${N * 120 + 600}px` }}
+      style={{ height: isMobile ? "auto" : `${N * 120 + 600}px` }}
     >
-      <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
+      <div
+        className={`flex flex-col items-center justify-center overflow-hidden ${
+          isMobile ? "py-16" : "sticky top-0 h-screen"
+        }`}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         {/* Central glow */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-          <div className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute w-[200px] h-[200px] md:w-[350px] md:h-[350px] rounded-full border border-primary/10" />
-          <div className="absolute w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full border border-primary/5" />
-          <div className="absolute w-[400px] h-[400px] md:w-[650px] md:h-[650px] rounded-full border border-primary/[0.03]" />
+          <div className="w-[260px] h-[260px] md:w-[500px] md:h-[500px] rounded-full bg-primary/5 blur-3xl" />
+          <div className="absolute w-[180px] h-[180px] md:w-[350px] md:h-[350px] rounded-full border border-primary/10" />
+          <div className="absolute w-[280px] h-[280px] md:w-[500px] md:h-[500px] rounded-full border border-primary/5" />
+          <div className="absolute w-[380px] h-[380px] md:w-[650px] md:h-[650px] rounded-full border border-primary/[0.03]" />
         </div>
 
-        {/* Orbital ring label */}
-        <div className="absolute top-8 md:top-12 left-1/2 -translate-x-1/2 text-center z-20">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium">
-            Scroll to explore
+        {/* Label */}
+        <div className="absolute top-6 md:top-12 left-1/2 -translate-x-1/2 text-center z-20">
+          <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium">
+            {isMobile ? "Swipe to explore" : "Scroll to explore"}
           </p>
-          <ChevronDown className="w-4 h-4 text-primary mx-auto mt-1 animate-bounce" />
+          {!isMobile && <ChevronDown className="w-4 h-4 text-primary mx-auto mt-1 animate-bounce" />}
         </div>
 
-        {/* 3D Carousel */}
-        <div
-          className="relative z-10"
-          style={{
-            width: `${radius * 2 + 320}px`,
-            height: "400px",
-            perspective: "1200px",
-          }}
-        >
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              transformStyle: "preserve-3d",
-              rotateY: rotation,
-            }}
+        {/* ── Desktop: 3D orbital carousel ── */}
+        {!isMobile && (
+          <div
+            className="relative z-10 hidden md:block"
+            style={{ width: `${radius * 2 + 320}px`, height: "400px", perspective: "1200px" }}
           >
-            {servicesData.map((service, i) => {
-              const Icon = service.icon;
-              const angle = i * ANGLE_PER;
-              const isActive = i === activeIdx;
-
-              return (
-                <motion.div
-                  key={service.slug}
-                  className="absolute top-1/2 left-1/2"
-                  style={{
-                    transform: `rotateY(${angle}deg) translateZ(${radius}px) translate(-50%, -50%)`,
-                    transformStyle: "preserve-3d",
-                    width: isMobile ? "200px" : "280px",
-                  }}
-                >
+            <motion.div
+              className="absolute inset-0"
+              style={{ transformStyle: "preserve-3d", rotateY: rotation }}
+            >
+              {servicesData.map((service, i) => {
+                const Icon = service.icon;
+                const angle = i * ANGLE_PER;
+                const isActive = i === activeIdx;
+                return (
                   <motion.div
-                    animate={{
-                      scale: isActive ? 1.08 : 0.82,
-                      opacity: isActive ? 1 : 0.5,
+                    key={service.slug}
+                    className="absolute top-1/2 left-1/2"
+                    style={{
+                      transform: `rotateY(${angle}deg) translateZ(${radius}px) translate(-50%, -50%)`,
+                      transformStyle: "preserve-3d",
+                      width: "280px",
                     }}
-                    transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                    className={`rounded-2xl p-5 md:p-6 border transition-colors cursor-pointer ${
-                      isActive
-                        ? "bg-card/95 border-primary/40 shadow-2xl shadow-primary/10 backdrop-blur-xl"
-                        : "bg-card/60 border-border/30 backdrop-blur-md"
-                    }`}
-                    onClick={() => scrollToService(i)}
                   >
-                    <div
-                      className={`w-11 h-11 md:w-14 md:h-14 rounded-xl bg-gradient-to-br ${service.color} flex items-center justify-center mb-3 md:mb-4 shadow-lg ${
-                        isActive ? "scale-110" : ""
-                      } transition-transform`}
+                    <motion.div
+                      animate={{ scale: isActive ? 1.08 : 0.82, opacity: isActive ? 1 : 0.5 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                      className={`rounded-2xl p-6 border transition-colors cursor-pointer ${
+                        isActive
+                          ? "bg-card/95 border-primary/40 shadow-2xl shadow-primary/10 backdrop-blur-xl"
+                          : "bg-card/60 border-border/30 backdrop-blur-md"
+                      }`}
+                      onClick={() => goTo(i)}
                     >
-                      <Icon className="w-5 h-5 md:w-7 md:h-7 text-white" />
-                    </div>
-                    <h3 className="font-display text-sm md:text-base font-bold mb-1.5 leading-tight">
-                      {service.title}
-                    </h3>
-                    {isActive && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <p className="text-xs md:text-sm text-muted-foreground mb-3 leading-relaxed">
-                          {service.description}
-                        </p>
-                        <ul className="space-y-1.5 mb-4">
-                          {service.features.map((f) => (
-                            <li key={f} className="flex items-center gap-1.5 text-xs">
-                              <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
-                              <span>{f}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <Link
-                          to={`/services/${service.slug}`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Button variant="outline" size="sm" className="w-full text-xs">
-                            View Details
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </Button>
-                        </Link>
-                      </motion.div>
-                    )}
+                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${service.color} flex items-center justify-center mb-4 shadow-lg ${isActive ? "scale-110" : ""} transition-transform`}>
+                        <Icon className="w-7 h-7 text-white" />
+                      </div>
+                      <h3 className="font-display text-base font-bold mb-1.5 leading-tight">{service.title}</h3>
+                      {isActive && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} transition={{ duration: 0.3 }}>
+                          <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{service.description}</p>
+                          <ul className="space-y-1.5 mb-4">
+                            {service.features.map((f) => (
+                              <li key={f} className="flex items-center gap-1.5 text-xs">
+                                <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                                <span>{f}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          <Link to={`/services/${service.slug}`} onClick={(e) => e.stopPropagation()}>
+                            <Button variant="outline" size="sm" className="w-full text-xs">View Details <ArrowRight className="w-3.5 h-3.5" /></Button>
+                          </Link>
+                        </motion.div>
+                      )}
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </div>
+                );
+              })}
+            </motion.div>
+          </div>
+        )}
 
-        {/* Service dots indicator */}
-        <div className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
+        {/* ── Mobile: flat swipeable card ── */}
+        {isMobile && (
+          <div className="relative z-10 w-full px-6 mt-8">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeIdx}
+                initial={{ opacity: 0, x: 60 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -60 }}
+                transition={{ type: "spring", stiffness: 260, damping: 26 }}
+                className="rounded-2xl border border-primary/30 bg-card/95 backdrop-blur-xl p-5 shadow-xl shadow-primary/5"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${servicesData[activeIdx].color} flex items-center justify-center mb-3 shadow-lg`}>
+                  {(() => { const Ic = servicesData[activeIdx].icon; return <Ic className="w-6 h-6 text-white" />; })()}
+                </div>
+                <h3 className="font-display text-base font-bold mb-1">
+                  {servicesData[activeIdx].title}
+                </h3>
+                <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+                  {servicesData[activeIdx].description}
+                </p>
+                <ul className="space-y-1.5 mb-4">
+                  {servicesData[activeIdx].features.map((f) => (
+                    <li key={f} className="flex items-center gap-1.5 text-xs">
+                      <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link to={`/services/${servicesData[activeIdx].slug}`}>
+                  <Button variant="outline" size="sm" className="w-full text-xs">
+                    View Details <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* prev / next arrows */}
+            <button onClick={goPrev} className="absolute left-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-card/80 border border-border flex items-center justify-center text-muted-foreground z-30" aria-label="Previous">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button onClick={goNext} className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-card/80 border border-border flex items-center justify-center text-muted-foreground z-30" aria-label="Next">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        )}
+
+        {/* Dots indicator */}
+        <div className={`${isMobile ? "mt-6" : "absolute bottom-8 md:bottom-12"} left-1/2 -translate-x-1/2 flex items-center gap-1.5 md:gap-2 z-20`}>
           {servicesData.map((s, i) => (
             <button
               key={s.slug}
-              onClick={() => scrollToService(i)}
+              onClick={() => goTo(i)}
               className={`rounded-full transition-all duration-300 ${
                 i === activeIdx
-                  ? "w-8 h-2 bg-primary"
-                  : "w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
+                  ? "w-7 md:w-8 h-1.5 md:h-2 bg-primary"
+                  : "w-1.5 md:w-2 h-1.5 md:h-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
               }`}
               aria-label={s.title}
             />
           ))}
         </div>
 
-        {/* Active service name label */}
+        {/* Active service name */}
         <motion.div
           key={activeIdx}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute bottom-16 md:bottom-20 left-1/2 -translate-x-1/2 text-center z-20"
+          className={`${isMobile ? "mt-4" : "absolute bottom-16 md:bottom-20"} left-1/2 -translate-x-1/2 text-center z-20`}
         >
-          <span className="text-sm font-semibold gradient-text">
+          <span className="text-xs md:text-sm font-semibold gradient-text">
             {servicesData[activeIdx].title}
           </span>
-          <span className="text-xs text-muted-foreground ml-2">
+          <span className="text-[10px] md:text-xs text-muted-foreground ml-2">
             {activeIdx + 1} / {N}
           </span>
         </motion.div>
