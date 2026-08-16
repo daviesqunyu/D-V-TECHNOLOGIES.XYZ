@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { HeroSection } from "@/components/sections/HeroSection";
+import { ScrollytellingExperience } from "@/components/scrollytelling/ScrollytellingExperience";
 import { ServicesSection } from "@/components/sections/ServicesSection";
 import { TrustedClientsSection } from "@/components/sections/TrustedClientsSection";
 import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
@@ -47,7 +47,7 @@ const Index = () => {
       />
       <Navbar />
       <main id="main-content">
-        <HeroSection />
+        <ScrollytellingExperience />
         <ServicesSection />
         {/* Packages should appear immediately after Services */}
         <PricingSection />
