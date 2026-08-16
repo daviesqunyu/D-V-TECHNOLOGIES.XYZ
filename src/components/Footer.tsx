@@ -1,6 +1,11 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, MessageCircle, Globe } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle, Globe, Send, ShoppingBag, Crown } from "lucide-react";
 import { PaymentOptions } from "@/components/PaymentOptions";
+import {
+  TELEGRAM_CHANNEL_URL,
+  TELEGRAM_PREMIUM_URL,
+  WEBSTORE_URL,
+} from "@/lib/promo";
 
 const WHATSAPP_NUMBER = "254759075816";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
@@ -157,8 +162,35 @@ export function Footer() {
             <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/30">
               <PaymentOptions variant="footer" />
             </div>
+              <a
+                href={TELEGRAM_CHANNEL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Join our Telegram channel"
+                className="w-9 h-9 rounded-lg bg-[#229ED9]/20 flex items-center justify-center hover:bg-[#229ED9]/30 text-[#229ED9] transition-all"
+              >
+                <Send className="w-4 h-4" />
+              </a>
+              <a
+                href={TELEGRAM_PREMIUM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Join our Telegram premium channel"
+                className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"
+              >
+                <Crown className="w-4 h-4" />
+              </a>
+              <a
+                href={WEBSTORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Shop via Telegram webstore"
+                className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"
+              >
+                <ShoppingBag className="w-4 h-4" />
+              </a>
+            </div>
           </div>
-        </div>
 
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
