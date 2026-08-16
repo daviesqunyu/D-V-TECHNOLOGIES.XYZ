@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
-import { Users, Target, Rocket, Shield } from "lucide-react";
+import { Users, Target, Rocket, Shield, Globe } from "lucide-react";
 
 const values = [
   {
@@ -31,26 +31,31 @@ export default function About() {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="About D&V Technologies | Nairobi Tech Company"
-        description="Learn about D&V Technologies, a Nairobi-based engineering team delivering software, AI, cybersecurity, and IT solutions for growth-focused businesses."
+        title="About D&V Technologies | One Team, Every Stack"
+        description="D&V Technologies is an engineering-led team delivering software, AI, cloud, cybersecurity and managed IT for growth-focused businesses worldwide."
         canonicalPath="/about"
       />
       <Navbar />
       <main id="main-content" className="pt-20 lg:pt-24">
-        <section className="py-16 lg:py-24 hero-pattern">
-          <div className="container mx-auto px-4 lg:px-8">
+        <section className="relative py-16 lg:py-24 hero-pattern overflow-hidden">
+          <div className="absolute inset-0 grid-pattern opacity-40" aria-hidden="true" />
+          <div className="container mx-auto px-4 lg:px-8 relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               className="max-w-4xl mx-auto text-center"
             >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-6">
+                <Globe className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-primary">Engineering-led · Global delivery</span>
+              </div>
               <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
                 About <span className="gradient-text">D&V Technologies</span>
               </h1>
               <p className="text-lg text-muted-foreground">
-                We are a Nairobi-based technology company helping businesses scale with reliable
-                software, cloud infrastructure, cybersecurity, and AI automation.
+                We build and run the technology that growing businesses depend on — software, cloud
+                infrastructure, cybersecurity and AI automation, delivered end to end.
               </p>
             </motion.div>
           </div>
@@ -63,7 +68,7 @@ export default function About() {
                 <h2 className="font-display text-3xl font-bold mb-4">Who We Are</h2>
                 <p className="text-muted-foreground mb-4">
                   D&V Technologies delivers end-to-end digital transformation for SMEs, startups,
-                  and enterprise teams across Kenya and East Africa. Our expertise spans modern web
+                  and enterprise teams across East Africa and beyond. Our expertise spans modern web
                   applications, backend systems, AI integration, managed IT support, and security.
                 </p>
                 <p className="text-muted-foreground">
@@ -74,7 +79,7 @@ export default function About() {
               <div className="glass-card rounded-2xl p-7 border border-border">
                 <h2 className="font-display text-3xl font-bold mb-4">Our Vision</h2>
                 <p className="text-muted-foreground mb-4">
-                  To help power Nairobi’s growth into a leading global innovation hub by building
+                  To power global innovation hubs like Nairobi's Silicon Savannah by building
                   technology systems that are reliable, secure, and scalable.
                 </p>
                 <p className="text-muted-foreground">

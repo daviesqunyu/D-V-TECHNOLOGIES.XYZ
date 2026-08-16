@@ -81,7 +81,7 @@ export default function Trade() {
               </h1>
               <p className="text-lg text-muted-foreground mb-8">
                 A marketplace for hardware supply, reselling and partner rollouts — built for
-                Nairobi businesses that want to move faster than their competitors.
+                businesses that want to move faster than their competitors.
               </p>
               <div className="flex flex-wrap gap-3">
                 <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">

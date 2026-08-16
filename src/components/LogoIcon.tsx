@@ -2,11 +2,12 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef, useId } from "react";
 
 /**
- * D&V Technologies mark — a modern geometric monogram.
+ * D&V Technologies mark — a modern geometric monogram with a living, 3D core.
  *
  * Concept: a "portal D" whose counter (the opening) becomes the launching
- * "V" (growth / velocity). A thin conic ring and an orbiting signal dot give
- * it a living, tech feel, while the whole badge tilts in 3D on hover.
+ * "V" (growth / velocity). Concentric rotating rings, a radar sweep, a light
+ * sheen and orbiting signal nodes give it depth and motion, while the whole
+ * badge tilts in 3D on hover with parallax layers.
  */
 export function LogoIcon({ size = 44 }: { size?: number }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -14,9 +15,10 @@ export function LogoIcon({ size = 44 }: { size?: number }) {
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const springConfig = { stiffness: 220, damping: 22 };
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [16, -16]), springConfig);
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-16, 16]), springConfig);
+  const springConfig = { stiffness: 200, damping: 20 };
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [18, -18]), springConfig);
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-18, 18]), springConfig);
+  const tilt = useSpring(useTransform(y, [-0.5, 0.5], [0, 1]), springConfig);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = ref.current?.getBoundingClientRect();
@@ -28,6 +30,9 @@ export function LogoIcon({ size = 44 }: { size?: number }) {
     x.set(0);
     y.set(0);
   };
+
+  const ringGrad =
+    "conic-gradient(from 0deg, #00e5ff 0%, #7c3aed 25%, #ff6b00 50%, #7c3aed 75%, #00e5ff 100%)";
 
   return (
     <motion.div
@@ -45,42 +50,57 @@ export function LogoIcon({ size = 44 }: { size?: number }) {
       className="relative flex items-center justify-center cursor-pointer select-none"
       aria-label="D&V Technologies"
     >
-      {/* Rotating conic ring */}
+      {/* Outer rotating conic ring */}
       <motion.div
         animate={{ rotate: 360 }}
-        transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-        style={{ width: size, height: size }}
-        className="absolute inset-0 rounded-[14px]"
+        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+        style={{ translateZ: -16 }}
+        className="absolute inset-0 rounded-[16px]"
       >
         <div
-          className="w-full h-full rounded-[14px]"
+          className="w-full h-full rounded-[16px] p-[1.5px]"
           style={{
-            background: "conic-gradient(from 0deg, #00e5ff 0%, #7c3aed 30%, #ff6b00 60%, #00e5ff 100%)",
-            padding: "1.5px",
+            background: ringGrad,
+            boxShadow: "0 0 18px rgba(0,229,255,0.25), 0 0 36px rgba(124,58,237,0.18)",
           }}
         >
-          <div className="w-full h-full rounded-[12.5px] bg-[#050510]" />
+          <div className="w-full h-full rounded-[14.5px] bg-[#050510]" />
         </div>
+      </motion.div>
+
+      {/* Counter-rotating dashed orbit ring */}
+      <motion.div
+        animate={{ rotate: -360 }}
+        transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
+        className="absolute inset-0 rounded-[16px] pointer-events-none"
+        style={{ translateZ: -8 }}
+      >
+        <div
+          className="w-full h-full rounded-[16px]"
+          style={{ border: "1px dashed rgba(0,229,255,0.35)" }}
+        />
       </motion.div>
 
       {/* Ambient glow */}
       <motion.div
-        animate={{ opacity: [0.14, 0.4, 0.14], scale: [0.92, 1.06, 0.92] }}
-        transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute rounded-[14px] blur-xl pointer-events-none"
+        animate={{ opacity: [0.15, 0.45, 0.15], scale: [0.94, 1.08, 0.94] }}
+        transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute rounded-[16px] blur-xl pointer-events-none"
         style={{
-          inset: -6,
-          background: "radial-gradient(ellipse, rgba(0,229,255,0.55) 0%, rgba(124,58,237,0.35) 55%, transparent 100%)",
+          inset: -8,
+          translateZ: -28,
+          background:
+            "radial-gradient(ellipse, rgba(0,229,255,0.55) 0%, rgba(124,58,237,0.4) 50%, rgba(255,107,0,0.25) 100%)",
         }}
       />
 
-      {/* Face */}
-      <div
-        className="absolute rounded-[12px] overflow-hidden"
-        style={{ inset: 2, background: "#050510" }}
+      {/* Glass face */}
+      <motion.div
+        className="absolute rounded-[14px] overflow-hidden"
+        style={{ inset: 2, background: "#050510", translateZ: 0 }}
       >
         {/* faint grid */}
-        <svg width="100%" height="100%" className="absolute inset-0 opacity-[0.12]">
+        <svg width="100%" height="100%" className="absolute inset-0 opacity-[0.14]">
           <defs>
             <pattern id={`${uid}-grid`} width="8" height="8" patternUnits="userSpaceOnUse">
               <path d="M 8 0 L 0 0 0 8" fill="none" stroke="#00e5ff" strokeWidth="0.4" />
@@ -88,21 +108,53 @@ export function LogoIcon({ size = 44 }: { size?: number }) {
           </defs>
           <rect width="100%" height="100%" fill={`url(#${uid}-grid)`} />
         </svg>
-        {/* centre bloom */}
-        <div
-          className="absolute inset-0"
+
+        {/* Radar sweep */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 4.5, repeat: Infinity, ease: "linear" }}
+          className="absolute -inset-px pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at 38% 60%, rgba(0,229,255,0.12) 0%, transparent 62%)",
+            background:
+              "conic-gradient(from 0deg, transparent 0deg, rgba(0,229,255,0.12) 55deg, transparent 110deg)",
           }}
         />
-      </div>
+
+        {/* Light sheen sweep */}
+        <motion.div
+          animate={{ x: ["-130%", "260%"] }}
+          transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.4 }}
+          className="absolute top-0 bottom-0 w-1/3 pointer-events-none"
+          style={{
+            rotate: 12,
+            background:
+              "linear-gradient(100deg, transparent, rgba(255,255,255,0.12), transparent)",
+          }}
+        />
+
+        {/* centre bloom */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at 38% 60%, rgba(0,229,255,0.14) 0%, transparent 62%)",
+          }}
+        />
+      </motion.div>
 
       {/* Monogram */}
       <motion.div
-        animate={{ filter: ["drop-shadow(0 0 3px rgba(0,229,255,0.6))", "drop-shadow(0 0 9px rgba(124,58,237,0.7))", "drop-shadow(0 0 3px rgba(0,229,255,0.6))"] }}
+        animate={{
+          filter: [
+            "drop-shadow(0 0 3px rgba(0,229,255,0.6))",
+            "drop-shadow(0 0 10px rgba(124,58,237,0.75))",
+            "drop-shadow(0 0 3px rgba(0,229,255,0.6))",
+          ],
+          scale: [1, 1.05, 1],
+        }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         className="relative z-10"
-        style={{ width: size * 0.8, height: size * 0.8 }}
+        style={{ width: size * 0.8, height: size * 0.8, translateZ: 20 }}
       >
         <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
           <defs>
@@ -180,8 +232,12 @@ export function LogoIcon({ size = 44 }: { size?: number }) {
 
           {/* signal nodes */}
           {([
-            [9, 6, "#00e5ff"], [9, 46, "#00e5ff"], [40, 26, "#7c3aed"],
-            [13, 16, "#7c3aed"], [26, 41, "#ff6b00"], [38, 13, "#ff6b00"],
+            [9, 6, "#00e5ff"],
+            [9, 46, "#00e5ff"],
+            [40, 26, "#7c3aed"],
+            [13, 16, "#7c3aed"],
+            [26, 41, "#ff6b00"],
+            [38, 13, "#ff6b00"],
           ] as [number, number, string][]).map(([cx, cy, fill], i) => (
             <g key={i} filter={`url(#${uid}-glow)`}>
               <circle cx={cx} cy={cy} r="2.6" fill={fill} opacity="0.18" />
@@ -191,18 +247,31 @@ export function LogoIcon({ size = 44 }: { size?: number }) {
         </svg>
       </motion.div>
 
-      {/* Orbiting signal dot */}
+      {/* Orbiting signal dots */}
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
         className="absolute inset-0 z-20 pointer-events-none"
-        style={{ transformStyle: "preserve-3d" }}
+        style={{ transformStyle: "preserve-3d", translateZ: 30 }}
       >
         <motion.span
           animate={{ opacity: [1, 0.35, 1], scale: [1, 0.7, 1] }}
           transition={{ duration: 1.6, repeat: Infinity }}
           className="absolute -top-1 left-1/2 w-1.5 h-1.5 rounded-full bg-[#00ff88]"
           style={{ boxShadow: "0 0 8px #00ff88", marginLeft: -3, marginTop: -3 }}
+        />
+      </motion.div>
+      <motion.div
+        animate={{ rotate: -360 }}
+        transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+        className="absolute inset-0 z-20 pointer-events-none"
+        style={{ transformStyle: "preserve-3d", translateZ: 34 }}
+      >
+        <motion.span
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.7, 1, 0.7] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute -bottom-1 left-1/2 w-1.5 h-1.5 rounded-full bg-[#ff6b00]"
+          style={{ boxShadow: "0 0 8px #ff6b00", marginLeft: -3, marginBottom: -3 }}
         />
       </motion.div>
     </motion.div>

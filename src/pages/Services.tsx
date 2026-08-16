@@ -7,6 +7,7 @@ import {
   Headphones,
   ArrowRight,
   CheckCircle,
+  Briefcase,
 } from "lucide-react";
 import { PricingSection } from "@/components/sections/PricingSection";
 import { SEOHead } from "@/components/SEOHead";
@@ -23,20 +24,25 @@ const Services = () => {
       <Navbar />
       <main id="main-content" className="pt-20 lg:pt-24">
         {/* Hero */}
-        <section className="py-16 lg:py-24 hero-pattern">
-          <div className="container mx-auto px-4 lg:px-8">
+        <section className="relative py-16 lg:py-24 hero-pattern overflow-hidden">
+          <div className="absolute inset-0 grid-pattern opacity-40" aria-hidden="true" />
+          <div className="container mx-auto px-4 lg:px-8 relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="max-w-3xl mx-auto text-center"
             >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-6">
+                <Briefcase className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-primary">What we do</span>
+              </div>
               <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
                 Our <span className="gradient-text">Services</span>
               </h1>
               <p className="text-lg text-muted-foreground">
-                12 comprehensive IT, hardware, software, data, and AI solutions designed for
-                modern businesses in Kenya and East Africa.
+                Twelve practice areas, one accountable team — IT, hardware, software, data and AI,
+                delivered end to end, anywhere in the world.
               </p>
             </motion.div>
           </div>
@@ -55,15 +61,15 @@ const Services = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: i * 0.05 }}
-                    className="glass-card rounded-2xl p-6 hover:border-primary/40 transition-all group"
+                    className="glass-card rounded-2xl p-6 hover:border-primary/40 transition-all group hover:-translate-y-1.5 hover:shadow-xl"
                   >
                     <Link
                       to={`/services/${service.slug}`}
                       className="block"
                     >
                       <div className="flex items-start gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                          <Icon className="w-6 h-6 text-primary-foreground" />
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${service.color} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg`}>
+                          <Icon className="w-6 h-6 text-white" />
                         </div>
                         <div>
                           <h3 className="font-display text-lg font-semibold mb-1">
@@ -82,8 +88,9 @@ const Services = () => {
                           </li>
                         ))}
                       </ul>
-                      <p className="mt-4 pl-16 text-sm font-medium text-primary group-hover:underline">
-                        View details →
+                      <p className="mt-4 pl-16 inline-flex items-center gap-1.5 text-sm font-medium text-primary group-hover:gap-2.5 transition-all">
+                        View details
+                        <ArrowRight className="w-4 h-4" />
                       </p>
                     </Link>
                   </motion.div>

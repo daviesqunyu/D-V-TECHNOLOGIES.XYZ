@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Bot, Home, Briefcase, Phone, Users, Target, Zap, MessageSquare, HelpCircle, ArrowRight, DollarSign, Mail, Info, FolderKanban, Newspaper, Scale, FileText, ShoppingBag, ArrowLeftRight, Wallet, ChevronDown } from "lucide-react";
+import { Menu, X, Bot, Home, Briefcase, Phone, Users, Target, Zap, MessageSquare, HelpCircle, ArrowRight, DollarSign, Mail, Info, FolderKanban, Newspaper, Scale, FileText, ShoppingBag, ArrowLeftRight, Wallet, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LogoIcon } from "@/components/LogoIcon";
@@ -130,97 +130,127 @@ export function Navbar() {
           </div>
 
           {/* CTA Button & Theme Toggle */}
-          <div className="hidden lg:flex items-center gap-1.5">
-            <ThemeToggle />
-            <Link
-              to="/pay"
-              className="relative p-2.5 rounded-lg hover:bg-muted transition-colors"
-              aria-label={`Cart with ${count} items`}
-              title="View cart & checkout"
-            >
-              <Wallet className="w-5 h-5 text-muted-foreground" />
-              {count > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-accent to-primary text-white text-[10px] font-bold flex items-center justify-center shadow-lg">
-                  {count > 99 ? "99+" : count}
-                </span>
-              )}
-            </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-lg" aria-label="Open app menu">
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 glass-card border-border">
-                <DropdownMenuLabel className="text-xs uppercase tracking-wider text-muted-foreground">
-                  App
-                </DropdownMenuLabel>
-                {desktopMenuItems.slice(0, 5).map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <DropdownMenuItem key={item.label} asChild>
-                      <Link to={item.to} className="flex items-center gap-3 cursor-pointer">
-                        <Icon className="w-4 h-4 text-primary" />
-                        {item.label}
+          <div className="hidden lg:flex items-center gap-3">
+            {/* Live badge */}
+            <span className="hidden xl:flex items-center gap-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+              <span className="relative flex w-2 h-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full w-2 h-2 bg-emerald-500" />
+              </span>
+              24/7 Live
+            </span>
+
+            {/* Command dock */}
+            <div className="relative flex items-center gap-1 rounded-2xl p-1.5 border border-border/60 bg-card/60 backdrop-blur-md shadow-sm">
+              <Link
+                to="/pay"
+                className="relative p-2.5 rounded-xl hover:bg-muted hover:text-primary transition-colors"
+                aria-label={`Cart with ${count} items`}
+                title="View cart & checkout"
+              >
+                <Wallet className="w-5 h-5 text-muted-foreground" />
+                {count > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-accent to-primary text-white text-[10px] font-bold flex items-center justify-center shadow-lg">
+                    {count > 99 ? "99+" : count}
+                  </span>
+                )}
+              </Link>
+              <span className="w-px h-6 bg-border/70" />
+              <ThemeToggle />
+              <span className="w-px h-6 bg-border/70" />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-xl w-10 h-10"
+                    aria-label="Open app menu"
+                  >
+                    <LayoutGrid className="w-5 h-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64 glass-card border-border">
+                  <DropdownMenuLabel className="text-xs uppercase tracking-wider text-muted-foreground">
+                    App
+                  </DropdownMenuLabel>
+                  {desktopMenuItems.slice(0, 5).map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <DropdownMenuItem key={item.label} asChild>
+                        <Link to={item.to} className="flex items-center gap-3 cursor-pointer">
+                          <Icon className="w-4 h-4 text-primary" />
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Company
+                  </DropdownMenuLabel>
+                  {desktopMenuItems.slice(5).map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <DropdownMenuItem key={item.label} asChild>
+                        <Link to={item.to} className="flex items-center gap-3 cursor-pointer">
+                          <Icon className="w-4 h-4 text-muted-foreground" />
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  <DropdownMenuSeparator />
+                  <div className="grid grid-cols-2 gap-1 p-1">
+                    <DropdownMenuItem asChild>
+                      <Link to="/privacy" className="cursor-pointer text-sm text-muted-foreground">
+                        Privacy
                       </Link>
                     </DropdownMenuItem>
-                  );
-                })}
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Company
-                </DropdownMenuLabel>
-                {desktopMenuItems.slice(5).map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <DropdownMenuItem key={item.label} asChild>
-                      <Link to={item.to} className="flex items-center gap-3 cursor-pointer">
-                        <Icon className="w-4 h-4 text-muted-foreground" />
-                        {item.label}
+                    <DropdownMenuItem asChild>
+                      <Link to="/terms" className="cursor-pointer text-sm text-muted-foreground">
+                        Terms
                       </Link>
                     </DropdownMenuItem>
-                  );
-                })}
-                <DropdownMenuSeparator />
-                <div className="grid grid-cols-2 gap-1 p-1">
-                  <DropdownMenuItem asChild>
-                    <Link to="/privacy" className="cursor-pointer text-sm text-muted-foreground">
-                      Privacy
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/terms" className="cursor-pointer text-sm text-muted-foreground">
-                      Terms
-                    </Link>
-                  </DropdownMenuItem>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
             <Link to="/contact">
-              <Button variant="hero" size="default">
-                Get Started
+              <Button variant="hero" size="default" className="group relative overflow-hidden px-5">
+                <span className="relative z-10 flex items-center gap-2">
+                  Get Started
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12"
+                />
               </Button>
             </Link>
           </div>
 
           {/* Mobile Theme Toggle & Menu Button */}
           <div className="lg:hidden flex items-center gap-2">
-            <Link
-              to="/pay"
-              className="relative p-2 rounded-lg hover:bg-muted transition-colors"
-              aria-label={`Cart with ${count} items`}
-            >
-              <Wallet className="w-5 h-5 text-muted-foreground" />
-              {count > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-0.5 rounded-full bg-gradient-to-r from-accent to-primary text-white text-[9px] font-bold flex items-center justify-center shadow-lg">
-                  {count > 99 ? "99+" : count}
-                </span>
-              )}
-            </Link>
-            <ThemeToggle />
+            <div className="relative flex items-center gap-1 rounded-2xl p-1.5 border border-border/60 bg-card/60 backdrop-blur-md shadow-sm">
+              <Link
+                to="/pay"
+                className="relative p-2 rounded-xl hover:bg-muted hover:text-primary transition-colors"
+                aria-label={`Cart with ${count} items`}
+              >
+                <Wallet className="w-5 h-5 text-muted-foreground" />
+                {count > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-0.5 rounded-full bg-gradient-to-r from-accent to-primary text-white text-[9px] font-bold flex items-center justify-center shadow-lg">
+                    {count > 99 ? "99+" : count}
+                  </span>
+                )}
+              </Link>
+              <span className="w-px h-6 bg-border/70" />
+              <ThemeToggle />
+            </div>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              className="p-2.5 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md shadow-sm text-foreground hover:border-primary/40 transition-colors"
               aria-label={isOpen ? "Close mobile menu" : "Open mobile menu"}
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

@@ -14,6 +14,13 @@ import {
   Laptop,
   HardDrive,
   Router,
+  Bot,
+  Smartphone,
+  CreditCard,
+  Bitcoin,
+  Send,
+  MessageCircle,
+  Zap,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -28,6 +35,17 @@ const FLOATING_CHIPS = [
   { icon: Laptop, label: "Repairs", bottom: "34%", left: "4%", grad: "from-slate-500 to-slate-700", d: 1.0, delay: 1.0 },
   { icon: Router, label: "Wi-Fi 6", top: "12%", right: "28%", grad: "from-teal-500 to-emerald-500", d: 1.4, delay: 1.3 },
   { icon: HardDrive, label: "Backups", bottom: "16%", right: "26%", grad: "from-amber-500 to-orange-600", d: 0.7, delay: 1.6 },
+] as const;
+
+const LIVE_TOOLS = [
+  { icon: Smartphone, label: "M-Pesa", grad: "from-green-500 to-emerald-500" },
+  { icon: CreditCard, label: "Paystack Cards", grad: "from-primary to-cyan-500" },
+  { icon: Bitcoin, label: "Bitcoin", grad: "from-orange-500 to-amber-500" },
+  { icon: Send, label: "Telegram", grad: "from-sky-500 to-blue-500" },
+  { icon: MessageCircle, label: "WhatsApp", grad: "from-emerald-500 to-teal-500" },
+  { icon: Bot, label: "DIVA AI", grad: "from-violet-500 to-fuchsia-500" },
+  { icon: Shield, label: "Security", grad: "from-red-500 to-orange-500" },
+  { icon: Cloud, label: "Cloud Backups", grad: "from-blue-500 to-cyan-400" },
 ] as const;
 
 function FloatingChip({
@@ -126,8 +144,11 @@ export function ScrollyHero() {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-8"
           >
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Silicon Savannah 2030 Vision</span>
+            <span className="relative flex w-2 h-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full w-2 h-2 bg-emerald-500" />
+            </span>
+            <span className="text-sm font-medium text-primary">Global Tech Partner · Live 24/7</span>
           </motion.div>
 
           <motion.h1
@@ -136,26 +157,35 @@ export function ScrollyHero() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6"
           >
-            Nairobi's <span className="gradient-text">Next-Gen</span>
+            Future-ready technology for{" "}
+            <span className="gradient-text">fast-moving</span>
             <br />
-            Tech Company
+            businesses
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8"
+            className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-3"
           >
-            IT, Hardware &amp; Software Solutions for Modern Businesses. We deliver innovative ICT
-            solutions to help Nairobi and African businesses grow, adapt, and succeed.
+            We design, build and run the technology that growing businesses depend on — IT support,
+            software, networks, cloud, AI and security, delivered end to end.
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="text-base md:text-lg text-muted-foreground/90 max-w-3xl mx-auto mb-8"
+          >
+            One team, every stack. From a single laptop to a full enterprise rollout — anywhere in the world.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
           >
             <Link to="/contact">
               <Button variant="hero" size="xl" className="group">
@@ -179,9 +209,9 @@ export function ScrollyHero() {
           >
             {[
               { icon: Users, value: "100+", label: "Businesses Served" },
-              { icon: Globe, value: "Kenya", label: "& East Africa" },
-              { icon: Shield, value: "24/7", label: "Support" },
-              { icon: Sparkles, value: "2030", label: "Vision" },
+              { icon: Globe, value: "Global", label: "Delivery & Support" },
+              { icon: Shield, value: "24/7", label: "Monitoring & Response" },
+              { icon: Bot, value: "20+", label: "Products & Tools" },
             ].map((stat, i) => (
               <div
                 key={i}
@@ -194,6 +224,35 @@ export function ScrollyHero() {
                 <p className="text-xs text-muted-foreground">{stat.label}</p>
               </div>
             ))}
+          </motion.div>
+
+          {/* Live tools marquee */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.55 }}
+            className="relative mt-12 overflow-hidden"
+          >
+            <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-background/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background/80 to-transparent z-10 pointer-events-none" />
+            <motion.div
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+              className="flex gap-3 w-max"
+            >
+              {[...LIVE_TOOLS, ...LIVE_TOOLS].map((tool, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2.5 rounded-full border border-border/60 bg-card/80 backdrop-blur px-4 py-2 shadow-lg"
+                >
+                  <span className={`w-7 h-7 rounded-lg bg-gradient-to-br ${tool.grad} flex items-center justify-center`}>
+                    <tool.icon className="w-3.5 h-3.5 text-white" />
+                  </span>
+                  <span className="text-xs font-semibold whitespace-nowrap">{tool.label}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
+              ))}
+            </motion.div>
           </motion.div>
         </div>
       </motion.div>

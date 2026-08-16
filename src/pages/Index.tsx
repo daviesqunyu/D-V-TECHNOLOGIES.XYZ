@@ -42,8 +42,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="D&V Technologies | Nairobi Tech Company"
-        description="Professional software, AI, cybersecurity, and IT solutions for modern businesses in Nairobi and beyond."
+        title="D&V Technologies | Future-Ready IT, AI & Digital Solutions"
+        description="Professional software, AI, cybersecurity, IT and hardware solutions for modern businesses — delivered end to end, anywhere in the world."
         canonicalPath="/"
       />
       <Navbar />
