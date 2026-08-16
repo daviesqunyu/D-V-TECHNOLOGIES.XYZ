@@ -1,5 +1,12 @@
 import { useRef, useState } from "react";
-import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  useMotionValueEvent,
+  type MotionValue,
+} from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -395,6 +402,113 @@ function FramePanel({ frame }: { frame: Frame }) {
 
 /* --------------------------------- Reel --------------------------------- */
 
+function ReelFrame({ frame, scrollYProgress }: { frame: Frame; scrollYProgress: MotionValue<number> }) {
+  const Icon = frame.icon;
+  const parallax = useTransform(scrollYProgress, [0, 1], [48, -48]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="absolute inset-0 z-10 pointer-events-none"
+      aria-label={frame.badge}
+    >
+      {/* frame orbs */}
+      <div className={`absolute -top-20 -right-20 w-[28rem] h-[28rem] rounded-full blur-3xl opacity-50 ${frame.orb}`} aria-hidden="true" />
+      <div className={`absolute -bottom-24 -left-24 w-96 h-96 rounded-full blur-3xl opacity-30 ${frame.orb}`} aria-hidden="true" />
+
+      {/* Static backdrop with a gentle scroll-driven parallax (GPU transform only) */}
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+        <motion.div style={{ y: parallax }} className="absolute -inset-y-[10%] inset-x-0 will-change-transform">
+          <img
+            src={frame.image}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+        <div className="absolute inset-0 bg-background/55 dark:bg-black/55" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
+        <div className="absolute inset-0 bg-primary/5 mix-blend-overlay" />
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background to-transparent" />
+      </div>
+
+      <div className="container relative mx-auto px-4 lg:px-8 h-full">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center h-full pt-24 pb-20">
+          {/* Copy */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border mb-6">
+              <Icon className={`w-4 h-4 ${frame.accentText}`} />
+              <span className={`text-sm font-medium ${frame.accentText}`}>{frame.badge}</span>
+            </div>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-5">
+              {frame.titleTop}{" "}
+              <span className={`gradient-text ${frame.accentText}`}>{frame.titleAccent}</span>
+              <br />
+              {frame.titleBottom}
+            </h2>
+            <p className="text-muted-foreground text-lg mb-6 max-w-xl leading-relaxed">
+              {frame.description}
+            </p>
+            <ul className="space-y-2.5 mb-8">
+              {frame.bullets.map((b) => (
+                <li key={b} className="flex items-center gap-3 text-sm font-medium">
+                  <span className={`w-5 h-5 rounded-full bg-gradient-to-br ${frame.orb} flex items-center justify-center`}>
+                    <Check className={`w-3 h-3 ${frame.accentText}`} />
+                  </span>
+                  {b}
+                </li>
+              ))}
+            </ul>
+            <Link to={frame.cta.to} className="pointer-events-auto inline-block">
+              <Button variant="hero" size="lg" className="group">
+                {frame.cta.label}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+          </motion.div>
+
+          {/* Live panel */}
+          <div className="hidden sm:block">
+            <motion.div
+              initial={{ opacity: 0, y: 28, rotateY: -8 }}
+              animate={{ opacity: 1, y: 0, rotateY: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.18 }}
+              className="relative rounded-3xl p-[1px] bg-gradient-to-br from-border via-primary/40 to-border shadow-2xl"
+              style={{ perspective: 1200 }}
+            >
+              <div className="rounded-[calc(1.5rem-1px)] bg-background/90 backdrop-blur-xl overflow-hidden">
+                {/* window chrome */}
+                <div className="flex items-center gap-1.5 px-4 pt-4 pb-2.5 border-b border-border/60">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
+                  <span className="ml-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    dvtechnologies.xyz
+                  </span>
+                </div>
+                <div className="p-6 lg:p-8">
+                  <FramePanel frame={frame} />
+                </div>
+              </div>
+              {/* corner accent */}
+              <div className={`absolute -top-3 -right-3 w-16 h-16 rounded-2xl bg-gradient-to-br ${frame.orb} blur-xl`} aria-hidden="true" />
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export function StoryReel() {
   const ref = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
@@ -404,7 +518,7 @@ export function StoryReel() {
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     const idx = Math.min(FRAMES.length - 1, Math.max(0, Math.floor(v * FRAMES.length)));
-    setActive(idx);
+    setActive((prev) => (prev === idx ? prev : idx));
   });
 
   return (
@@ -432,113 +546,10 @@ export function StoryReel() {
           />
         </div>
 
-        {/* Frames */}
-        {FRAMES.map((frame, i) => {
-          const isActive = i === active;
-          const Icon = frame.icon;
-          return (
-            <motion.div
-              key={frame.key}
-              initial={false}
-              animate={{
-                opacity: isActive ? 1 : 0,
-                scale: isActive ? 1 : 1.04,
-                filter: isActive ? "blur(0px)" : "blur(6px)",
-              }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute inset-0 z-10 pointer-events-none"
-              aria-hidden={!isActive}
-            >
-              {/* frame orb */}
-              <div className={`absolute -top-20 -right-20 w-[28rem] h-[28rem] rounded-full blur-3xl opacity-50 ${frame.orb}`} />
-              <div className={`absolute -bottom-24 -left-24 w-96 h-96 rounded-full blur-3xl opacity-30 ${frame.orb}`} />
-
-              {/* Cinematic background image (slow Ken Burns zoom while active) */}
-              <div className="absolute inset-0" aria-hidden="true">
-                <motion.img
-                  src={frame.image}
-                  alt=""
-                  loading="lazy"
-                  animate={{ scale: isActive ? 1.14 : 1.05 }}
-                  transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-background/55 dark:bg-black/55" />
-                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
-                <div className="absolute inset-0 bg-primary/5 mix-blend-overlay" aria-hidden="true" />
-                <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background to-transparent" />
-              </div>
-
-              <div className="container mx-auto px-4 lg:px-8 h-full">
-                <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center h-full pt-24 pb-20">
-                  {/* Copy */}
-                  <motion.div
-                    initial={false}
-                    animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 24 }}
-                    transition={{ duration: 0.6, delay: isActive ? 0.05 : 0 }}
-                  >
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border mb-6">
-                      <Icon className={`w-4 h-4 ${frame.accentText}`} />
-                      <span className={`text-sm font-medium ${frame.accentText}`}>{frame.badge}</span>
-                    </div>
-                    <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-5">
-                      {frame.titleTop}{" "}
-                      <span className={`gradient-text ${frame.accentText}`}>{frame.titleAccent}</span>
-                      <br />
-                      {frame.titleBottom}
-                    </h2>
-                    <p className="text-muted-foreground text-lg mb-6 max-w-xl leading-relaxed">
-                      {frame.description}
-                    </p>
-                    <ul className="space-y-2.5 mb-8">
-                      {frame.bullets.map((b) => (
-                        <li key={b} className="flex items-center gap-3 text-sm font-medium">
-                          <span className={`w-5 h-5 rounded-full bg-gradient-to-br ${frame.orb} flex items-center justify-center`}>
-                            <Check className={`w-3 h-3 ${frame.accentText}`} />
-                          </span>
-                          {b}
-                        </li>
-                      ))}
-                    </ul>
-                    <Link to={frame.cta.to} className="pointer-events-auto inline-block">
-                      <Button variant="hero" size="lg" className="group">
-                        {frame.cta.label}
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
-                  </motion.div>
-
-                  {/* Live panel */}
-                  <div className="hidden sm:block">
-                    <motion.div
-                      animate={{ rotateY: isActive ? 0 : -8, rotateX: isActive ? 0 : 6 }}
-                      transition={{ duration: 0.6 }}
-                      className="relative rounded-3xl p-[1px] bg-gradient-to-br from-border via-primary/40 to-border shadow-2xl"
-                      style={{ perspective: 1200 }}
-                    >
-                      <div className="rounded-[calc(1.5rem-1px)] bg-background/90 backdrop-blur-xl overflow-hidden">
-                        {/* window chrome */}
-                        <div className="flex items-center gap-1.5 px-4 pt-4 pb-2.5 border-b border-border/60">
-                          <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
-                          <span className="ml-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                            dvtechnologies.xyz
-                          </span>
-                        </div>
-                        <div className="p-6 lg:p-8">
-                          <FramePanel frame={frame} />
-                        </div>
-                      </div>
-                      {/* corner accent */}
-                      <div className={`absolute -top-3 -right-3 w-16 h-16 rounded-2xl bg-gradient-to-br ${frame.orb} blur-xl`} />
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
+        {/* Active frame — only one is mounted at a time (no blur, no Ken Burns) */}
+        <AnimatePresence>
+          <ReelFrame key={FRAMES[active].key} frame={FRAMES[active]} scrollYProgress={scrollYProgress} />
+        </AnimatePresence>
 
         {/* Frame counter */}
         <div className="absolute bottom-8 right-4 lg:right-8 z-20 flex items-center gap-3">

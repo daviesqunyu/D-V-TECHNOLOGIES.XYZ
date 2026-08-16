@@ -27,14 +27,14 @@ import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const FLOATING_CHIPS = [
-  { icon: Wifi, label: "Networks", top: "18%", left: "7%", grad: "from-cyan-500 to-blue-500", d: 0.9, delay: 0 },
-  { icon: Shield, label: "Security", top: "22%", right: "10%", grad: "from-emerald-500 to-teal-500", d: 1.1, delay: 0.4 },
-  { icon: Cloud, label: "Cloud", bottom: "26%", left: "11%", grad: "from-sky-500 to-indigo-500", d: 1.3, delay: 0.8 },
-  { icon: Brain, label: "AI & DIVA", top: "60%", right: "13%", grad: "from-fuchsia-500 to-violet-600", d: 0.8, delay: 0.2 },
-  { icon: Cpu, label: "Hardware", top: "42%", right: "5%", grad: "from-orange-500 to-rose-500", d: 1.2, delay: 0.6 },
-  { icon: Laptop, label: "Repairs", bottom: "32%", left: "5%", grad: "from-slate-500 to-slate-700", d: 1.0, delay: 1.0 },
-  { icon: Router, label: "Wi-Fi 6", top: "12%", right: "30%", grad: "from-teal-500 to-emerald-500", d: 1.4, delay: 1.3 },
-  { icon: HardDrive, label: "Backups", bottom: "15%", right: "28%", grad: "from-amber-500 to-orange-600", d: 0.7, delay: 1.6 },
+  { icon: Wifi, label: "Networks", top: "18%", left: "7%", grad: "from-cyan-500 to-blue-500", d: 0.9, delay: 0, tilt: "-rotate-3" },
+  { icon: Shield, label: "Security", top: "22%", right: "10%", grad: "from-emerald-500 to-teal-500", d: 1.1, delay: 0.4, tilt: "rotate-2" },
+  { icon: Cloud, label: "Cloud", bottom: "26%", left: "11%", grad: "from-sky-500 to-indigo-500", d: 1.3, delay: 0.8, tilt: "rotate-3" },
+  { icon: Brain, label: "AI & DIVA", top: "60%", right: "13%", grad: "from-fuchsia-500 to-violet-600", d: 0.8, delay: 0.2, tilt: "-rotate-2" },
+  { icon: Cpu, label: "Hardware", top: "42%", right: "5%", grad: "from-orange-500 to-rose-500", d: 1.2, delay: 0.6, tilt: "rotate-2" },
+  { icon: Laptop, label: "Repairs", bottom: "32%", left: "5%", grad: "from-slate-500 to-slate-700", d: 1.0, delay: 1.0, tilt: "-rotate-2" },
+  { icon: Router, label: "Wi-Fi 6", top: "12%", right: "30%", grad: "from-teal-500 to-emerald-500", d: 1.4, delay: 1.3, tilt: "rotate-3" },
+  { icon: HardDrive, label: "Backups", bottom: "15%", right: "28%", grad: "from-amber-500 to-orange-600", d: 0.7, delay: 1.6, tilt: "-rotate-3" },
 ] as const;
 
 const LIVE_TOOLS = [
@@ -58,33 +58,27 @@ const STATS = [
 function FloatingChip({
   chip,
   progress,
-  tint,
 }: {
   chip: (typeof FLOATING_CHIPS)[number];
   progress: MotionValue<number>;
-  tint: MotionValue<number>;
 }) {
   const Icon = chip.icon;
   const parallax = useTransform(progress, [0, 1], [0, -140 * chip.d]);
-  const rotateX = useTransform(tint, [0, 1], [-6, 8]);
-  const rotateY = useTransform(tint, [0, 1], [8, -10]);
   const { top, left, right, bottom } = chip;
   return (
     <motion.div
       style={{ top, left, right, bottom, y: parallax }}
-      className="absolute z-[3] hidden xl:block [transform-style:preserve-3d] pointer-events-none"
+      className={`absolute z-[3] hidden xl:block pointer-events-none ${chip.tilt}`}
     >
-      <motion.div
-        style={{ rotateX, rotateY }}
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 5 + chip.delay, repeat: Infinity, ease: "easeInOut", delay: chip.delay }}
-        className="flex items-center gap-2 rounded-xl border border-border/50 bg-card/70 backdrop-blur-md px-3 py-2 shadow-lg shadow-black/10"
+      <div
+        className="float-sm flex items-center gap-2 rounded-xl border border-border/50 bg-card/70 backdrop-blur-md px-3 py-2 shadow-lg shadow-black/10"
+        style={{ animationDelay: `${chip.delay}s` }}
       >
         <span className={`w-8 h-8 rounded-lg bg-gradient-to-br ${chip.grad} flex items-center justify-center shadow-md`}>
           <Icon className="w-4 h-4 text-white" />
         </span>
         <span className="text-xs font-semibold pr-1">{chip.label}</span>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
@@ -93,11 +87,9 @@ export function ScrollyHero() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
 
-  const tint = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.22]);
-  const blur = useTransform(scrollYProgress, [0, 0.6, 1], ["blur(0px)", "blur(3px)", "blur(12px)"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 1, 0]);
-  const y = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.18]);
+  const opacity = useTransform(scrollYProgress, [0, 0.75, 1], [1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, -90]);
 
   return (
     <section
@@ -105,40 +97,31 @@ export function ScrollyHero() {
       ref={ref}
       className="relative h-screen min-h-[640px] overflow-hidden scroll-mt-0 flex items-center justify-center"
     >
-      {/* Background image */}
+      {/* Background image (transform-only scroll zoom) */}
       <motion.div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
         style={{ backgroundImage: `url(${heroBg})`, scale }}
       />
-      <motion.div
-        className="absolute inset-0 bg-background/70 z-[1]"
-        style={{ opacity }}
-        aria-hidden="true"
-      />
 
-      {/* Ambient orbs */}
-      <div className="absolute inset-0 pointer-events-none hero-pattern z-[2]" aria-hidden="true">
-        <motion.div
-          animate={{ scale: [1, 1.25, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 10, repeat: Infinity }}
-          className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full blur-3xl"
-        />
+      {/* Layered tint + vignette for legibility */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/65 to-background/90 z-[1]" aria-hidden="true" />
+      <div className="absolute inset-0 hero-pattern opacity-60 z-[1]" aria-hidden="true" />
+
+      {/* Ambient orbs (CSS opacity pulse — no JS loop) */}
+      <div className="absolute inset-0 pointer-events-none z-[2]" aria-hidden="true">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/15 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/15 rounded-full blur-3xl animate-pulse [animation-delay:2s]" />
       </div>
 
-      {/* Floating 3D tech chips */}
+      {/* Floating 3D tech chips (CSS float + scroll parallax only) */}
       <div className="absolute inset-0 z-[3] pointer-events-none" aria-hidden="true">
         {FLOATING_CHIPS.map((chip) => (
-          <FloatingChip key={chip.label} chip={chip} progress={scrollYProgress} tint={tint} />
+          <FloatingChip key={chip.label} chip={chip} progress={scrollYProgress} />
         ))}
       </div>
 
       <motion.div
-        style={{ opacity, y, filter: blur }}
+        style={{ opacity, y }}
         className="container relative z-10 mx-auto px-4 lg:px-8 pt-20 lg:pt-24 pb-16"
       >
         <div className="max-w-4xl mx-auto text-center">
@@ -215,7 +198,7 @@ export function ScrollyHero() {
             ))}
           </motion.div>
 
-          {/* Live tools marquee */}
+          {/* Live tools marquee (CSS transform only) */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -224,11 +207,7 @@ export function ScrollyHero() {
           >
             <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
             <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-            <motion.div
-              animate={{ x: ["0%", "-50%"] }}
-              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-              className="flex gap-2.5 w-max pointer-events-none"
-            >
+            <div className="marquee flex gap-2.5 w-max pointer-events-none">
               {[...LIVE_TOOLS, ...LIVE_TOOLS].map((tool, i) => (
                 <div
                   key={i}
@@ -241,7 +220,7 @@ export function ScrollyHero() {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 </div>
               ))}
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </motion.div>
@@ -253,12 +232,9 @@ export function ScrollyHero() {
         aria-hidden="true"
       >
         <span className="text-[10px] uppercase tracking-[0.25em] font-medium">Keep scrolling</span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-        >
+        <div className="float-sm">
           <ChevronDown className="w-5 h-5" />
-        </motion.div>
+        </div>
       </motion.div>
     </section>
   );

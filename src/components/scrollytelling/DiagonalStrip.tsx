@@ -31,12 +31,11 @@ const ITEMS: { label: string; icon: LucideIcon; gradient: string }[] = [
   { label: "Data Science", icon: LineChart, gradient: "from-indigo-500 to-violet-500" },
 ];
 
-function Chip({ item, index }: { item: (typeof ITEMS)[number]; index: number }) {
+function Chip({ item }: { item: (typeof ITEMS)[number] }) {
   const Icon = item.icon;
   return (
     <div
       className="flex items-center gap-3 rounded-2xl px-5 py-3 bg-card/80 border border-border/70 shadow-lg backdrop-blur whitespace-nowrap"
-      style={{ animationDelay: `${index * 0.5}s` }}
     >
       <span className={`w-9 h-9 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center flex-shrink-0`}>
         <Icon className="w-4 h-4 text-white" />
@@ -80,12 +79,12 @@ export function DiagonalStrip() {
       <div className="relative -rotate-2">
         <motion.div style={{ x: rowA, y: yA }} className="flex gap-4 mb-4 w-max">
           {bandA.map((item, i) => (
-            <Chip key={`${item.label}-${i}`} item={item} index={i} />
+            <Chip key={`${item.label}-${i}`} item={item} />
           ))}
         </motion.div>
         <motion.div style={{ x: rowB, y: yB }} className="flex gap-4 w-max opacity-80">
           {bandB.map((item, i) => (
-            <Chip key={`${item.label}-${i}`} item={item} index={i} />
+            <Chip key={`${item.label}-${i}`} item={item} />
           ))}
         </motion.div>
       </div>

@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Bot,
   Headphones,
@@ -72,19 +71,14 @@ const TILES: { icon: LucideIcon; title: string; description: string; gradient: s
 ];
 
 function Tile({ tile, index }: { tile: (typeof TILES)[number]; index: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [index % 2 === 0 ? 40 : 60, index % 2 === 0 ? -40 : -60]);
   const Icon = tile.icon;
 
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 40, scale: 0.96 }}
+      initial={{ opacity: 0, y: 32, scale: 0.97 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, margin: "-80px" }}
+      viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.55, delay: (index % 4) * 0.08, ease: [0.22, 1, 0.36, 1] }}
-      style={{ y }}
       className="group relative rounded-2xl p-[1px] bg-gradient-to-b from-border/80 via-border/30 to-border/80 hover:from-primary/60 hover:via-primary/30 hover:to-primary/60 transition-all duration-500"
     >
       <div className="relative rounded-[calc(1rem-1px)] bg-card/90 p-6 h-full overflow-hidden">
