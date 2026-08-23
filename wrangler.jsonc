@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "dvtechnologies-site",
+  "compatibility_date": "2026-08-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    { "pattern": "dvtechnologies.xyz/*", "zone_name": "dvtechnologies.xyz" },
+    { "pattern": "www.dvtechnologies.xyz/*", "zone_name": "dvtechnologies.xyz" }
+  ]
+}
