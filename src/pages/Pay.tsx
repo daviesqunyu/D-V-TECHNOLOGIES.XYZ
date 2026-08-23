@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Wallet,
   Trash2,
@@ -22,12 +23,17 @@ import {
   RotateCcw,
   ChevronRight,
   Package,
+  Copy,
+  Check,
+  Loader2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
+import { api, authHeaders } from "@/lib/api";
 
 const WHATSAPP_URL = "https://wa.me/254759075816";
+const BTC_ADDRESS = "1PZPhUGugY5ecF9hYFYvpffsYUFUk2hK6i";
 const PAY_METHODS = [
   {
     id: "mpesa",
@@ -65,23 +71,87 @@ const TRUST_ITEMS = [
 export default function Pay() {
   const { items, count, total, updateQty, removeItem, clear } = useCart();
   const [method, setMethod] = useState<(typeof PAY_METHODS)[number]["id"]>("mpesa");
-  const [confirmed, setConfirmed] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [btcCopied, setBtcCopied] = useState(false);
+  const [paystackEmail, setPaystackEmail] = useState("");
+  const [paystackName, setPaystackName] = useState("");
+  const [showPaystackForm, setShowPaystackForm] = useState(false);
 
   const orderSummary = items
     .map((item) => `${item.name} x${item.qty}`)
     .join("\n");
 
-  const checkout = () => {
+  /* ── M-Pesa: open WhatsApp ── */
+  const checkoutWhatsApp = () => {
     const text = encodeURIComponent(
-      `Hi D&V Technologies, I'd like to complete my order:\n\n${orderSummary}\n\nTotal: ${formatPrice(
-        total,
-        "KES"
-      )}\nPayment: ${PAY_METHODS.find((m) => m.id === method)?.name}`
+      `Hi D&V Technologies, I'd like to complete my order:\n\n${orderSummary}\n\nTotal: ${formatPrice(total, "KES")}\nPayment: M-Pesa`
     );
-    setConfirmed(true);
-    setTimeout(() => setConfirmed(false), 2000);
     window.open(`${WHATSAPP_URL}?text=${text}`, "_blank", "noopener,noreferrer");
   };
+
+  /* ── Bitcoin: copy address ── */
+  const copyBtc = () => {
+    navigator.clipboard.writeText(BTC_ADDRESS);
+    setBtcCopied(true);
+    setTimeout(() => setBtcCopied(false), 2500);
+  };
+
+  /* ── Card (Paystack): initiate checkout ── */
+  const checkoutPaystack = async () => {
+    const email = paystackEmail.trim().toLowerCase();
+    if (!email) return;
+    setLoading(true);
+    try {
+      const res = await fetch(api.initiatePayment, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({
+          method: "paystack",
+          plan: items.map((i) => i.name).join(", "),
+          amount: total,
+          email,
+          name: paystackName.trim() || undefined,
+        }),
+      });
+      const data = (await res.json().catch(() => null)) as
+        | { success?: boolean; authorization_url?: string; error?: string; message?: string }
+        | null;
+      if (res.ok && data?.success && data.authorization_url) {
+        window.location.href = data.authorization_url;
+        return;
+      }
+      alert(data?.error || data?.message || "Could not start card checkout. Please try again.");
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Connection error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ── Main checkout handler ── */
+  const handleCheckout = () => {
+    if (method === "mpesa") {
+      checkoutWhatsApp();
+    } else if (method === "btc") {
+      copyBtc();
+    } else if (method === "paystack") {
+      if (!showPaystackForm) {
+        setShowPaystackForm(true);
+      } else {
+        checkoutPaystack();
+      }
+    }
+  };
+
+  const ctaLabel = (() => {
+    if (method === "mpesa") return "Pay with M-Pesa";
+    if (method === "btc") return btcCopied ? "Address Copied!" : "Copy Bitcoin Address";
+    if (method === "paystack") {
+      if (!showPaystackForm) return "Pay with Card";
+      return loading ? "Processing…" : "Pay Now";
+    }
+    return "Checkout";
+  })();
 
   return (
     <div className="min-h-screen bg-background">
@@ -272,7 +342,7 @@ export default function Pay() {
                       return (
                         <button
                           key={m.id}
-                          onClick={() => setMethod(m.id)}
+                          onClick={() => { setMethod(m.id); if (m.id !== "paystack") setShowPaystackForm(false); }}
                           className={`w-full flex items-center gap-3 rounded-xl border p-3.5 transition-all ${
                             selected
                               ? "border-primary/50 bg-primary/5 shadow-lg shadow-primary/5 ring-1 ring-primary/20"
@@ -303,22 +373,117 @@ export default function Pay() {
                     })}
                   </div>
 
-                  {/* CTA */}
+                  {/* Paystack form (shown when card selected and "Pay with Card" clicked) */}
+                  <AnimatePresence>
+                    {method === "paystack" && showPaystackForm && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3 mb-4">
+                          <label className="text-xs text-muted-foreground block">
+                            Full name
+                            <Input
+                              value={paystackName}
+                              onChange={(e) => setPaystackName(e.target.value)}
+                              placeholder="John Doe"
+                              className="mt-1 h-10 bg-background/80"
+                              autoComplete="name"
+                              disabled={loading}
+                            />
+                          </label>
+                          <label className="text-xs text-muted-foreground block">
+                            Email (for receipt & Paystack redirect)
+                            <Input
+                              value={paystackEmail}
+                              onChange={(e) => setPaystackEmail(e.target.value)}
+                              placeholder="you@example.com"
+                              className="mt-1 h-10 bg-background/80"
+                              type="email"
+                              autoComplete="email"
+                              disabled={loading}
+                            />
+                          </label>
+                          <p className="text-[11px] text-muted-foreground">
+                            You'll be redirected to Paystack to enter card details securely. We never store your card.
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Bitcoin address (shown when BTC selected) */}
+                  <AnimatePresence>
+                    {method === "btc" && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4 mb-4">
+                          <p className="text-xs font-medium text-foreground mb-2">Send Bitcoin to:</p>
+                          <div className="flex items-center gap-2 bg-background/80 rounded-lg p-2 border border-border/60">
+                            <code className="text-[11px] text-muted-foreground break-all flex-1 font-mono">{BTC_ADDRESS}</code>
+                            <button onClick={copyBtc} className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors" title="Copy address">
+                              {btcCopied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-2">
+                            Send exactly <span className="font-medium text-foreground">{formatPrice(total, "KES")}</span> worth of BTC. After payment, message us on WhatsApp to confirm.
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* M-Pesa info */}
+                  <AnimatePresence>
+                    {method === "mpesa" && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-4 mb-4">
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            You'll be redirected to WhatsApp to confirm your order. We'll send you an M-Pesa STK push to your phone to complete payment.
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* CTA Button */}
                   <Button
                     variant="hero"
                     size="lg"
                     className="w-full mb-3 h-12 text-base"
-                    onClick={checkout}
+                    onClick={handleCheckout}
+                    disabled={loading || (method === "paystack" && showPaystackForm && !paystackEmail.trim())}
                   >
-                    <MessageCircle className="w-5 h-5" />
-                    {confirmed ? (
-                      <span className="inline-flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4" /> Opening WhatsApp…
-                      </span>
+                    {loading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : method === "mpesa" ? (
+                      <Send className="w-5 h-5" />
+                    ) : method === "btc" ? (
+                      btcCopied ? <CheckCircle2 className="w-5 h-5" /> : <Bitcoin className="w-5 h-5" />
                     ) : (
-                      "Confirm on WhatsApp"
+                      <CreditCard className="w-5 h-5" />
                     )}
+                    {ctaLabel}
                   </Button>
+
+                  {method === "mpesa" && (
+                    <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground text-center mb-3">
+                      <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+                      Opens WhatsApp to complete your M-Pesa order
+                    </p>
+                  )}
 
                   {/* Trust signals */}
                   <div className="grid grid-cols-2 gap-2 mt-4">
