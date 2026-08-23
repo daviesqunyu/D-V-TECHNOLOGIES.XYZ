@@ -21,11 +21,12 @@ import {
   Lock,
   Truck,
   RotateCcw,
-  ChevronRight,
-  Package,
-  Copy,
-  Check,
-  Loader2,
+   ChevronRight,
+   Package,
+   Copy,
+   Check,
+   Coins,
+   Loader2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/lib/cart";
@@ -34,6 +35,9 @@ import { api, authHeaders } from "@/lib/api";
 
 const WHATSAPP_URL = "https://wa.me/254759075816";
 const BTC_ADDRESS = "1PZPhUGugY5ecF9hYFYvpffsYUFUk2hK6i";
+const USDT_ADDRESS =
+  (import.meta.env.VITE_USDT_TRC20_ADDRESS as string | undefined) ||
+  "TKfF9M8iUwy2VdB4Eor5et8AnFRMvzJELT";
 const PAY_METHODS = [
   {
     id: "mpesa",
@@ -59,6 +63,14 @@ const PAY_METHODS = [
     gradient: "from-orange-500 to-amber-500",
     badge: null,
   },
+  {
+    id: "usdt",
+    name: "USDT Tether",
+    sub: "TRC-20 · Stablecoin · Low fees",
+    icon: Coins,
+    gradient: "from-emerald-600 to-teal-500",
+    badge: null,
+  },
 ] as const;
 
 const TRUST_ITEMS = [
@@ -73,6 +85,7 @@ export default function Pay() {
   const [method, setMethod] = useState<(typeof PAY_METHODS)[number]["id"]>("mpesa");
   const [loading, setLoading] = useState(false);
   const [btcCopied, setBtcCopied] = useState(false);
+  const [usdtCopied, setUsdtCopied] = useState(false);
   const [paystackEmail, setPaystackEmail] = useState("");
   const [paystackName, setPaystackName] = useState("");
   const [showPaystackForm, setShowPaystackForm] = useState(false);
@@ -94,6 +107,13 @@ export default function Pay() {
     navigator.clipboard.writeText(BTC_ADDRESS);
     setBtcCopied(true);
     setTimeout(() => setBtcCopied(false), 2500);
+  };
+
+  /* ── USDT: copy address ── */
+  const copyUsdt = () => {
+    navigator.clipboard.writeText(USDT_ADDRESS);
+    setUsdtCopied(true);
+    setTimeout(() => setUsdtCopied(false), 2500);
   };
 
   /* ── Card (Paystack): initiate checkout ── */
@@ -134,6 +154,8 @@ export default function Pay() {
       checkoutWhatsApp();
     } else if (method === "btc") {
       copyBtc();
+    } else if (method === "usdt") {
+      copyUsdt();
     } else if (method === "paystack") {
       if (!showPaystackForm) {
         setShowPaystackForm(true);
@@ -146,6 +168,7 @@ export default function Pay() {
   const ctaLabel = (() => {
     if (method === "mpesa") return "Pay with M-Pesa";
     if (method === "btc") return btcCopied ? "Address Copied!" : "Copy Bitcoin Address";
+    if (method === "usdt") return usdtCopied ? "Address Copied!" : "Copy USDT Address";
     if (method === "paystack") {
       if (!showPaystackForm) return "Pay with Card";
       return loading ? "Processing…" : "Pay Now";
@@ -157,7 +180,7 @@ export default function Pay() {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Pay | Checkout — D&V Technologies"
-        description="Checkout with M-Pesa, Paystack card or Bitcoin. Review your cart and confirm your order with D&V Technologies."
+        description="Checkout with M-Pesa, Paystack card, Bitcoin or USDT TRC-20. Review your cart and confirm your order with D&V Technologies."
         canonicalPath="/pay"
       />
       <Navbar />
@@ -440,6 +463,36 @@ export default function Pay() {
                     )}
                   </AnimatePresence>
 
+                  {/* USDT TRC-20 address (shown when USDT selected) */}
+                  <AnimatePresence>
+                    {method === "usdt" && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-medium text-foreground">Send USDT (TRC-20) to:</p>
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                              Tron Network
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 bg-background/80 rounded-lg p-2 border border-border/60">
+                            <code className="text-[11px] text-muted-foreground break-all flex-1 font-mono">{USDT_ADDRESS}</code>
+                            <button onClick={copyUsdt} className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors" title="Copy USDT address">
+                              {usdtCopied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
+                            Send only <span className="font-medium text-foreground">USDT on the TRON (TRC-20) network</span> — equivalent of <span className="font-medium text-foreground">{formatPrice(total, "KES")}</span>. Other networks will be lost. After sending, message us on WhatsApp with the transaction hash (TXID) to confirm.
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {/* M-Pesa info */}
                   <AnimatePresence>
                     {method === "mpesa" && (
@@ -472,6 +525,8 @@ export default function Pay() {
                       <Send className="w-5 h-5" />
                     ) : method === "btc" ? (
                       btcCopied ? <CheckCircle2 className="w-5 h-5" /> : <Bitcoin className="w-5 h-5" />
+                    ) : method === "usdt" ? (
+                      usdtCopied ? <CheckCircle2 className="w-5 h-5" /> : <Coins className="w-5 h-5" />
                     ) : (
                       <CreditCard className="w-5 h-5" />
                     )}

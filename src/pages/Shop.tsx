@@ -215,7 +215,7 @@ function ProductModal({ product, onClose }: { product: Product; onClose: () => v
 }
 
 export default function Shop() {
-  const { count, addItem } = useCart();
+  const { count, total, addItem } = useCart();
   const { toast } = useToast();
   const [category, setCategory] = useState("All");
   const [query, setQuery] = useState("");
@@ -305,7 +305,7 @@ export default function Shop() {
         </section>
 
         {/* Catalog */}
-        <section className="py-12 lg:py-16">
+        <section className="py-12 lg:py-16 pb-28 lg:pb-32">
           <div className="container mx-auto px-4 lg:px-8">
             {/* Controls */}
             <div className="flex flex-col md:flex-row md:items-center gap-3 mb-8">
@@ -450,6 +450,42 @@ export default function Shop() {
 
       <AnimatePresence>
         {selected && <ProductModal product={selected} onClose={() => setSelected(null)} />}
+      </AnimatePresence>
+
+      {/* Floating cart bar — always-visible total + checkout CTA */}
+      <AnimatePresence>
+        {count > 0 && !selected && (
+          <motion.div
+            initial={{ y: 90, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 90, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-x-4 bottom-4 z-[90] flex justify-center pointer-events-none"
+          >
+            <div className="pointer-events-auto w-full max-w-xl rounded-2xl border border-border/60 bg-card/95 backdrop-blur-md shadow-2xl p-3 flex items-center gap-3">
+              <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-lg">
+                <ShoppingBag className="w-5 h-5 text-white" />
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-background border border-border text-[10px] font-black flex items-center justify-center text-primary">
+                  {count > 99 ? "99+" : count}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-display font-extrabold gradient-text tabular-nums leading-tight">
+                  {formatPrice(total, "KES")}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {count} item{count > 1 ? "s" : ""} in your cart
+                </p>
+              </div>
+              <Link to="/pay" className="flex-shrink-0">
+                <Button variant="hero" size="lg" className="group px-5">
+                  Checkout
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       <Footer />
