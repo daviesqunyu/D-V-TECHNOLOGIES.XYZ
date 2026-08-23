@@ -89,15 +89,23 @@ export default function Pay() {
   const [paystackEmail, setPaystackEmail] = useState("");
   const [paystackName, setPaystackName] = useState("");
   const [showPaystackForm, setShowPaystackForm] = useState(false);
+  const [customAmount, setCustomAmount] = useState("");
 
-  const orderSummary = items
-    .map((item) => `${item.name} x${item.qty}`)
-    .join("\n");
+  const hasItems = count > 0;
+  // When the cart is empty the page becomes a "Quick Pay" form: any amount can be paid.
+  const parsedCustom = Math.round((Number(customAmount) || 0) * 100) / 100;
+  const payable = hasItems ? total : parsedCustom;
+
+  const planLabel = hasItems ? items.map((i) => i.name).join(", ") : "Custom payment";
+
+  const orderSummary = hasItems
+    ? items.map((item) => `${item.name} x${item.qty}`).join("\n")
+    : `Custom payment of ${formatPrice(payable, "KES")}`;
 
   /* ── M-Pesa: open WhatsApp ── */
   const checkoutWhatsApp = () => {
     const text = encodeURIComponent(
-      `Hi D&V Technologies, I'd like to complete my order:\n\n${orderSummary}\n\nTotal: ${formatPrice(total, "KES")}\nPayment: M-Pesa`
+      `Hi D&V Technologies, I'd like to complete my order:\n\n${orderSummary}\n\nTotal: ${formatPrice(payable, "KES")}\nPayment: M-Pesa`
     );
     window.open(`${WHATSAPP_URL}?text=${text}`, "_blank", "noopener,noreferrer");
   };
@@ -127,8 +135,8 @@ export default function Pay() {
         headers: authHeaders(),
         body: JSON.stringify({
           method: "paystack",
-          plan: items.map((i) => i.name).join(", "),
-          amount: total,
+          plan: planLabel,
+          amount: payable,
           email,
           name: paystackName.trim() || undefined,
         }),
@@ -209,37 +217,81 @@ export default function Pay() {
                 </h1>
               </div>
               <p className="text-muted-foreground ml-[52px]">
-                {count > 0
+                {hasItems
                   ? `${count} item${count > 1 ? "s" : ""} in your order`
-                  : "Your cart is empty — browse the shop to get started."}
+                  : parsedCustom > 0
+                    ? `Quick pay ${formatPrice(parsedCustom, "KES")} — choose a method below.`
+                    : "Enter an amount below or browse the shop to get started."}
               </p>
             </motion.div>
           </div>
 
-          {count === 0 ? (
-            <EmptyCart />
-          ) : (
-            <div className="grid lg:grid-cols-5 gap-8 lg:gap-10">
-              {/* Left: Cart items */}
-              <div className="lg:col-span-3">
-                {/* Step indicator */}
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">1</span>
-                    <span className="text-sm font-semibold">Cart Review</span>
-                  </div>
-                  <div className="flex-1 h-px bg-border" />
-                  <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-bold">2</span>
-                    <span className="text-sm text-muted-foreground">Payment</span>
-                  </div>
-                  <div className="flex-1 h-px bg-border" />
-                  <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-bold">3</span>
-                    <span className="text-sm text-muted-foreground">Confirm</span>
-                  </div>
+          <div className="grid lg:grid-cols-5 gap-8 lg:gap-10">
+            {/* Left: Cart items / Quick Pay */}
+            <div className="lg:col-span-3">
+              {/* Step indicator */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center gap-2">
+                  <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${hasItems ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>1</span>
+                  <span className={`text-sm font-semibold ${hasItems ? "" : "text-muted-foreground"}`}>Cart Review</span>
                 </div>
+                <div className="flex-1 h-px bg-border" />
+                <div className="flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-bold">2</span>
+                  <span className="text-sm text-muted-foreground">Payment</span>
+                </div>
+                <div className="flex-1 h-px bg-border" />
+                <div className="flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-bold">3</span>
+                  <span className="text-sm text-muted-foreground">Confirm</span>
+                </div>
+              </div>
 
+              {!hasItems ? (
+                /* ── Quick Pay: enter any amount without a cart ── */
+                <div className="rounded-2xl border border-primary/25 bg-card/80 backdrop-blur-sm p-6 md:p-8">
+                  <h2 className="font-display text-xl md:text-2xl font-bold mb-1.5">Quick Pay</h2>
+                  <p className="text-sm text-muted-foreground mb-5">
+                    Paying for an invoice, service or top-up? Enter the amount in KES and choose how you'd like to pay.
+                  </p>
+                  <label className="block text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">
+                    Amount to pay (KES)
+                  </label>
+                  <Input
+                    type="number"
+                    min={1}
+                    step={1}
+                    inputMode="numeric"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                    placeholder="e.g. 1500"
+                    disabled={loading}
+                    className="h-12 text-lg font-bold bg-background/80 mb-3"
+                  />
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {[500, 1000, 2500, 5000, 10000].map((amt) => (
+                      <button
+                        key={amt}
+                        onClick={() => setCustomAmount(String(amt))}
+                        className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                          parsedCustom === amt
+                            ? "bg-gradient-to-r from-primary to-accent text-primary-foreground border-transparent shadow-lg"
+                            : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                        }`}
+                      >
+                        {formatPrice(amt, "KES")}
+                      </button>
+                    ))}
+                  </div>
+                  <Link
+                    to="/shop"
+                    className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                  >
+                    Or add products from the shop <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              ) : (
+                <>
                 {/* Items */}
                 <div className="space-y-3">
                   <AnimatePresence mode="popLayout">
@@ -322,37 +374,46 @@ export default function Pay() {
                     Continue shopping <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
-              </div>
+                </>
+              )}
+            </div>
 
-              {/* Right: Order summary */}
-              <div className="lg:col-span-2">
-                <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-6 lg:sticky lg:top-28">
-                  <h2 className="font-display text-lg font-bold mb-5">Order Summary</h2>
+            {/* Right: Order summary */}
+            <div className="lg:col-span-2">
+              <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-6 lg:sticky lg:top-28">
+                <h2 className="font-display text-lg font-bold mb-5">Order Summary</h2>
 
-                  {/* Line items */}
-                  <div className="space-y-3 mb-5">
-                    {items.map((item) => (
-                      <div key={item.id} className="flex justify-between text-sm">
-                        <span className="text-muted-foreground truncate pr-3">
-                          {item.name}
-                          {item.qty > 1 && <span className="text-muted-foreground/60"> &times;{item.qty}</span>}
-                        </span>
-                        <span className="font-medium tabular-nums whitespace-nowrap">
-                          {formatPrice(item.price * item.qty, item.currency, item.billing)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Divider */}
-                  <div className="border-t border-border/60 pt-4 mb-6">
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-sm text-muted-foreground">Total</span>
-                      <span className="font-display text-2xl font-black gradient-text tabular-nums">
-                        {formatPrice(total, "KES")}
+                {/* Line items */}
+                <div className="space-y-3 mb-5">
+                  {hasItems ? items.map((item) => (
+                    <div key={item.id} className="flex justify-between text-sm">
+                      <span className="text-muted-foreground truncate pr-3">
+                        {item.name}
+                        {item.qty > 1 && <span className="text-muted-foreground/60"> &times;{item.qty}</span>}
+                      </span>
+                      <span className="font-medium tabular-nums whitespace-nowrap">
+                        {formatPrice(item.price * item.qty, item.currency, item.billing)}
                       </span>
                     </div>
+                  )) : (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Quick Pay — one-time amount</span>
+                      <span className="font-medium tabular-nums whitespace-nowrap">
+                        {formatPrice(parsedCustom, "KES")}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-border/60 pt-4 mb-6">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-sm text-muted-foreground">Total</span>
+                    <span className="font-display text-2xl font-black gradient-text tabular-nums">
+                      {formatPrice(payable, "KES")}
+                    </span>
                   </div>
+                </div>
 
                   {/* Payment methods */}
                   <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-3">
@@ -456,7 +517,7 @@ export default function Pay() {
                             </button>
                           </div>
                           <p className="text-[11px] text-muted-foreground mt-2">
-                            Send exactly <span className="font-medium text-foreground">{formatPrice(total, "KES")}</span> worth of BTC. After payment, message us on WhatsApp to confirm.
+                            Send exactly <span className="font-medium text-foreground">{formatPrice(payable, "KES")}</span> worth of BTC. After payment, message us on WhatsApp to confirm.
                           </p>
                         </div>
                       </motion.div>
@@ -486,7 +547,7 @@ export default function Pay() {
                             </button>
                           </div>
                           <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
-                            Send only <span className="font-medium text-foreground">USDT on the TRON (TRC-20) network</span> — equivalent of <span className="font-medium text-foreground">{formatPrice(total, "KES")}</span>. Other networks will be lost. After sending, message us on WhatsApp with the transaction hash (TXID) to confirm.
+                            Send only <span className="font-medium text-foreground">USDT on the TRON (TRC-20) network</span> — equivalent of <span className="font-medium text-foreground">{formatPrice(payable, "KES")}</span>. Other networks will be lost. After sending, message us on WhatsApp with the transaction hash (TXID) to confirm.
                           </p>
                         </div>
                       </motion.div>
@@ -517,7 +578,11 @@ export default function Pay() {
                     size="lg"
                     className="w-full mb-3 h-12 text-base"
                     onClick={handleCheckout}
-                    disabled={loading || (method === "paystack" && showPaystackForm && !paystackEmail.trim())}
+                    disabled={
+                      loading ||
+                      payable <= 0 ||
+                      (method === "paystack" && showPaystackForm && !paystackEmail.trim())
+                    }
                   >
                     {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
@@ -549,10 +614,9 @@ export default function Pay() {
                       </div>
                     ))}
                   </div>
-                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </main>
       <Footer />
@@ -560,30 +624,3 @@ export default function Pay() {
   );
 }
 
-/* ─── Empty cart state ─── */
-function EmptyCart() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.97 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4 }}
-      className="max-w-lg mx-auto text-center"
-    >
-      <div className="rounded-3xl border border-dashed border-border/60 bg-card/40 backdrop-blur-sm p-10 md:p-14">
-        <div className="w-16 h-16 mx-auto rounded-2xl bg-muted/50 flex items-center justify-center mb-5 border border-border/40">
-          <ShoppingBag className="w-7 h-7 text-muted-foreground" />
-        </div>
-        <h2 className="font-display text-2xl font-bold mb-2">Cart is empty</h2>
-        <p className="text-sm text-muted-foreground mb-8 max-w-xs mx-auto leading-relaxed">
-          Explore our shop for plans, hardware, software and AI services — everything in one place.
-        </p>
-        <Link to="/shop">
-          <Button variant="hero" size="lg" className="group">
-            Browse Shop
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
-        </Link>
-      </div>
-    </motion.div>
-  );
-}
