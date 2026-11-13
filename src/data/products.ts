@@ -38,10 +38,13 @@ export type Product = {
   name: string;
   description: string;
   longDescription?: string;
+  /** Display / cart amount. Use 0 with quoteOnly for consultation items. */
   price: number;
   compareAt?: number;
   currency: "KES" | "USD";
-  billing?: "weekly" | "monthly" | "once";
+  billing?: "weekly" | "monthly" | "once" | "yearly";
+  /** When true, shop shows “Request a quotation” instead of Add to cart. */
+  quoteOnly?: boolean;
   category: string;
   icon: LucideIcon;
   gradient: string;
@@ -61,8 +64,8 @@ export const products: Product[] = [
     description:
       "Test our services risk-free. Remote IT support, troubleshooting and guidance billed every week via M-Pesa. Cancel anytime.",
     longDescription:
-      "The 100 KES weekly plan is D&V's risk-free way to start working with a professional IT team. You get remote support during business hours, fast answers to your tech questions and guidance on the basics — hardware, software, email and networking. Billed automatically every week on M-Pesa, you can cancel anytime with no lock-in.",
-    price: 100,
+      "The weekly plan is a low-commitment way to try remote IT support: business-hours help with common hardware, software, email and networking issues. Billed weekly via M-Pesa; cancel anytime.",
+    price: 500,
     currency: "KES",
     billing: "weekly",
     category: "IT Support",
@@ -88,8 +91,8 @@ export const products: Product[] = [
       "Core IT support for small businesses getting started with professional tech services.",
     longDescription:
       "Essential Support gives a small business a real IT department. Expect fast remote help, software management, hardware troubleshooting and a monthly system health check that keeps your machines fast and your data safe — all without hiring in-house staff.",
-    price: 300,
-    currency: "USD",
+    price: 25000,
+    currency: "KES",
     billing: "monthly",
     category: "IT Support",
     icon: Monitor,
@@ -110,9 +113,9 @@ export const products: Product[] = [
     description:
       "Full-service IT, networking, cloud, and security for growing businesses.",
     longDescription:
-      "Advanced Solutions is our most popular managed plan. It covers 24/7 support, hardware and server maintenance, network design, cloud migration, backups and firewall protection — everything a growing Nairobi company needs to run without tech drama. Most clients see this plan as 'our IT department for a flat monthly fee'.",
-    price: 650,
-    currency: "USD",
+      "Advanced Solutions is our managed plan for growing businesses: extended-hours remote support, scheduled on-site visits, network and Wi-Fi care, backups and basic security hardening — a practical IT retainer without hiring a full in-house team.",
+    price: 65000,
+    currency: "KES",
     billing: "monthly",
     category: "IT Support",
     icon: Network,
@@ -120,36 +123,37 @@ export const products: Product[] = [
     tag: "Popular",
     featured: true,
     image: img(1148820),
-    highlight: "Most popular for growing businesses",
+    highlight: "Suitable for growing offices",
     features: [
-      "24/7 remote & on-site support",
-      "Hardware repair & server maintenance",
+      "Extended-hours remote support",
+      "Hardware troubleshooting & maintenance",
       "Network design & Wi-Fi (multi-AP)",
       "Firewall & VPN configuration",
-      "Cloud migration & SaaS setup",
-      "Data backup & recovery plan",
+      "Cloud / SaaS setup assistance",
+      "Data backup guidance & monitoring",
     ],
-    deliverables: ["24/7 hotline + SLA", "On-site visits (4/month)", "Quarterly security review"],
+    deliverables: ["Support channel + response targets", "On-site visits (up to 4/month)", "Monthly health summary"],
   },
   {
     id: "enterprise-ai",
     name: "Enterprise & AI",
     description:
-      "Unlimited support, custom software, AI, cybersecurity and full digital transformation.",
+      "Priority support with scoped software, AI and security projects — priced after consultation.",
     longDescription:
-      "Our top tier is a full transformation partnership. Unlimited priority support plus custom software, ERP, AI/automation, predictive analytics and digital strategy. If you want your business run by technology — not just supported by it — this is the plan.",
-    price: 900,
-    currency: "USD",
+      "For organisations that need ongoing priority support plus scoped software, AI or security projects. Scope and fees are agreed in writing before work starts.",
+    price: 0,
+    currency: "KES",
     billing: "monthly",
+    quoteOnly: true,
     category: "IT Support",
     icon: Building2,
     gradient: "from-violet-500 to-primary",
     image: img(3182812),
     features: [
-      "24/7 priority support (unlimited)",
+      "Priority support with agreed response times",
       "Custom software & ERP development",
       "AI & automation solutions",
-      "Unlimited on-site visits",
+      "On-site visits as agreed in the contract",
       "Cybersecurity audit & training",
       "Dedicated account manager",
     ],
@@ -162,8 +166,8 @@ export const products: Product[] = [
       "A modern, fast, SEO-ready website designed around your brand and goals.",
     longDescription:
       "We design and build your website from scratch — or refresh your existing one — with a modern UI, mobile-first responsiveness and SEO foundations. You own everything: domain, hosting and code. Includes a training session so your team can update content easily.",
-    price: 25000,
-    compareAt: 40000,
+    price: 45000,
+    compareAt: 65000,
     currency: "KES",
     billing: "once",
     category: "Software",
@@ -189,8 +193,8 @@ export const products: Product[] = [
       "Launch a full online store with M-Pesa, card and delivery integrations.",
     longDescription:
       "A complete online shop: catalog, cart, secure checkout with M-Pesa STK and cards, order dashboard, and delivery integrations. We handle payment wiring, so customers pay you directly. Perfect for retailers, boutiques and distributors ready to sell online.",
-    price: 60000,
-    compareAt: 90000,
+    price: 95000,
+    compareAt: 140000,
     currency: "KES",
     billing: "once",
     category: "Software",
@@ -214,7 +218,7 @@ export const products: Product[] = [
       "Deploy DIVA, our local AI assistant, on your website or Telegram to answer customers instantly.",
     longDescription:
       "We train an AI assistant on YOUR business — products, prices, FAQs, location — and deploy it on your website and/or Telegram. It answers customers 24/7 in English and Swahili, hands off to a human when stuck, and even collects leads for you.",
-    price: 15000,
+    price: 35000,
     currency: "KES",
     billing: "once",
     category: "AI",
@@ -239,9 +243,9 @@ export const products: Product[] = [
     longDescription:
       "Free diagnosis, honest quotes, genuine parts and a 90-day repair warranty. Whether it's a cracked screen, dead battery, overheating fan or water damage, we repair most laptops within 24-72 hours and can usually save your data.",
     price: 2500,
-    compareAt: 5000,
     currency: "KES",
     billing: "once",
+    quoteOnly: true,
     category: "Hardware",
     icon: Laptop,
     gradient: "from-slate-500 to-slate-700",
@@ -263,7 +267,7 @@ export const products: Product[] = [
       "RAM, SSD and processor upgrades to give your existing machines a new life.",
     longDescription:
       "Before you buy a new computer, let us upgrade your current one. Adding an SSD and more RAM is the fastest, cheapest way to make an old machine feel brand new. Includes cloning of your existing drive so nothing is lost.",
-    price: 8000,
+    price: 12000,
     currency: "KES",
     billing: "once",
     category: "Hardware",
@@ -286,7 +290,7 @@ export const products: Product[] = [
       "Professional access point installation and configuration for home or small office.",
     longDescription:
       "Reliable Wi-Fi in every corner. We survey your space, install and configure a quality access point, and secure your network with a strong password and guest network. Ideal for homes and offices struggling with dead zones.",
-    price: 3500,
+    price: 7500,
     currency: "KES",
     billing: "once",
     category: "Networking",
@@ -309,10 +313,10 @@ export const products: Product[] = [
       "IP camera setup with mobile remote viewing so you can monitor from anywhere.",
     longDescription:
       "Protect your premises with a professional IP CCTV system. We supply and install 4 cameras with a network recorder, set up mobile remote viewing, and run clean, safe cabling. Everything is tested and handed over with a 1-year warranty.",
-    price: 22000,
-    compareAt: 30000,
+    price: 0,
     currency: "KES",
     billing: "once",
+    quoteOnly: true,
     category: "Hardware",
     icon: Camera,
     gradient: "from-yellow-500 to-amber-500",
@@ -334,7 +338,7 @@ export const products: Product[] = [
       "Full security assessment, firewall hardening and staff awareness training.",
     longDescription:
       "Find and fix the gaps before attackers do. We assess your systems, test for vulnerabilities, harden your firewall and VPN, deploy anti-malware, and train your team to spot phishing — the #1 way businesses get hacked.",
-    price: 18000,
+    price: 35000,
     currency: "KES",
     billing: "once",
     category: "Security",
@@ -357,7 +361,7 @@ export const products: Product[] = [
       "Automated off-site backups with tested recovery, so you never lose data again.",
     longDescription:
       "Automatic, encrypted backups of your files, servers and databases to off-site cloud storage. We schedule, monitor and — most importantly — actually test restores, so when disaster strikes you're back online in hours, not days.",
-    price: 5000,
+    price: 7500,
     currency: "KES",
     billing: "monthly",
     category: "Cloud",
@@ -380,7 +384,7 @@ export const products: Product[] = [
       "Wire M-Pesa STK push, C2B and B2B payments into your website or business system.",
     longDescription:
       "Let customers pay you directly in-app or on-site. We integrate M-Pesa STK push (Lipa na M-Pesa), C2B payments and confirmations into your website, mobile app or business system, complete with a transaction ledger and developer handover docs.",
-    price: 30000,
+    price: 45000,
     currency: "KES",
     billing: "once",
     category: "Software",
@@ -403,7 +407,7 @@ export const products: Product[] = [
       "Secure remote access and site-to-site connectivity for hybrid teams and branches.",
     longDescription:
       "Give your team secure access from anywhere. We configure VPN clients, site-to-site tunnels between branches, access policies and full security hardening — so your staff work safely from home, the office, or on the road.",
-    price: 6000,
+    price: 15000,
     currency: "KES",
     billing: "once",
     category: "Networking",
@@ -425,9 +429,10 @@ export const products: Product[] = [
       "End-to-end business systems — inventory, sales, accounting and HR in one platform.",
     longDescription:
       "Bring your whole business into one system. We analyze your workflows, configure an ERP (Odoo, ERPNext or custom), migrate your data, train your team and support you through go-live. Stop juggling spreadsheets — run your business on one source of truth.",
-    price: 120000,
+    price: 0,
     currency: "KES",
     billing: "once",
+    quoteOnly: true,
     category: "Software",
     icon: Building2,
     gradient: "from-orange-500 to-red-500",
@@ -448,9 +453,10 @@ export const products: Product[] = [
       "Supply and installation of servers, racks and enterprise storage for offices.",
     longDescription:
       "We source, supply and install enterprise servers, racks and storage — tailored to your budget. Includes rack mounting, cable management, cooling/power planning and full warranty support, so your infrastructure is built right the first time.",
-    price: 145000,
+    price: 0,
     currency: "KES",
     billing: "once",
+    quoteOnly: true,
     category: "Hardware",
     icon: HardDrive,
     gradient: "from-slate-600 to-slate-900",
@@ -471,9 +477,10 @@ export const products: Product[] = [
       "Cat6 structured cabling, patch panels and network rollout for offices and campuses.",
     longDescription:
       "Professional structured cabling that looks clean and performs reliably. Cat6 drops, patch panels, switches and full network rollout with testing, labeling and certification — built to grow with your business.",
-    price: 45000,
+    price: 0,
     currency: "KES",
     billing: "once",
+    quoteOnly: true,
     category: "Networking",
     icon: LineChart,
     gradient: "from-indigo-500 to-blue-600",
@@ -494,9 +501,9 @@ export const products: Product[] = [
       "Domain registration, business email and managed hosting with SSL for your website.",
     longDescription:
       "Everything your website needs to live on the internet: domain registration/renewal, fast and secure hosting, free SSL, business email and daily backups. We handle renewals so your site never goes down because of a forgotten payment.",
-    price: 4500,
+    price: 7500,
     currency: "KES",
-    billing: "monthly",
+    billing: "yearly",
     category: "Cloud",
     icon: Globe,
     gradient: "from-teal-500 to-emerald-500",
@@ -517,9 +524,10 @@ export const products: Product[] = [
       "Android & iOS apps built with React Native or Flutter — one codebase, both stores.",
     longDescription:
       "From a simple MVP to a full product: we design, build and ship native-quality apps on Android and iOS from a single codebase. Includes M-Pesa and card payments, push notifications and app store publishing.",
-    price: 80000,
+    price: 0,
     currency: "KES",
     billing: "once",
+    quoteOnly: true,
     category: "Software",
     icon: Smartphone,
     gradient: "from-emerald-500 to-teal-500",
@@ -541,7 +549,7 @@ export const products: Product[] = [
       "Social media management, content and paid ads that turn followers into customers.",
     longDescription:
       "A monthly marketing engine for your business: content calendar, social media management, ad campaigns on Meta & Google, and monthly performance reports. We focus on local reach that actually converts — not vanity metrics.",
-    price: 20000,
+    price: 35000,
     currency: "KES",
     billing: "monthly",
     category: "Marketing",
@@ -564,7 +572,7 @@ export const products: Product[] = [
       "Updates, backups, security patches and small edits so your site stays healthy.",
     longDescription:
       "Your website quietly breaks if nothing maintains it. We handle updates, backups, uptime monitoring and security patches, plus up to 2 hours of small edits each month. Ideal for businesses with an existing site they can't ignore.",
-    price: 3000,
+    price: 7500,
     currency: "KES",
     billing: "monthly",
     category: "Cloud",
@@ -590,6 +598,7 @@ export const products: Product[] = [
     price: 5000,
     currency: "KES",
     billing: "once",
+    quoteOnly: true,
     category: "Hardware",
     icon: HardDrive,
     gradient: "from-rose-500 to-red-500",
@@ -609,7 +618,7 @@ export const products: Product[] = [
       "Printer setup, toner/ink supply, driver fixes and network printing for offices.",
     longDescription:
       "Printers are notorious for 'just not working'. We install printers on Windows/Mac, fix driver and connectivity issues, set up network printing and shared queues, and supply toner/ink — keeping your office productive.",
-    price: 1800,
+    price: 2500,
     currency: "KES",
     billing: "once",
     category: "Hardware",
@@ -631,7 +640,7 @@ export const products: Product[] = [
       "Point-of-sale with inventory, M-Pesa payments and simple reports for retail & F&B.",
     longDescription:
       "Run your shop or restaurant on a modern POS: touch-screen till, inventory tracking, M-Pesa and card payments, staff permissions and daily sales reports. We install, train your team and support you monthly.",
-    price: 18000,
+    price: 35000,
     currency: "KES",
     billing: "once",
     category: "Software",
@@ -654,7 +663,7 @@ export const products: Product[] = [
       "Hands-on workshops on Microsoft 365, Google Workspace, data safety and AI tools.",
     longDescription:
       "Train your team to actually use the tools you already pay for. Practical, hands-on workshops in Excel, Google Workspace, Microsoft 365, cybersecurity basics and using AI tools productively — delivered at your office or online.",
-    price: 15000,
+    price: 25000,
     currency: "KES",
     billing: "once",
     category: "Training",
@@ -677,9 +686,10 @@ export const products: Product[] = [
       "Biometric door access, attendance tracking and secure entry for offices.",
     longDescription:
       "Control who enters your building and track staff attendance automatically. We supply and install fingerprint/face readers, configure schedules and permissions, and hand over clean attendance reports — no more manual registers.",
-    price: 28000,
+    price: 0,
     currency: "KES",
     billing: "once",
+    quoteOnly: true,
     category: "Security",
     icon: Fingerprint,
     gradient: "from-violet-600 to-purple-700",
@@ -700,9 +710,10 @@ export const products: Product[] = [
       "Protect your hardware from outages with UPS units, surge protection and power audits.",
     longDescription:
       "Nairobi outages damage hardware and corrupt data. We supply and install quality UPS units, surge protectors and power audits for your office — keeping servers, POS and workstations alive through outages.",
-    price: 12000,
+    price: 0,
     currency: "KES",
     billing: "once",
+    quoteOnly: true,
     category: "Hardware",
     icon: BatteryCharging,
     gradient: "from-green-500 to-lime-500",
@@ -722,9 +733,10 @@ export const products: Product[] = [
       "Quality-checked refurbished laptops with warranty — business and student ready.",
     longDescription:
       "Affordable, quality-checked refurbished laptops for businesses, schools and students. Every unit is cleaned, upgraded (SSD + RAM where possible), tested and sold with a warranty and setup service.",
-    price: 28000,
+    price: 0,
     currency: "KES",
     billing: "once",
+    quoteOnly: true,
     category: "Hardware",
     icon: Laptop,
     gradient: "from-blue-500 to-cyan-500",
@@ -746,9 +758,10 @@ export const products: Product[] = [
       "Smart lighting, sensors, energy monitoring and automation for modern offices.",
     longDescription:
       "Turn your office into a smart space: automated lighting, energy monitoring, temperature sensors and security integrations — controlled from one dashboard. Cut power bills and impress clients with a modern workspace.",
-    price: 35000,
+    price: 0,
     currency: "KES",
     billing: "once",
+    quoteOnly: true,
     category: "IoT",
     icon: Brain,
     gradient: "from-cyan-500 to-teal-500",
@@ -777,7 +790,7 @@ export const DELIVERY_PROCESS = [
   },
   {
     title: "Quote & agree",
-    description: "Fixed transparent price. We schedule work at your convenience.",
+    description: "We confirm scope and price before work begins, then schedule at your convenience.",
     icon: CreditCard,
   },
   {

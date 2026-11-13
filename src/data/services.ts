@@ -119,15 +119,15 @@ export const servicesData: ServiceItem[] = [
     slug: "web-app-development",
     title: "Web & App Development",
     description:
-      "Custom websites, e-commerce platforms, mobile apps (React Native, Flutter), and progressive web apps.",
+      "Business websites, booking systems, e-commerce, and mobile apps — with M-Pesa and card payments when you need them.",
     color: "from-green-500 to-emerald-500",
     icon: Globe,
     category: "Software",
     features: [
-      "Custom Websites & Landing Pages",
-      "E-commerce Platforms",
-      "Mobile Apps (React Native, Flutter)",
-      "Progressive Web Apps (PWAs)",
+      "Business websites & portals",
+      "E-commerce with M-Pesa / cards",
+      "Android & iOS apps",
+      "Booking, inventory & dashboards",
     ],
   },
   {
@@ -194,15 +194,16 @@ export const servicesData: ServiceItem[] = [
     slug: "ai-machine-learning",
     title: "AI & Machine Learning",
     description:
-      "Deep learning, NLP for Swahili & English, predictive analytics, and intelligent automation bots.",
+      "AI chatbots and business agents for WhatsApp, Telegram, or your website — sales, support, and internal tools in English and Swahili.",
     color: "from-primary to-pink-500",
     icon: Brain,
     category: "AI",
     features: [
-      "Deep Learning & Neural Networks",
-      "NLP (Swahili & English)",
-      "Predictive Analytics",
-      "Intelligent Automation Bots",
+      "WhatsApp & Telegram business agents",
+      "Website chatbots for leads & FAQs",
+      "English & Swahili support",
+      "Order, booking & support workflows",
     ],
   },
 ];
+

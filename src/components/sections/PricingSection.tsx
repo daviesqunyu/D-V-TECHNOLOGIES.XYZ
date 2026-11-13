@@ -29,7 +29,10 @@ type Feature = { text: string; included: boolean };
 interface Plan {
   tier: string;
   name: string;
-  priceUsd: number;
+  /** Primary list price in KES (Kenya market). */
+  priceKes: number;
+  /** When true, CTAs go to consultation instead of instant checkout. */
+  quoteOnly?: boolean;
   description: string;
   features: Feature[];
   highlighted: boolean;
@@ -40,9 +43,9 @@ type Currency = "USD" | "KES";
 
 const USD_TO_KES_RATE = Number(import.meta.env.VITE_USD_TO_KES_RATE ?? 129);
 
-function usdToKes(usd: number): number {
+function kesToUsd(kes: number): number {
   const safeRate = Number.isFinite(USD_TO_KES_RATE) && USD_TO_KES_RATE > 0 ? USD_TO_KES_RATE : 129;
-  return usd * safeRate;
+  return Math.round(kes / safeRate);
 }
 
 function formatUsd(amount: number) {
@@ -65,21 +68,21 @@ const plans: Plan[] = [
   {
     tier: "BASIC",
     name: "Essential Support",
-    priceUsd: 300,
+    priceKes: 25000,
     description:
-      "Core IT support for small businesses getting started with professional tech services.",
+      "Remote IT support for small offices — troubleshooting, updates and a monthly health check.",
     features: [
       { text: "Remote IT support (business hours)", included: true },
       { text: "Basic hardware troubleshooting", included: true },
       { text: "Software installation & updates", included: true },
       { text: "Email & productivity setup", included: true },
       { text: "Monthly system health check", included: true },
-      { text: "Basic Wi-Fi setup (single AP)", included: true },
-      { text: "On-site visits (1/month)", included: false },
+      { text: "Basic Wi-Fi guidance (single AP)", included: true },
+      { text: "On-site visits (scheduled)", included: false },
       { text: "Custom software development", included: false },
-      { text: "Cloud migration & management", included: false },
-      { text: "Cybersecurity audit & firewall", included: false },
-      { text: "AI & automation solutions", included: false },
+      { text: "Cloud migration projects", included: false },
+      { text: "Cybersecurity audit", included: false },
+      { text: "AI chatbot / agent projects", included: false },
       { text: "Dedicated account manager", included: false },
     ],
     highlighted: false,
@@ -88,21 +91,21 @@ const plans: Plan[] = [
   {
     tier: "PREMIUM",
     name: "Advanced Solutions",
-    priceUsd: 650,
+    priceKes: 65000,
     description:
-      "Full-service IT, networking, cloud, and security for growing businesses.",
+      "Extended-hours support, on-site visits, networking care and backup guidance for growing businesses.",
     features: [
-      { text: "24/7 remote & on-site support", included: true },
-      { text: "Hardware repair & server maintenance", included: true },
-      { text: "Software updates & patch management", included: true },
+      { text: "Extended-hours remote support", included: true },
+      { text: "Hardware troubleshooting & maintenance", included: true },
+      { text: "Software updates & patch guidance", included: true },
       { text: "Network design & Wi-Fi (multi-AP)", included: true },
-      { text: "Weekly system health checks", included: true },
-      { text: "Cloud migration & SaaS setup", included: true },
-      { text: "On-site visits (4/month)", included: true },
+      { text: "Monthly system health checks", included: true },
+      { text: "Cloud / SaaS setup assistance", included: true },
+      { text: "On-site visits (up to 4/month)", included: true },
       { text: "Firewall & VPN configuration", included: true },
-      { text: "Data backup & recovery plan", included: true },
+      { text: "Data backup guidance & monitoring", included: true },
       { text: "Custom software development", included: false },
-      { text: "AI & automation solutions", included: false },
+      { text: "AI chatbot / agent projects", included: false },
       { text: "Dedicated account manager", included: false },
     ],
     highlighted: true,
@@ -110,26 +113,27 @@ const plans: Plan[] = [
   },
   {
     tier: "EXCLUSIVE",
-    name: "Enterprise & AI",
-    priceUsd: 900,
+    name: "Enterprise & Projects",
+    priceKes: 0,
+    quoteOnly: true,
     description:
-      "Unlimited support, custom software, AI, cybersecurity, and full digital transformation.",
+      "Priority support plus scoped software, AI or security work — quoted after we understand your needs.",
     features: [
-      { text: "24/7 priority support (unlimited)", included: true },
-      { text: "Unlimited hardware repair & upgrades", included: true },
-      { text: "Enterprise networking & internet", included: true },
-      { text: "Custom software & ERP development", included: true },
-      { text: "Full cloud infrastructure management", included: true },
-      { text: "Cybersecurity audit, firewall & training", included: true },
-      { text: "Unlimited on-site visits", included: true },
-      { text: "AI & automation solutions", included: true },
-      { text: "Predictive analytics & NLP", included: true },
-      { text: "Business process automation", included: true },
-      { text: "Digital strategy consulting", included: true },
-      { text: "Dedicated account manager", included: true },
+      { text: "Priority support with agreed response times", included: true },
+      { text: "Hardware repair & upgrades as scoped", included: true },
+      { text: "Networking & connectivity projects", included: true },
+      { text: "Custom software & systems (quoted)", included: true },
+      { text: "Cloud setup & migration (quoted)", included: true },
+      { text: "Security review & hardening (quoted)", included: true },
+      { text: "On-site visits as agreed in contract", included: true },
+      { text: "AI chatbot / business agent projects", included: true },
+      { text: "Process automation (scoped)", included: true },
+      { text: "Technical consulting", included: true },
+      { text: "Written scope before work starts", included: true },
+      { text: "Dedicated account contact", included: true },
     ],
     highlighted: false,
-    cta: "Contact Sales",
+    cta: "Request a quotation",
   },
 ];
 
@@ -155,8 +159,8 @@ function PaymentModal({
   const [loading, setLoading] = useState(false);
   const [btcCopied, setBtcCopied] = useState(false);
 
-  const amountUsd = plan.priceUsd;
-  const amountKes = Math.round(usdToKes(amountUsd));
+  const amountKes = plan.priceKes;
+  const amountUsd = kesToUsd(amountKes);
   const displayPrice =
     currency === "KES" ? `${formatKes(amountKes)}` : `${formatUsd(amountUsd)}`;
 
@@ -465,12 +469,20 @@ export function PricingSection() {
                       <h3 className="font-display text-2xl font-bold mb-2">{plan.name}</h3>
 
                       <div className="flex items-baseline gap-1 mb-4">
-                        <span className="font-display text-5xl font-extrabold gradient-text">
-                          {currency === "KES"
-                            ? formatKes(Math.round(usdToKes(plan.priceUsd)))
-                            : formatUsd(plan.priceUsd)}
-                        </span>
-                        <span className="text-sm text-muted-foreground">/month</span>
+                        {plan.quoteOnly ? (
+                          <span className="font-display text-3xl font-extrabold gradient-text">
+                            On quotation
+                          </span>
+                        ) : (
+                          <>
+                            <span className="font-display text-5xl font-extrabold gradient-text">
+                              {currency === "KES"
+                                ? formatKes(plan.priceKes)
+                                : formatUsd(kesToUsd(plan.priceKes))}
+                            </span>
+                            <span className="text-sm text-muted-foreground">/month</span>
+                          </>
+                        )}
                       </div>
 
                       <p className="mb-7 flex-shrink-0 text-sm text-muted-foreground leading-relaxed">
@@ -503,35 +515,56 @@ export function PricingSection() {
                       </ul>
 
                       {/* CTA */}
-                      <Button
-                        variant={plan.highlighted ? "hero" : "outline"}
-                        size="lg"
-                        className={`w-full group font-semibold ${plan.highlighted ? "" : "hover:border-primary/50 hover:text-primary"}`}
-                        onClick={() => setSelectedPlan(plan)}
-                      >
-                        {plan.highlighted && <Sparkles className="w-4 h-4" />}
-                        {plan.cta}
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </Button>
+                      {plan.quoteOnly ? (
+                        <a
+                          href={`${WHATSAPP_URL}?text=${encodeURIComponent(`Hi D&V, I'd like a quotation for the ${plan.name} plan.`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <Button
+                            variant="outline"
+                            size="lg"
+                            className="w-full group font-semibold hover:border-primary/50 hover:text-primary"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                            {plan.cta}
+                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          </Button>
+                        </a>
+                      ) : (
+                        <Button
+                          variant={plan.highlighted ? "hero" : "outline"}
+                          size="lg"
+                          className={`w-full group font-semibold ${plan.highlighted ? "" : "hover:border-primary/50 hover:text-primary"}`}
+                          onClick={() => setSelectedPlan(plan)}
+                        >
+                          {plan.highlighted && <Sparkles className="w-4 h-4" />}
+                          {plan.cta}
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      )}
 
                       {/* Payment methods */}
-                      <div className="mt-4 flex items-center justify-center gap-3 border-t border-border/60 pt-4">
-                        {PAYMENTS.map((p, idx) => (
-                          <button
-                            key={p.label}
-                            onClick={() => setSelectedPlan(plan)}
-                            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-                          >
-                            <p.icon className="w-4 h-4" />
-                            <span className={idx === PAYMENTS.length - 1 ? "hidden sm:inline" : ""}>
-                              {p.label}
-                            </span>
-                            {idx < PAYMENTS.length - 1 && (
-                              <span className="text-muted-foreground/30 ml-1.5">·</span>
-                            )}
-                          </button>
-                        ))}
-                      </div>
+                      {!plan.quoteOnly && (
+                        <div className="mt-4 flex items-center justify-center gap-3 border-t border-border/60 pt-4">
+                          {PAYMENTS.map((p, idx) => (
+                            <button
+                              key={p.label}
+                              onClick={() => setSelectedPlan(plan)}
+                              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+                            >
+                              <p.icon className="w-4 h-4" />
+                              <span className={idx === PAYMENTS.length - 1 ? "hidden sm:inline" : ""}>
+                                {p.label}
+                              </span>
+                              {idx < PAYMENTS.length - 1 && (
+                                <span className="text-muted-foreground/30 ml-1.5">·</span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>

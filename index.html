@@ -31,6 +31,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://images.pexels.com" />
+    <link rel="preconnect" href="https://images.pexels.com" crossorigin />
     
     <!-- Preload critical resources -->
     <link rel="preload" href="/favicon.svg" as="image" type="image/svg+xml" />
@@ -146,34 +148,48 @@
     }
     </script>
 
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4079400519004955"
-      crossorigin="anonymous"></script>
+    <!-- AdSense + optional analytics: deferred until after first paint -->
+    <script>
+      (function () {
+        function loadDeferred() {
+          var ads = document.createElement("script");
+          ads.async = true;
+          ads.src =
+            "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4079400519004955";
+          ads.crossOrigin = "anonymous";
+          document.head.appendChild(ads);
 
-    <script>
-      (function () {
-        var gaId = "%VITE_GA_MEASUREMENT_ID%";
-        if (!gaId || gaId.indexOf("VITE_GA_MEASUREMENT_ID") !== -1) return;
-        var script = document.createElement("script");
-        script.async = true;
-        script.src = "https://www.googletagmanager.com/gtag/js?id=" + gaId;
-        document.head.appendChild(script);
-        window.dataLayer = window.dataLayer || [];
-        function gtag() {
-          window.dataLayer.push(arguments);
+          var gaId = "%VITE_GA_MEASUREMENT_ID%";
+          if (gaId && gaId.indexOf("VITE_GA_MEASUREMENT_ID") === -1) {
+            var gtagScript = document.createElement("script");
+            gtagScript.async = true;
+            gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=" + gaId;
+            document.head.appendChild(gtagScript);
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              window.dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", gaId, { anonymize_ip: true });
+          }
+
+          var recaptchaKey = "%VITE_RECAPTCHA_SITE_KEY%";
+          if (recaptchaKey && recaptchaKey.indexOf("VITE_RECAPTCHA_SITE_KEY") === -1) {
+            var recaptcha = document.createElement("script");
+            recaptcha.src = "https://www.google.com/recaptcha/api.js?render=" + recaptchaKey;
+            recaptcha.async = true;
+            recaptcha.defer = true;
+            document.head.appendChild(recaptcha);
+          }
         }
-        gtag("js", new Date());
-        gtag("config", gaId, { anonymize_ip: true });
-      })();
-    </script>
-    <script>
-      (function () {
-        var recaptchaKey = "%VITE_RECAPTCHA_SITE_KEY%";
-        if (!recaptchaKey || recaptchaKey.indexOf("VITE_RECAPTCHA_SITE_KEY") !== -1) return;
-        var script = document.createElement("script");
-        script.src = "https://www.google.com/recaptcha/api.js?render=" + recaptchaKey;
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
+
+        if ("requestIdleCallback" in window) {
+          requestIdleCallback(loadDeferred, { timeout: 2500 });
+        } else {
+          window.addEventListener("load", function () {
+            setTimeout(loadDeferred, 1200);
+          });
+        }
       })();
     </script>
   </head>

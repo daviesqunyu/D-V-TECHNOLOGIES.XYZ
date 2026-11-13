@@ -1,23 +1,12 @@
 import { useRef, useState } from "react";
-import {
-  motion,
-  AnimatePresence,
-  useScroll,
-  useTransform,
-  useMotionValueEvent,
-  type MotionValue,
-} from "framer-motion";
+import { motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   ShoppingBag,
   Wallet,
-  Send,
   ArrowRight,
   Check,
-  CreditCard,
-  Bitcoin,
-  Bot,
   Store,
   Truck,
   Percent,
@@ -32,8 +21,6 @@ import {
   Laptop,
   HardDrive,
   Building2,
-  Smartphone,
-  Headphones,
   Cpu,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -56,10 +43,10 @@ type Frame = {
 /* ------------------------------- What We Do ------------------------------- */
 
 const DO_ITEMS = [
-  { icon: Monitor, label: "Managed IT Support", sub: "24/7 remote & on-site", grad: "from-primary to-cyan-500", d: 0.2 },
-  { icon: Globe, label: "Software & Web", sub: "Websites, apps & ERP", grad: "from-green-500 to-emerald-500", d: 0.32 },
-  { icon: Wifi, label: "Networks & Security", sub: "Wi-Fi, cabling, firewalls", grad: "from-cyan-500 to-blue-500", d: 0.44 },
-  { icon: Cloud, label: "Cloud & Data", sub: "Migration, backups, BI", grad: "from-sky-500 to-indigo-500", d: 0.56 },
+  { icon: Monitor, label: "Managed IT Support", sub: "24/7 remote & on-site", grad: "from-primary to-cyan-500" },
+  { icon: Globe, label: "Software & Web", sub: "Websites, apps & ERP", grad: "from-green-500 to-emerald-500" },
+  { icon: Wifi, label: "Networks & Security", sub: "Wi-Fi, cabling, firewalls", grad: "from-cyan-500 to-blue-500" },
+  { icon: Cloud, label: "Cloud & Data", sub: "Migration, backups, BI", grad: "from-sky-500 to-indigo-500" },
 ];
 
 function DoPanel() {
@@ -69,11 +56,8 @@ function DoPanel() {
         What we handle for you
       </p>
       {DO_ITEMS.map((item) => (
-        <motion.div
+        <div
           key={item.label}
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: item.d }}
           className="flex items-center gap-3 rounded-xl bg-card/80 border border-border/70 p-3"
         >
           <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${item.grad} flex items-center justify-center flex-shrink-0`}>
@@ -86,7 +70,7 @@ function DoPanel() {
           <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
             <Check className="w-3.5 h-3.5" />
           </span>
-        </motion.div>
+        </div>
       ))}
     </div>
   );
@@ -112,27 +96,19 @@ function ServicesPanel() {
         Twelve practice areas, one team
       </p>
       <div className="grid grid-cols-2 gap-2.5">
-        {SERVICE_CHIPS.map((s, i) => (
-          <motion.div
+        {SERVICE_CHIPS.map((s) => (
+          <div
             key={s.label}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 + i * 0.06 }}
             className="flex items-center gap-2.5 rounded-xl bg-card/80 border border-border/70 p-3"
           >
             <span className={`w-9 h-9 rounded-lg bg-gradient-to-br ${s.grad} flex items-center justify-center flex-shrink-0`}>
               <s.icon className="w-4 h-4 text-white" />
             </span>
             <span className="text-sm font-semibold leading-tight">{s.label}</span>
-          </motion.div>
+          </div>
         ))}
       </div>
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.65 }}
-        className="rounded-xl bg-gradient-to-r from-primary to-accent p-[1px]"
-      >
+      <div className="rounded-xl bg-gradient-to-r from-primary to-accent p-[1px]">
         <div className="rounded-[10px] bg-card/90 px-4 py-3 flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground">Start with any single service</p>
@@ -140,7 +116,7 @@ function ServicesPanel() {
           </div>
           <ArrowRight className="w-4 h-4 text-primary" />
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -148,9 +124,9 @@ function ServicesPanel() {
 /* --------------------------------- Products ------------------------------- */
 
 const PRODUCTS = [
-  { name: "Refurbished Laptops", price: "from KES 28,000", grad: "from-blue-500 to-cyan-500", icon: Laptop, d: 0.2 },
-  { name: "CCTV Kit · 4 Cams", price: "KES 22,000", grad: "from-yellow-500 to-amber-500", icon: Camera, d: 0.32 },
-  { name: "Server & Rack Supply", price: "from KES 145,000", grad: "from-slate-500 to-slate-800", icon: HardDrive, d: 0.44 },
+  { name: "Refurbished Laptops", price: "Quotation on request", grad: "from-blue-500 to-cyan-500", icon: Laptop },
+  { name: "CCTV installation", price: "Site survey & quotation", grad: "from-yellow-500 to-amber-500", icon: Camera },
+  { name: "Server & rack supply", price: "Quoted to specification", grad: "from-slate-500 to-slate-800", icon: HardDrive },
 ];
 
 function ProductsPanel() {
@@ -160,11 +136,8 @@ function ProductsPanel() {
         In stock, with warranty & setup
       </p>
       {PRODUCTS.map((p) => (
-        <motion.div
+        <div
           key={p.name}
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: p.d }}
           className="flex items-center gap-3 rounded-xl bg-card/80 border border-border/70 p-3"
         >
           <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${p.grad} flex items-center justify-center flex-shrink-0`}>
@@ -175,14 +148,9 @@ function ProductsPanel() {
             <p className="text-xs text-muted-foreground">{p.price}</p>
           </div>
           <ShoppingBag className="w-4 h-4 text-muted-foreground" />
-        </motion.div>
+        </div>
       ))}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.58 }}
-        className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 p-3"
-      >
+      <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 p-3">
         <span className="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
           <Cpu className="w-4 h-4" />
         </span>
@@ -191,61 +159,7 @@ function ProductsPanel() {
           <p className="text-xs text-muted-foreground">Browse the full catalog</p>
         </div>
         <Store className="w-4 h-4 text-muted-foreground" />
-      </motion.div>
-    </div>
-  );
-}
-
-/* -------------------------------- Live Tools ------------------------------ */
-
-const TOOLS = [
-  { name: "M-Pesa STK", sub: "Instant · subscriptions", icon: Smartphone, grad: "from-green-500 to-emerald-500", d: 0.2 },
-  { name: "Cards via Paystack", sub: "Visa · Mastercard", icon: CreditCard, grad: "from-primary to-cyan-500", d: 0.32 },
-  { name: "Bitcoin", sub: "Global · secure", icon: Bitcoin, grad: "from-orange-500 to-amber-500", d: 0.44 },
-  { name: "DIVA AI", sub: "Chat on Telegram · 24/7", icon: Bot, grad: "from-violet-500 to-fuchsia-500", d: 0.56 },
-];
-
-function ToolsPanel() {
-  return (
-    <div className="space-y-3">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-        Pay your way, chat to get help
-      </p>
-      {TOOLS.map((t) => (
-        <motion.div
-          key={t.name}
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: t.d }}
-          className="flex items-center gap-3 rounded-xl bg-card/80 border border-border/70 p-3"
-        >
-          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${t.grad} flex items-center justify-center flex-shrink-0`}>
-            <t.icon className="w-4 h-4 text-white" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate">{t.name}</p>
-            <p className="text-xs text-muted-foreground">{t.sub}</p>
-          </div>
-          <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
-            <Check className="w-3.5 h-3.5" />
-          </span>
-        </motion.div>
-      ))}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-        className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/30 p-3"
-      >
-        <span className="w-9 h-9 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center">
-          <Headphones className="w-4 h-4" />
-        </span>
-        <div className="flex-1">
-          <p className="text-sm font-bold">24/7 human support</p>
-          <p className="text-xs text-muted-foreground">WhatsApp · phone · on-site</p>
-        </div>
-        <Send className="w-4 h-4 text-muted-foreground" />
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -253,9 +167,9 @@ function ToolsPanel() {
 /* --------------------------------- Partner -------------------------------- */
 
 const PARTNER_ROWS = [
-  { label: "Bulk hardware supply", value: "Wholesale", icon: Truck, grad: "from-emerald-500 to-teal-500", d: 0.2 },
-  { label: "Reseller margins", value: "up to 25%", icon: Percent, grad: "from-cyan-500 to-blue-500", d: 0.32 },
-  { label: "Campus & corporate rollouts", value: "East Africa", icon: Building2, grad: "from-indigo-500 to-violet-500", d: 0.44 },
+  { label: "Bulk hardware supply", value: "Wholesale", icon: Truck, grad: "from-emerald-500 to-teal-500" },
+  { label: "Reseller margins", value: "up to 25%", icon: Percent, grad: "from-cyan-500 to-blue-500" },
+  { label: "Campus & corporate rollouts", value: "East Africa", icon: Building2, grad: "from-indigo-500 to-violet-500" },
 ];
 
 function PartnerPanel() {
@@ -265,11 +179,8 @@ function PartnerPanel() {
         Grow with us
       </p>
       {PARTNER_ROWS.map((r) => (
-        <motion.div
+        <div
           key={r.label}
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: r.d }}
           className="flex items-center gap-3 rounded-xl bg-card/80 border border-border/70 p-3"
         >
           <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${r.grad} flex items-center justify-center flex-shrink-0`}>
@@ -279,14 +190,9 @@ function PartnerPanel() {
             <p className="text-sm font-semibold truncate">{r.label}</p>
             <p className="text-xs text-muted-foreground">{r.value}</p>
           </div>
-        </motion.div>
+        </div>
       ))}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.58 }}
-        className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 p-3"
-      >
+      <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 p-3">
         <span className="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
           <Wallet className="w-4 h-4" />
         </span>
@@ -295,7 +201,7 @@ function PartnerPanel() {
           <p className="text-xs text-muted-foreground">Transparent, no surprises</p>
         </div>
         <Store className="w-4 h-4 text-muted-foreground" />
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -315,7 +221,7 @@ const FRAMES: Frame[] = [
     orb: "bg-gradient-to-br from-primary/40 to-cyan-500/20",
     accentText: "text-primary",
     image:
-      "https://images.pexels.com/photos/1148820/pexels-photo-1148820.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "https://images.pexels.com/photos/1148820/pexels-photo-1148820.jpeg?auto=compress&cs=tinysrgb&w=1200",
   },
   {
     key: "services",
@@ -331,7 +237,7 @@ const FRAMES: Frame[] = [
     orb: "bg-gradient-to-br from-accent/40 to-orange-500/20",
     accentText: "text-accent",
     image:
-      "https://images.pexels.com/photos/3182773/pexels-photo-3182773.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "https://images.pexels.com/photos/3182773/pexels-photo-3182773.jpeg?auto=compress&cs=tinysrgb&w=1200",
   },
   {
     key: "products",
@@ -341,33 +247,17 @@ const FRAMES: Frame[] = [
     titleBottom: "ready to buy",
     description:
       "Quality-checked laptops, CCTV kits, servers, Wi-Fi, UPS backup and more — delivered with warranty, setup and support.",
-    bullets: ["Refurbished laptops from KES 28,000", "CCTV kits from KES 22,000", "Servers, racks & storage", "Warranty + setup included"],
+    bullets: ["Refurbished laptops — quoted to your specs", "CCTV install — after site survey", "Servers, racks & storage on quotation", "Warranty and setup included"],
     cta: { label: "Open Shop", to: "/shop" },
     icon: ShoppingBag,
     orb: "bg-gradient-to-br from-emerald-400/40 to-teal-500/20",
     accentText: "text-emerald-500 dark:text-emerald-400",
     image:
-      "https://images.pexels.com/photos/18105/pexels-photo-18105.jpeg?auto=compress&cs=tinysrgb&w=1600",
-  },
-  {
-    key: "tools",
-    badge: "04 · Live Tools",
-    titleTop: "Tools your",
-    titleAccent: "customers can",
-    titleBottom: "use today",
-    description:
-      "Pay with M-Pesa, cards or Bitcoin. Chat with DIVA AI on Telegram or WhatsApp. Everything is live — right now.",
-    bullets: ["M-Pesa STK push & subscriptions", "Cards via Paystack · Bitcoin", "DIVA AI on Telegram", "Instant digital delivery"],
-    cta: { label: "Explore Payments", to: "/pay" },
-    icon: Wallet,
-    orb: "bg-gradient-to-br from-violet-500/40 to-fuchsia-500/20",
-    accentText: "text-violet-400 dark:text-violet-300",
-    image:
-      "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "https://images.pexels.com/photos/18105/pexels-photo-18105.jpeg?auto=compress&cs=tinysrgb&w=1200",
   },
   {
     key: "partner",
-    badge: "05 · Partner",
+    badge: "04 · Partner",
     titleTop: "Let's build your",
     titleAccent: "next",
     titleBottom: "advantage",
@@ -379,7 +269,7 @@ const FRAMES: Frame[] = [
     orb: "bg-gradient-to-br from-emerald-400/40 to-teal-500/20",
     accentText: "text-emerald-500 dark:text-emerald-400",
     image:
-      "https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=1200",
   },
 ];
 
@@ -391,8 +281,6 @@ function FramePanel({ frame }: { frame: Frame }) {
       return <ServicesPanel />;
     case "products":
       return <ProductsPanel />;
-    case "tools":
-      return <ToolsPanel />;
     case "partner":
       return <PartnerPanel />;
     default:
@@ -400,51 +288,52 @@ function FramePanel({ frame }: { frame: Frame }) {
   }
 }
 
-/* --------------------------------- Reel --------------------------------- */
-
-function ReelFrame({ frame, scrollYProgress }: { frame: Frame; scrollYProgress: MotionValue<number> }) {
+function StorySlide({
+  frame,
+  index,
+  active,
+  shouldLoad,
+}: {
+  frame: Frame;
+  index: number;
+  active: number;
+  shouldLoad: boolean;
+}) {
   const Icon = frame.icon;
-  const parallax = useTransform(scrollYProgress, [0, 1], [48, -48]);
+  const isActive = index === active;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="absolute inset-0 z-10 pointer-events-none"
+    <div
       aria-label={frame.badge}
+      aria-hidden={!isActive}
+      className={`absolute inset-0 ${isActive ? "z-10 visible" : "z-0 invisible"}`}
     >
-      {/* frame orbs */}
-      <div className={`absolute -top-20 -right-20 w-[28rem] h-[28rem] rounded-full blur-3xl opacity-50 ${frame.orb}`} aria-hidden="true" />
-      <div className={`absolute -bottom-24 -left-24 w-96 h-96 rounded-full blur-3xl opacity-30 ${frame.orb}`} aria-hidden="true" />
-
-      {/* Static backdrop with a gentle scroll-driven parallax (GPU transform only) */}
-      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-        <motion.div style={{ y: parallax }} className="absolute -inset-y-[10%] inset-x-0 will-change-transform">
+      <div className="absolute inset-0" aria-hidden="true">
+        {shouldLoad ? (
           <img
             src={frame.image}
             alt=""
-            loading="lazy"
+            loading={index === 0 ? "eager" : "lazy"}
             decoding="async"
+            fetchPriority={index === 0 ? "high" : "low"}
             draggable={false}
             className="w-full h-full object-cover"
           />
-        </motion.div>
+        ) : (
+          <div className="w-full h-full bg-muted" />
+        )}
         <div className="absolute inset-0 bg-background/55 dark:bg-black/55" />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
         <div className="absolute inset-0 bg-primary/5 mix-blend-overlay" />
-        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent" />
       </div>
 
-      <div className="container relative mx-auto px-4 lg:px-8 h-full">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center h-full pt-24 pb-20">
-          {/* Copy */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-          >
+      <div className={`absolute -top-20 -right-20 w-[28rem] h-[28rem] rounded-full blur-2xl opacity-40 ${frame.orb}`} aria-hidden="true" />
+      <div className={`absolute -bottom-24 -left-24 w-96 h-96 rounded-full blur-2xl opacity-25 ${frame.orb}`} aria-hidden="true" />
+
+      <div className="container relative mx-auto px-4 lg:px-8 h-full flex items-center py-24 lg:py-20 pointer-events-none">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center w-full">
+          <div>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border mb-6">
               <Icon className={`w-4 h-4 ${frame.accentText}`} />
               <span className={`text-sm font-medium ${frame.accentText}`}>{frame.badge}</span>
@@ -468,25 +357,21 @@ function ReelFrame({ frame, scrollYProgress }: { frame: Frame; scrollYProgress: 
                 </li>
               ))}
             </ul>
-            <Link to={frame.cta.to} className="pointer-events-auto inline-block">
+            <Link
+              to={frame.cta.to}
+              tabIndex={isActive ? 0 : -1}
+              className={`inline-block ${isActive ? "pointer-events-auto" : "pointer-events-none"}`}
+            >
               <Button variant="hero" size="lg" className="group">
                 {frame.cta.label}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-          </motion.div>
+          </div>
 
-          {/* Live panel */}
           <div className="hidden sm:block">
-            <motion.div
-              initial={{ opacity: 0, y: 28, rotateY: -8 }}
-              animate={{ opacity: 1, y: 0, rotateY: 0 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.18 }}
-              className="relative rounded-3xl p-[1px] bg-gradient-to-br from-border via-primary/40 to-border shadow-2xl"
-              style={{ perspective: 1200 }}
-            >
-              <div className="rounded-[calc(1.5rem-1px)] bg-background/90 backdrop-blur-xl overflow-hidden">
-                {/* window chrome */}
+            <div className="relative rounded-3xl p-[1px] bg-gradient-to-br from-border via-primary/40 to-border shadow-2xl">
+              <div className="rounded-[calc(1.5rem-1px)] bg-background/95 overflow-hidden">
                 <div className="flex items-center gap-1.5 px-4 pt-4 pb-2.5 border-b border-border/60">
                   <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
                   <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
@@ -499,60 +384,55 @@ function ReelFrame({ frame, scrollYProgress }: { frame: Frame; scrollYProgress: 
                   <FramePanel frame={frame} />
                 </div>
               </div>
-              {/* corner accent */}
               <div className={`absolute -top-3 -right-3 w-16 h-16 rounded-2xl bg-gradient-to-br ${frame.orb} blur-xl`} aria-hidden="true" />
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 export function StoryReel() {
   const ref = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
+  const [loadedThrough, setLoadedThrough] = useState(1); // index 0 + next
+  const count = FRAMES.length;
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
   const progress = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const idx = Math.min(FRAMES.length - 1, Math.max(0, Math.floor(v * FRAMES.length)));
+    const idx = Math.min(count - 1, Math.max(0, Math.floor(v * count - 1e-6)));
     setActive((prev) => (prev === idx ? prev : idx));
+    setLoadedThrough((prev) => Math.max(prev, Math.min(count - 1, idx + 1)));
   });
 
   return (
-    <section ref={ref} className="relative h-[500vh]">
-      <div className="sticky top-0 h-screen overflow-hidden">
-        {/* Shared backdrop */}
-        <div className="absolute inset-0 hero-pattern opacity-40" aria-hidden="true" />
-        <div className="absolute inset-0 grid-pattern opacity-40" aria-hidden="true" />
+    // Sticky reel: scroll advances 01→05. Short track keeps it responsive (no fade).
+    <section ref={ref} className="relative h-[200vh]">
+      <div className="sticky top-0 h-dvh overflow-hidden">
+        <div className="absolute inset-0 hero-pattern opacity-30" aria-hidden="true" />
+        <div className="absolute inset-0 grid-pattern opacity-30" aria-hidden="true" />
 
-        {/* Cinematic vignette */}
-        <div
-          className="absolute inset-0 z-[5] pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.35) 100%)",
-          }}
-          aria-hidden="true"
-        />
-
-        {/* Top progress bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-border/60 z-20">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-border/60 z-30">
           <motion.div
             style={{ width: progress }}
             className="h-full bg-gradient-to-r from-primary via-accent to-primary"
           />
         </div>
 
-        {/* Active frame — only one is mounted at a time (no blur, no Ken Burns) */}
-        <AnimatePresence>
-          <ReelFrame key={FRAMES[active].key} frame={FRAMES[active]} scrollYProgress={scrollYProgress} />
-        </AnimatePresence>
+        {FRAMES.map((frame, i) => (
+          <StorySlide
+            key={frame.key}
+            frame={frame}
+            index={i}
+            active={active}
+            shouldLoad={i <= loadedThrough}
+          />
+        ))}
 
-        {/* Frame counter */}
-        <div className="absolute bottom-8 right-4 lg:right-8 z-20 flex items-center gap-3">
+        <div className="absolute bottom-8 right-4 lg:right-8 z-30 flex items-center gap-3 pointer-events-none">
           <span className="font-display text-4xl lg:text-6xl font-black text-foreground/10 tabular-nums">
             {String(active + 1).padStart(2, "0")}
           </span>
@@ -560,7 +440,7 @@ export function StoryReel() {
             {FRAMES.map((frame, i) => (
               <span
                 key={frame.key}
-                className={`block h-1.5 rounded-full transition-all duration-500 ${
+                className={`block h-1.5 rounded-full ${
                   i === active ? "w-8 bg-gradient-to-r from-primary to-accent" : "w-3 bg-foreground/15"
                 }`}
               />
@@ -568,12 +448,11 @@ export function StoryReel() {
           </div>
         </div>
 
-        {/* Vertical scroll progress rail (desktop) */}
-        <div className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2 items-center">
+        <div className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2 items-center pointer-events-none z-30">
           {FRAMES.map((frame, i) => (
             <span
               key={frame.key}
-              className={`w-2 h-2 rounded-full transition-all duration-500 ${
+              className={`w-2 h-2 rounded-full ${
                 i === active ? "bg-primary scale-125" : "bg-foreground/20"
               }`}
             />

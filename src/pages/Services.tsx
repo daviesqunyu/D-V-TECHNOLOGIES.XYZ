@@ -1,336 +1,240 @@
-import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, animate } from "framer-motion";
+import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  CheckCircle,
   Briefcase,
-  Globe,
-  ChevronDown,
+  CheckCircle,
+  Code2,
+  Bot,
+  Wrench,
+  type LucideIcon,
 } from "lucide-react";
 import { PricingSection } from "@/components/sections/PricingSection";
 import { SEOHead } from "@/components/SEOHead";
-import { servicesData } from "@/data/services";
+import { servicesData, type ServiceItem } from "@/data/services";
 
-const N = servicesData.length;
-const ANGLE_PER = 360 / N;
+type Bucket = "all" | "build" | "automate" | "run";
+
+const BUCKETS: { id: Bucket; label: string; blurb: string; icon: LucideIcon }[] = [
+  { id: "all", label: "All", blurb: "Every practice area", icon: Briefcase },
+  { id: "build", label: "Build", blurb: "Web, apps & systems", icon: Code2 },
+  { id: "automate", label: "Automate", blurb: "AI agents & data", icon: Bot },
+  { id: "run", label: "Run", blurb: "IT, networks & security", icon: Wrench },
+];
+
+/** Map existing service categories into clear buyer-facing buckets */
+function getBucket(service: ServiceItem): Exclude<Bucket, "all"> {
+  const cat = service.category.toLowerCase();
+  if (cat === "software") return "build";
+  if (cat === "ai" || cat === "iot") return "automate";
+  return "run";
+}
 
 export default function Services() {
+  const [bucket, setBucket] = useState<Bucket>("all");
+
+  const filtered = useMemo(() => {
+    if (bucket === "all") return servicesData;
+    return servicesData.filter((s) => getBucket(s) === bucket);
+  }, [bucket]);
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Services | D&V Technologies"
-        description="Explore software engineering, AI, cybersecurity, cloud, networking, and managed IT services from D&V Technologies."
+        description="Web & mobile apps, AI business agents, IT support, networking, cloud and security — delivered end to end by D&V Technologies."
         canonicalPath="/services"
       />
       <Navbar />
       <main id="main-content" className="pt-20 lg:pt-24">
-        {/* Hero */}
-        <section className="relative py-16 lg:py-24 hero-pattern overflow-hidden">
+        <section className="relative py-14 lg:py-20 hero-pattern overflow-hidden">
           <div className="absolute inset-0 grid-pattern opacity-40" aria-hidden="true" />
           <div className="container mx-auto px-4 lg:px-8 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-3xl mx-auto text-center"
-            >
+            <div className="max-w-3xl mx-auto text-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-6">
                 <Briefcase className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-primary">What we do</span>
               </div>
-              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-5">
                 Our <span className="gradient-text">Services</span>
               </h1>
-              <p className="text-lg text-muted-foreground">
-                Twelve practice areas, one accountable team — IT, hardware, software, data and AI,
-                delivered end to end, anywhere in the world.
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                We build web and mobile apps, set up AI agents for your business, and run the IT
+                that keeps you online — clear offers, no jargon.
               </p>
-            </motion.div>
+            </div>
           </div>
         </section>
 
-        {/* Globe Orbital Scroll */}
-        <GlobeOrbital />
+        {/* Featured offers */}
+        <section className="pb-4 lg:pb-6">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="grid md:grid-cols-2 gap-4 lg:gap-6 max-w-5xl mx-auto">
+              <Link
+                to="/services/web-app-development"
+                className="rounded-2xl border border-border bg-card p-6 hover:border-primary/40 transition-colors group"
+              >
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-4">
+                  <Code2 className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="font-display text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                  Web & mobile apps
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                  Business sites, booking systems, e-commerce, and mobile apps — with M-Pesa and
+                  card payments when you need them.
+                </p>
+                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+                  View details <ArrowRight className="w-4 h-4" />
+                </span>
+              </Link>
+              <Link
+                to="/services/ai-machine-learning"
+                className="rounded-2xl border border-border bg-card p-6 hover:border-primary/40 transition-colors group"
+              >
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center mb-4">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="font-display text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                  AI chatbots & business agents
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                  WhatsApp, Telegram, or web agents that answer customers, take leads, and help
+                  your team — in English and Swahili.
+                </p>
+                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+                  View details <ArrowRight className="w-4 h-4" />
+                </span>
+              </Link>
+            </div>
+          </div>
+        </section>
 
-        {/* Pricing */}
+        {/* Easy-scroll service grid */}
+        <section className="py-12 lg:py-16 bg-card">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+              <div>
+                <h2 className="font-display text-2xl md:text-3xl font-bold mb-2">
+                  Browse by what you need
+                </h2>
+                <p className="text-muted-foreground text-sm md:text-base">
+                  {filtered.length} service{filtered.length === 1 ? "" : "s"} — scroll normally, tap any card.
+                </p>
+              </div>
+            </div>
+
+            <div
+              className="flex flex-wrap gap-2 mb-10"
+              role="tablist"
+              aria-label="Filter services"
+            >
+              {BUCKETS.map((b) => {
+                const Icon = b.icon;
+                const active = bucket === b.id;
+                return (
+                  <button
+                    key={b.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setBucket(b.id)}
+                    className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium border transition-colors ${
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {b.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
+              {filtered.map((service, i) => {
+                const Icon = service.icon;
+                return (
+                  <motion.div
+                    key={service.slug}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, delay: Math.min(i * 0.03, 0.24) }}
+                  >
+                    <Link
+                      to={`/services/${service.slug}`}
+                      className="block h-full rounded-2xl border border-border bg-background p-6 hover:border-primary/40 hover:shadow-md transition-all group"
+                      aria-label={`View details for ${service.title}`}
+                    >
+                      <div
+                        className={`w-12 h-12 rounded-xl bg-gradient-to-br ${service.color} flex items-center justify-center mb-4 shadow-sm group-hover:scale-105 transition-transform`}
+                      >
+                        <Icon className="w-6 h-6 text-white" />
+                      </div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">
+                        {BUCKETS.find((b) => b.id === getBucket(service))?.label}
+                      </p>
+                      <h3 className="font-display text-lg font-bold mb-2 group-hover:text-primary transition-colors">
+                        {service.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                        {service.description}
+                      </p>
+                      <ul className="space-y-1.5 mb-5">
+                        {service.features.slice(0, 3).map((f) => (
+                          <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
+                            <CheckCircle className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+                        View details
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                      </span>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         <PricingSection />
 
-        {/* CTA */}
         <section className="py-16 lg:py-24">
           <div className="container mx-auto px-4 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="glass-card rounded-3xl p-8 lg:p-16 text-center"
-            >
-              <Globe className="w-16 h-16 text-primary mx-auto mb-6" />
+            <div className="glass-card rounded-3xl p-8 lg:p-16 text-center">
               <h2 className="font-display text-3xl lg:text-4xl font-bold mb-4">
-                Need a Custom Solution?
+                Need something specific?
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-                Every business is unique. Let's discuss your specific needs and
-                create a tailored technology solution for your organization.
+                Tell us what you want to build or fix — a website, an app, an AI agent, or day-to-day
+                IT. We’ll reply with a clear next step.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/contact">
                   <Button variant="hero" size="lg">
-                    Contact Us
+                    Contact us
                     <ArrowRight className="w-5 h-5" />
                   </Button>
                 </Link>
-                <Link to="/ai-assistant">
+                <a href="https://wa.me/254759075816" target="_blank" rel="noopener noreferrer">
                   <Button variant="glass" size="lg">
-                    Ask AI Assistant
+                    WhatsApp us
                   </Button>
-                </Link>
+                </a>
               </div>
-            </motion.div>
+            </div>
           </div>
         </section>
       </main>
       <Footer />
     </div>
-  );
-}
-
-/* ─── Globe Orbital Component ─── */
-function GlobeOrbital() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const rotation = useMotionValue(0);
-  const [isMobile, setIsMobile] = useState(false);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  const totalRotation = useTransform(scrollYProgress, [0, 1], [0, 360 * 2]);
-
-  useEffect(() => {
-    if (isMobile) return; /* mobile uses tap/swipe, not scroll */
-    const unsub = totalRotation.on("change", (v) => {
-      rotation.set(v);
-      const idx = Math.round(-v / ANGLE_PER) % N;
-      setActiveIdx(((idx % N) + N) % N);
-    });
-    return unsub;
-  }, [totalRotation, isMobile]);
-
-  const goTo = useCallback(
-    (idx: number) => {
-      const target = idx * ANGLE_PER;
-      animate(rotation, -target, { type: "spring", stiffness: 80, damping: 20 });
-      setActiveIdx(idx);
-    },
-    [rotation]
-  );
-
-  const goNext = useCallback(() => {
-    const next = (activeIdx + 1) % N;
-    goTo(next);
-  }, [activeIdx, goTo]);
-
-  const goPrev = useCallback(() => {
-    const prev = (activeIdx - 1 + N) % N;
-    goTo(prev);
-  }, [activeIdx, goTo]);
-
-  /* swipe handlers for mobile */
-  const onTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (touchStart === null) return;
-    const diff = touchStart - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) goNext(); else goPrev();
-    }
-    setTouchStart(null);
-  };
-
-  const radius = 380;
-
-  return (
-    <section
-      ref={containerRef}
-      className="relative bg-card"
-      style={{ height: isMobile ? "auto" : `${N * 120 + 600}px` }}
-    >
-      <div
-        className={`flex flex-col items-center justify-center overflow-hidden ${
-          isMobile ? "py-16" : "sticky top-0 h-screen"
-        }`}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-      >
-        {/* Central glow */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-          <div className="w-[260px] h-[260px] md:w-[500px] md:h-[500px] rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute w-[180px] h-[180px] md:w-[350px] md:h-[350px] rounded-full border border-primary/10" />
-          <div className="absolute w-[280px] h-[280px] md:w-[500px] md:h-[500px] rounded-full border border-primary/5" />
-          <div className="absolute w-[380px] h-[380px] md:w-[650px] md:h-[650px] rounded-full border border-primary/[0.03]" />
-        </div>
-
-        {/* Label */}
-        <div className="absolute top-6 md:top-12 left-1/2 -translate-x-1/2 text-center z-20">
-          <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium">
-            {isMobile ? "Swipe to explore" : "Scroll to explore"}
-          </p>
-          {!isMobile && <ChevronDown className="w-4 h-4 text-primary mx-auto mt-1 animate-bounce" />}
-        </div>
-
-        {/* ── Desktop: 3D orbital carousel ── */}
-        {!isMobile && (
-          <div
-            className="relative z-10 hidden md:block"
-            style={{ width: `${radius * 2 + 320}px`, height: "400px", perspective: "1200px" }}
-          >
-            <motion.div
-              className="absolute inset-0"
-              style={{ transformStyle: "preserve-3d", rotateY: rotation }}
-            >
-              {servicesData.map((service, i) => {
-                const Icon = service.icon;
-                const angle = i * ANGLE_PER;
-                const isActive = i === activeIdx;
-                return (
-                  <motion.div
-                    key={service.slug}
-                    className="absolute top-1/2 left-1/2"
-                    style={{
-                      transform: `rotateY(${angle}deg) translateZ(${radius}px) translate(-50%, -50%)`,
-                      transformStyle: "preserve-3d",
-                      width: "280px",
-                    }}
-                  >
-                    <motion.div
-                      animate={{ scale: isActive ? 1.08 : 0.82, opacity: isActive ? 1 : 0.5 }}
-                      transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                      className={`rounded-2xl p-6 border transition-colors cursor-pointer ${
-                        isActive
-                          ? "bg-card/95 border-primary/40 shadow-2xl shadow-primary/10 backdrop-blur-xl"
-                          : "bg-card/60 border-border/30 backdrop-blur-md"
-                      }`}
-                      onClick={() => goTo(i)}
-                    >
-                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${service.color} flex items-center justify-center mb-4 shadow-lg ${isActive ? "scale-110" : ""} transition-transform`}>
-                        <Icon className="w-7 h-7 text-white" />
-                      </div>
-                      <h3 className="font-display text-base font-bold mb-1.5 leading-tight">{service.title}</h3>
-                      {isActive && (
-                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} transition={{ duration: 0.3 }}>
-                          <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{service.description}</p>
-                          <ul className="space-y-1.5 mb-4">
-                            {service.features.map((f) => (
-                              <li key={f} className="flex items-center gap-1.5 text-xs">
-                                <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
-                                <span>{f}</span>
-                              </li>
-                            ))}
-                          </ul>
-                          <Link to={`/services/${service.slug}`} onClick={(e) => e.stopPropagation()}>
-                            <Button variant="outline" size="sm" className="w-full text-xs">View Details <ArrowRight className="w-3.5 h-3.5" /></Button>
-                          </Link>
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </div>
-        )}
-
-        {/* ── Mobile: flat swipeable card ── */}
-        {isMobile && (
-          <div className="relative z-10 w-full px-6 mt-8">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeIdx}
-                initial={{ opacity: 0, x: 60 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -60 }}
-                transition={{ type: "spring", stiffness: 260, damping: 26 }}
-                className="rounded-2xl border border-primary/30 bg-card/95 backdrop-blur-xl p-5 shadow-xl shadow-primary/5"
-              >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${servicesData[activeIdx].color} flex items-center justify-center mb-3 shadow-lg`}>
-                  {(() => { const Ic = servicesData[activeIdx].icon; return <Ic className="w-6 h-6 text-white" />; })()}
-                </div>
-                <h3 className="font-display text-base font-bold mb-1">
-                  {servicesData[activeIdx].title}
-                </h3>
-                <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-                  {servicesData[activeIdx].description}
-                </p>
-                <ul className="space-y-1.5 mb-4">
-                  {servicesData[activeIdx].features.map((f) => (
-                    <li key={f} className="flex items-center gap-1.5 text-xs">
-                      <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link to={`/services/${servicesData[activeIdx].slug}`}>
-                  <Button variant="outline" size="sm" className="w-full text-xs">
-                    View Details <ArrowRight className="w-3.5 h-3.5" />
-                  </Button>
-                </Link>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* prev / next arrows */}
-            <button onClick={goPrev} className="absolute left-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-card/80 border border-border flex items-center justify-center text-muted-foreground z-30" aria-label="Previous">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
-            </button>
-            <button onClick={goNext} className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-card/80 border border-border flex items-center justify-center text-muted-foreground z-30" aria-label="Next">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
-          </div>
-        )}
-
-        {/* Dots indicator */}
-        <div className={`${isMobile ? "mt-6" : "absolute bottom-8 md:bottom-12"} left-1/2 -translate-x-1/2 flex items-center gap-1.5 md:gap-2 z-20`}>
-          {servicesData.map((s, i) => (
-            <button
-              key={s.slug}
-              onClick={() => goTo(i)}
-              className={`rounded-full transition-all duration-300 ${
-                i === activeIdx
-                  ? "w-7 md:w-8 h-1.5 md:h-2 bg-primary"
-                  : "w-1.5 md:w-2 h-1.5 md:h-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
-              }`}
-              aria-label={s.title}
-            />
-          ))}
-        </div>
-
-        {/* Active service name */}
-        <motion.div
-          key={activeIdx}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`${isMobile ? "mt-4" : "absolute bottom-16 md:bottom-20"} left-1/2 -translate-x-1/2 text-center z-20`}
-        >
-          <span className="text-xs md:text-sm font-semibold gradient-text">
-            {servicesData[activeIdx].title}
-          </span>
-          <span className="text-[10px] md:text-xs text-muted-foreground ml-2">
-            {activeIdx + 1} / {N}
-          </span>
-        </motion.div>
-      </div>
-    </section>
   );
 }

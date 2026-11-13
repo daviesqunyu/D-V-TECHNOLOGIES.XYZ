@@ -6,7 +6,7 @@ export type CartItem = {
   name: string;
   price: number;
   currency: "USD" | "KES";
-  billing?: "weekly" | "monthly" | "once";
+  billing?: "weekly" | "monthly" | "once" | "yearly";
   category?: string;
   qty: number;
 };

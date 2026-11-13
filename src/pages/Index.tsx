@@ -1,22 +1,31 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SectionDivider } from "@/components/SectionDivider";
 import { ScrollytellingExperience } from "@/components/scrollytelling/ScrollytellingExperience";
 import { ServicesSection } from "@/components/sections/ServicesSection";
-import { TrustedClientsSection } from "@/components/sections/TrustedClientsSection";
-import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
-import { MissionSection } from "@/components/sections/MissionSection";
-import { WhyChooseUsSection } from "@/components/sections/WhyChooseUsSection";
 import { PricingSection } from "@/components/sections/PricingSection";
-import { AISection } from "@/components/sections/AISection";
-import { FAQSection } from "@/components/sections/FAQSection";
-import { NewsletterSection } from "@/components/sections/NewsletterSection";
-import { ContactSection } from "@/components/sections/ContactSection";
-import { ShowcaseSection } from "@/components/sections/ShowcaseSection";
-import { TelegramPromoSection } from "@/components/sections/TelegramPromoSection";
 import { SEOHead } from "@/components/SEOHead";
+
+/* Below-fold — deferred for faster first paint */
+const TrustedClientsSection = lazy(() =>
+  import("@/components/sections/TrustedClientsSection").then((m) => ({ default: m.TrustedClientsSection })),
+);
+const TestimonialsSection = lazy(() =>
+  import("@/components/sections/TestimonialsSection").then((m) => ({ default: m.TestimonialsSection })),
+);
+const MissionSection = lazy(() =>
+  import("@/components/sections/MissionSection").then((m) => ({ default: m.MissionSection })),
+);
+const FAQSection = lazy(() =>
+  import("@/components/sections/FAQSection").then((m) => ({ default: m.FAQSection })),
+);
+const ContactSection = lazy(() =>
+  import("@/components/sections/ContactSection").then((m) => ({ default: m.ContactSection })),
+);
+
+const SectionFallback = () => <div className="min-h-[32vh]" aria-hidden="true" />;
 
 const Index = () => {
   const { hash } = useLocation();
@@ -35,7 +44,10 @@ const Index = () => {
       if (!tryScroll()) {
         const t1 = setTimeout(tryScroll, 200);
         const t2 = setTimeout(tryScroll, 500);
-        return () => { clearTimeout(t1); clearTimeout(t2); };
+        return () => {
+          clearTimeout(t1);
+          clearTimeout(t2);
+        };
       }
     }
   }, [hash]);
@@ -49,31 +61,23 @@ const Index = () => {
       />
       <Navbar />
       <main id="main-content">
+        {/* Story once → services once → buy → trust → proof → mission → FAQ → contact */}
         <ScrollytellingExperience />
         <SectionDivider />
         <ServicesSection />
-        {/* Packages should appear immediately after Services */}
         <PricingSection />
-        <SectionDivider />
-        <TrustedClientsSection />
-        <SectionDivider />
-        <TestimonialsSection />
-        <SectionDivider />
-        <MissionSection />
-        <SectionDivider />
-        <ShowcaseSection />
-        <SectionDivider />
-        <WhyChooseUsSection />
-        <SectionDivider />
-        <AISection />
-        <SectionDivider />
-        <FAQSection />
-        <SectionDivider />
-        <TelegramPromoSection />
-        <SectionDivider />
-        <NewsletterSection />
-        <SectionDivider />
-        <ContactSection />
+        <Suspense fallback={<SectionFallback />}>
+          <SectionDivider />
+          <TrustedClientsSection />
+          <SectionDivider />
+          <TestimonialsSection />
+          <SectionDivider />
+          <MissionSection />
+          <SectionDivider />
+          <FAQSection />
+          <SectionDivider />
+          <ContactSection />
+        </Suspense>
       </main>
       <Footer />
     </div>

@@ -37,7 +37,12 @@ function ProductModal({ product, onClose }: { product: Product; onClose: () => v
   const [added, setAdded] = useState(false);
   const Icon = product.icon;
 
+  const quoteUrl = `${WHATSAPP_URL}?text=${encodeURIComponent(
+    `Hi D&V, I'd like a quotation for: ${product.name}`,
+  )}`;
+
   const handleAdd = () => {
+    if (product.quoteOnly) return;
     addItem({
       id: product.id,
       name: product.name,
@@ -177,36 +182,61 @@ function ProductModal({ product, onClose }: { product: Product; onClose: () => v
           <div className="rounded-2xl p-[1px] bg-gradient-to-r from-primary to-accent">
             <div className="rounded-[calc(1rem-1px)] bg-card p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
               <div>
-                <p className="font-display text-3xl font-extrabold gradient-text tabular-nums">
-                  {formatPrice(product.price, product.currency, product.billing)}
-                </p>
-                {product.compareAt && (
-                  <p className="text-xs text-muted-foreground line-through tabular-nums">
-                    {formatPrice(product.compareAt, product.currency, product.billing)}
-                  </p>
+                {product.quoteOnly ? (
+                  <>
+                    <p className="font-display text-2xl font-extrabold gradient-text">
+                      Quotation on request
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Specs and stock change — we confirm price before work begins.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-display text-3xl font-extrabold gradient-text tabular-nums">
+                      {formatPrice(product.price, product.currency, product.billing)}
+                    </p>
+                    {product.compareAt && (
+                      <p className="text-xs text-muted-foreground line-through tabular-nums">
+                        {formatPrice(product.compareAt, product.currency, product.billing)}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
               <div className="flex gap-2 w-full sm:w-auto">
-                <Button variant="hero" onClick={handleAdd} className="flex-1 sm:flex-none">
-                  {added ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                  {added ? "Added" : "Add to Cart"}
-                </Button>
-                <a
-                  href={`${WHATSAPP_URL}?text=${encodeURIComponent(`Hi D&V, I'm interested in: ${product.name}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="outline" className="h-full">
-                    <MessageCircle className="w-4 h-4" /> Ask
-                  </Button>
-                </a>
+                {product.quoteOnly ? (
+                  <a href={quoteUrl} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-none">
+                    <Button variant="hero" className="w-full">
+                      <MessageCircle className="w-4 h-4" /> Request quotation
+                    </Button>
+                  </a>
+                ) : (
+                  <>
+                    <Button variant="hero" onClick={handleAdd} className="flex-1 sm:flex-none">
+                      {added ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                      {added ? "Added" : "Add to Cart"}
+                    </Button>
+                    <a
+                      href={`${WHATSAPP_URL}?text=${encodeURIComponent(`Hi D&V, I'm interested in: ${product.name}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button variant="outline" className="h-full">
+                        <MessageCircle className="w-4 h-4" /> Ask
+                      </Button>
+                    </a>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground text-center">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            Pay with M-Pesa, Paystack card or Bitcoin · Receipts saved automatically
+            {product.quoteOnly
+              ? "We reply on WhatsApp with a clear quotation"
+              : "Pay with M-Pesa, Paystack card or Bitcoin · Receipts saved automatically"}
           </p>
         </div>
       </motion.div>
@@ -232,6 +262,7 @@ export default function Shop() {
   });
 
   const handleAdd = (product: Product) => {
+    if (product.quoteOnly) return;
     addItem({
       id: product.id,
       name: product.name,
@@ -390,37 +421,62 @@ export default function Shop() {
 
                               <div className="flex items-end justify-between mb-4">
                                 <div>
-                                  <p className="font-display text-xl font-extrabold gradient-text tabular-nums">
-                                    {formatPrice(product.price, product.currency, product.billing)}
-                                  </p>
-                                  {product.compareAt && (
-                                    <p className="text-xs text-muted-foreground line-through tabular-nums">
-                                      {formatPrice(product.compareAt, product.currency, product.billing)}
+                                  {product.quoteOnly ? (
+                                    <p className="font-display text-lg font-extrabold gradient-text">
+                                      On quotation
                                     </p>
+                                  ) : (
+                                    <>
+                                      <p className="font-display text-xl font-extrabold gradient-text tabular-nums">
+                                        {formatPrice(product.price, product.currency, product.billing)}
+                                      </p>
+                                      {product.compareAt && (
+                                        <p className="text-xs text-muted-foreground line-through tabular-nums">
+                                          {formatPrice(product.compareAt, product.currency, product.billing)}
+                                        </p>
+                                      )}
+                                    </>
                                   )}
                                 </div>
                                 <span className="text-[10px] font-semibold text-emerald-500">
-                                  {product.billing === "once" ? "One-time" : `Billed ${product.billing}`}
+                                  {product.quoteOnly
+                                    ? "Consult first"
+                                    : product.billing === "once"
+                                      ? "One-time"
+                                      : `Billed ${product.billing}`}
                                 </span>
                               </div>
 
                               <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                                <Button
-                                  variant={added === product.id ? "secondary" : "hero"}
-                                  size="sm"
-                                  className="flex-1"
-                                  onClick={() => handleAdd(product)}
-                                >
-                                  {added === product.id ? (
-                                    <>
-                                      <Check className="w-4 h-4" /> Added
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Plus className="w-4 h-4" /> Add
-                                    </>
-                                  )}
-                                </Button>
+                                {product.quoteOnly ? (
+                                  <a
+                                    href={`${WHATSAPP_URL}?text=${encodeURIComponent(`Hi D&V, I'd like a quotation for: ${product.name}`)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex-1"
+                                  >
+                                    <Button variant="hero" size="sm" className="w-full">
+                                      <MessageCircle className="w-4 h-4" /> Quote
+                                    </Button>
+                                  </a>
+                                ) : (
+                                  <Button
+                                    variant={added === product.id ? "secondary" : "hero"}
+                                    size="sm"
+                                    className="flex-1"
+                                    onClick={() => handleAdd(product)}
+                                  >
+                                    {added === product.id ? (
+                                      <>
+                                        <Check className="w-4 h-4" /> Added
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Plus className="w-4 h-4" /> Add
+                                      </>
+                                    )}
+                                  </Button>
+                                )}
                                 <Button
                                   variant="outline"
                                   size="sm"

@@ -49,10 +49,10 @@ const LIVE_TOOLS = [
 ] as const;
 
 const STATS = [
-  { icon: Users, value: "100+", label: "Businesses Served" },
-  { icon: Globe, value: "Global", label: "Delivery & Support" },
-  { icon: Shield, value: "24/7", label: "Monitoring & Response" },
-  { icon: Bot, value: "20+", label: "Products & Tools" },
+  { icon: Users, value: "SME", label: "Focused on businesses" },
+  { icon: Globe, value: "Global", label: "Delivery & support" },
+  { icon: Shield, value: "Clear", label: "Scope before we start" },
+  { icon: Bot, value: "AI", label: "Chatbots & agents" },
 ] as const;
 
 function FloatingChip({

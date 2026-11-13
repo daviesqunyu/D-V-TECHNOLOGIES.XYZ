@@ -14,5 +14,6 @@ export function formatPrice(amount: number, currency: "KES" | "USD", billing?: s
 
   if (billing === "weekly") return `${formatted}/week`;
   if (billing === "monthly") return `${formatted}/mo`;
+  if (billing === "yearly") return `${formatted}/year`;
   return formatted;
 }

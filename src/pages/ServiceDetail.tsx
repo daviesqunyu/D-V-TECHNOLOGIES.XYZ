@@ -77,7 +77,7 @@ const ServiceDetail = () => {
   const Icon = service.icon;
   const related = products.filter((p) => p.category === service.category).slice(0, 3);
 
-  const handleAdd = (id: string, name: string, price: number, currency: "KES" | "USD", billing?: "weekly" | "monthly" | "once") => {
+  const handleAdd = (id: string, name: string, price: number, currency: "KES" | "USD", billing?: "weekly" | "monthly" | "once" | "yearly") => {
     addItem({ id, name, price, currency, billing, category: service.category });
     setAddedId(id);
     setTimeout(() => setAddedId(null), 1200);
@@ -331,34 +331,48 @@ const ServiceDetail = () => {
                           <p className="font-display font-semibold text-sm leading-snug mb-1 line-clamp-2">
                             {product.name}
                           </p>
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-2">
                             <p className="font-bold gradient-text text-sm tabular-nums">
-                              {formatPrice(product.price, product.currency, product.billing)}
+                              {product.quoteOnly
+                                ? "On quotation"
+                                : formatPrice(product.price, product.currency, product.billing)}
                             </p>
-                            <Button
-                              variant={isAdded ? "secondary" : "outline"}
-                              size="sm"
-                              className="h-8 px-2.5"
-                              onClick={() =>
-                                handleAdd(
-                                  product.id,
-                                  product.name,
-                                  product.price,
-                                  product.currency,
-                                  product.billing
-                                )
-                              }
-                            >
-                              {isAdded ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5" /> Added
-                                </>
-                              ) : (
-                                <>
-                                  <Plus className="w-3.5 h-3.5" /> Add
-                                </>
-                              )}
-                            </Button>
+                            {product.quoteOnly ? (
+                              <a
+                                href={`https://wa.me/254759075816?text=${encodeURIComponent(`Hi D&V, I'd like a quotation for: ${product.name}`)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Button variant="outline" size="sm" className="h-8 px-2.5">
+                                  Quote
+                                </Button>
+                              </a>
+                            ) : (
+                              <Button
+                                variant={isAdded ? "secondary" : "outline"}
+                                size="sm"
+                                className="h-8 px-2.5"
+                                onClick={() =>
+                                  handleAdd(
+                                    product.id,
+                                    product.name,
+                                    product.price,
+                                    product.currency,
+                                    product.billing
+                                  )
+                                }
+                              >
+                                {isAdded ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5" /> Added
+                                  </>
+                                ) : (
+                                  <>
+                                    <Plus className="w-3.5 h-3.5" /> Add
+                                  </>
+                                )}
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </motion.div>

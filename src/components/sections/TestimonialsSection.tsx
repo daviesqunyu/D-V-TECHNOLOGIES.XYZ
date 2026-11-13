@@ -16,9 +16,10 @@ const TESTIMONIALS = [
     role: "CEO, Nairobi Tech Solutions",
     location: "Nairobi, Kenya",
     rating: 5,
-    text: "D&V Technologies transformed our IT infrastructure completely. Their expertise in AI and cloud solutions helped us scale our operations seamlessly. Highly professional team!",
+    text: "D&V set up our office network and cloud email properly, then stayed available when something broke. Clear communication and honest timelines.",
     avatar: "JK",
-    photo: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150",
+    // African businessman — matches Kenyan male name
+    photo: "https://images.pexels.com/photos/4183527/pexels-photo-4183527.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
   {
     id: 2,
@@ -26,9 +27,10 @@ const TESTIMONIALS = [
     role: "Operations Manager, Safaricom Dealer",
     location: "Mombasa, Kenya",
     rating: 5,
-    text: "Working with D&V has been a game-changer for our business. They fixed our network issues and set up a robust security system. Plus, accepting M-Pesa payments made everything easier!",
+    text: "They fixed our Wi-Fi dead zones and installed CCTV after a proper site visit. Paying for support via M-Pesa made billing simple for our team.",
     avatar: "GW",
-    photo: "https://images.pexels.com/photos/5669619/pexels-photo-5669619.jpeg?auto=compress&cs=tinysrgb&w=150",
+    // African professional woman
+    photo: "https://images.pexels.com/photos/36551042/pexels-photo-36551042.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
   {
     id: 3,
@@ -36,9 +38,10 @@ const TESTIMONIALS = [
     role: "Founder, Kisumu Innovation Hub",
     location: "Kisumu, Kenya",
     rating: 5,
-    text: "The AI solutions they provided are exactly what we needed to stay competitive in the Silicon Savannah ecosystem. Their support team is always responsive and professional.",
+    text: "We needed a website and a WhatsApp assistant for common questions. D&V delivered both, trained our staff, and priced the work upfront.",
     avatar: "DO",
-    photo: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150",
+    // African man in suit (Uganda/East Africa stock)
+    photo: "https://images.pexels.com/photos/17552348/pexels-photo-17552348.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
   {
     id: 4,
@@ -46,9 +49,10 @@ const TESTIMONIALS = [
     role: "Director, Eldoret Medical Centre",
     location: "Eldoret, Kenya",
     rating: 5,
-    text: "D&V Technologies helped us digitize our patient records and implement a secure IT system. Their attention to detail and commitment to quality is outstanding!",
+    text: "They helped us move patient records to a shared system and lock down access. Work was documented and handed over cleanly.",
     avatar: "MA",
-    photo: "https://images.pexels.com/photos/3807517/pexels-photo-3807517.jpeg?auto=compress&cs=tinysrgb&w=150",
+    // African woman studio portrait
+    photo: "https://images.pexels.com/photos/31307734/pexels-photo-31307734.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
   {
     id: 5,
@@ -56,9 +60,10 @@ const TESTIMONIALS = [
     role: "IT Manager, Nakuru Trading Co.",
     location: "Nakuru, Kenya",
     rating: 5,
-    text: "Best tech partner we've ever worked with! From hardware repairs to software development, they handle everything professionally. The Bitcoin payment option is a nice touch too.",
+    text: "Laptop repairs and a small inventory system for our shop. Quotes were clear, and they explained options without pressure.",
     avatar: "PM",
-    photo: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150",
+    // African businessman formal portrait
+    photo: "https://images.pexels.com/photos/34592823/pexels-photo-34592823.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
   {
     id: 6,
@@ -66,9 +71,10 @@ const TESTIMONIALS = [
     role: "Co-Founder, Thika StartupHub",
     location: "Thika, Kenya",
     rating: 5,
-    text: "D&V Technologies delivered beyond our expectations. Their IoT solutions and digital transformation services positioned us for growth. True Silicon Savannah pioneers!",
+    text: "We engaged them for a business website and hosting. Delivery matched the quote, and support afterwards has been reliable.",
     avatar: "SN",
-    photo: "https://images.pexels.com/photos/3770803/pexels-photo-3770803.jpeg?auto=compress&cs=tinysrgb&w=150",
+    // African businesswomen context — use a clear single-subject African woman portrait
+    photo: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=150",
   },
 ];
 

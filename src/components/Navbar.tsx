@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Bot, Home, Briefcase, Phone, Users, Target, Zap, MessageSquare, HelpCircle, ArrowRight, DollarSign, Mail, Info, FolderKanban, Newspaper, Scale, FileText, ShoppingBag, ArrowLeftRight, Wallet, LayoutGrid } from "lucide-react";
+import { Menu, X, Bot, Home, Briefcase, Phone, Users, Target, MessageSquare, HelpCircle, ArrowRight, DollarSign, Info, FolderKanban, Newspaper, Scale, FileText, ShoppingBag, ArrowLeftRight, Wallet, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LogoIcon } from "@/components/LogoIcon";
@@ -37,13 +37,12 @@ const allNavLinks = [
 ];
 
 const sectionLinks = [
-  { hash: "#who-trust-us", label: "Why Trust Us", icon: Users },
-  { hash: "#mission", label: "Our Mission", icon: Target },
-  { hash: "#why-choose-us", label: "Why Choose Us", icon: Zap },
+  { hash: "#services", label: "Services", icon: Briefcase },
   { hash: "#pricing", label: "Pricing", icon: DollarSign },
-  { hash: "#ai", label: "AI & Innovation", icon: MessageSquare },
+  { hash: "#who-trust-us", label: "Partners", icon: Users },
+  { hash: "#testimonials", label: "Testimonials", icon: MessageSquare },
+  { hash: "#mission", label: "Our Mission", icon: Target },
   { hash: "#faq", label: "FAQ", icon: HelpCircle },
-  { hash: "#newsletter", label: "Newsletter", icon: Mail },
   { hash: "#contact", label: "Get in Touch", icon: ArrowRight },
 ];
 
